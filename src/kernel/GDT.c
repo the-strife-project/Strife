@@ -19,12 +19,12 @@ uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t flags) {
 }
 
 void gdt_init(void) {
-	uint64_t GDT[3];
+	uint64_t GDT[GDT_ENTRIES];
 
 	// First entry must be all zeros.
-	GDT[0] = createGDTEntry(0, 0, 0);
+	GDT[_GDT_NULL] = createGDTEntry(0, 0, 0);
 	// Second entry: code segment.
-	GDT[1] = createGDTEntry(0, 0x000FFFFF,
+	GDT[_KERNEL_CODESEGMENT_N] = createGDTEntry(0, 0x000FFFFF,
 		SEG_DESCTYPE(1) |	// Code segment.
 		SEG_PRES(1)	|	// Present.
 		SEG_SAVL(0)	|	// Available to the system.
@@ -35,7 +35,7 @@ void gdt_init(void) {
 		SEG_CODE_EXRD	// Execute + Read
 	);
 	// Third entry: data segment (writable).
-	GDT[2] = createGDTEntry(0, 0x000FFFFF,
+	GDT[_KERNEL_DATASEGMENT_N] = createGDTEntry(0, 0x000FFFFF,
 		SEG_DESCTYPE(1) |	// Data segment.
 		SEG_PRES(1)	|	// Present.
 		SEG_SAVL(0)	|	// Available to the system.
@@ -46,9 +46,32 @@ void gdt_init(void) {
 		SEG_DATA_RDWR	// Read + Write
 	);
 
-	// Create the pointer, and load it.
+	// Create the pointer and load it.
 	struct GDT_ptr gdtptr;
 	gdtptr.size = sizeof(GDT);
 	gdtptr.base = (uint32_t)GDT;
-	load_gdt(&gdtptr);
+
+	asm volatile("lgdt (%0)" : : "r" (&gdtptr));
+
+	/*
+		Reload CS and IP
+		That '8' down there is _KERNEL_CODESEGMENT.
+		I don't know how to make it use the constant.
+		If you're reading this and you know, let me know.
+	*/
+	asm volatile(
+		"jmpl $8, $1f\n"
+		"1:\n"
+		: : : "memory"
+	);
+
+	// Reset the segment registers to use the new GDT.
+	asm volatile(
+		"movw %w0, %%ss\n"
+		"movw %w0, %%ds\n"
+		"movw %w0, %%es\n"
+		"movw %w0, %%fs\n"
+		: : "r" (_KERNEL_DATASEGMENT)
+		: "memory"
+	);
 }

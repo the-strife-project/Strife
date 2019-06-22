@@ -10,6 +10,16 @@ struct GDT_ptr {
 
 uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t abf);
 
+void gdt_init(void);
+
+#define _GDT_NULL 0
+#define _KERNEL_CODESEGMENT_N 1
+#define _KERNEL_DATASEGMENT_N 2
+#define GDT_ENTRIES 3
+
+#define _KERNEL_CODESEGMENT (_KERNEL_CODESEGMENT_N << 3)
+#define _KERNEL_DATASEGMENT (_KERNEL_DATASEGMENT_N << 3)
+
 // Source: https://wiki.osdev.org/GDT_Tutorial
 #define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)
 #define SEG_PRES(x)      ((x) << 0x07) // Present
@@ -35,10 +45,5 @@ uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t abf);
 #define SEG_CODE_EXCA      0x0D // Execute-Only, conforming, accessed
 #define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
 #define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
-// - End -
-
-extern void load_gdt(struct GDT_ptr* gdt_ptr);
-
-void gdt_init(void);
 
 #endif
