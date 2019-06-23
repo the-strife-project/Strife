@@ -39,3 +39,21 @@ void terminal_goDown() {
 	terminal_column = 0;
 	if(++terminal_row == VGA_WIDTH) terminal_row = 0;
 }
+
+void terminal_goStart() {
+	terminal_column = 0;
+	terminal_row = 0;
+}
+
+void terminal_fill(uint8_t color) {
+	terminal_goStart();
+	terminal_color = color;
+	for(unsigned int i=0; i<VGA_WIDTH*VGA_HEIGHT; i++) {
+		terminal_writec(' ');
+	}
+}
+
+void terminal_clear() {
+	terminal_fill(terminal_color);
+	terminal_goStart();
+}

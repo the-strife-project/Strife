@@ -14,24 +14,27 @@
 /* 16K stack */
 .section .bss
 .align 16
-stack_bottom:
-.skip 16384
-stack_top:
+.global STACK_BOTTOM
+.global STACK_TOP
+STACK_BOTTOM:
+.skip 16384	/* 16 KiB */
+STACK_TOP:
 
 
 .section .text
 .global _start
 .type _start, @function
 _start:
-	mov $stack_top, %esp
-
-	/* The GDT should be loaded here. Paging should be enabled here. */
-
+	mov $STACK_TOP, %esp
+	push %ebx
+	push %eax
 	call kernel_main
+	cli
 
 	/* Enter an infinite loop */
 1:	hlt
 	jmp 1b
 
-
-.size _start, . - _start
+.global ASM_KERNEL_END
+ASM_KERNEL_END:
+	/* Kernel size detection */
