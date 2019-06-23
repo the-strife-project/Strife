@@ -6,9 +6,14 @@
 #include <PIC.h>
 
 void keyboard_handler(void) {
-	writec('A');
-
 	outb(PIC_IO_PIC1, PIC_EOI);
+
+	if(inb(KEYBOARD_STATUS_PORT) & 0x01) {
+		// Lowest bit is set. The buffer is NOT empty.
+		char keycode = inb(KEYBOARD_DATA_PORT);
+		if(keycode < 0) return;
+		writec(keycode);
+	}
 }
 
 void keyboard_init(void) {
