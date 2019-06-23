@@ -1,38 +1,29 @@
-.global irq1
-
+.global unhandled_interrupt
 .global load_idt
-.global read_port
-.global write_port
 
-irq1:
+unhandled_interrupt:
 	push %ds
-	push %es
-	push %fs
-	push %gs
+    push %es
+    push %fs
 	pusha
 
-	call keyboard_handler
+	/*
+		Here, at some point, we will have to go kernel mode.
+		Also, I can't pop GS.
+		See: https://github.com/mkilgore/protura/blob/master/arch/x86/kernel/irq_handler.S
+	*/
+
+	push %esp
+	call unhandled_interrupt_handler
+	add $4, %esp
 
 	popa
-	pop %gs
-	pop %fs
-	pop %es
+    pop %fs
+    pop %es
 	pop %ds
 	iret
 
 load_idt:
-	mov 0x4(%esp), %edx
-	lidt (%edx)
-	sti	/* Turn interrupts on */
-	ret
-
-read_port:
-	mov 0x4(%esp), %edx
-	in %dx, %al
-	ret
-
-write_port:
-	mov 0x4(%esp), %edx
-	mov 0x8(%esp), %al
-	out %al, %dx
+	mov 0x4(%esp), %eax
+	lidt (%eax)
 	ret

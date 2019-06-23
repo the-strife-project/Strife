@@ -1,5 +1,7 @@
 #include <GDT.h>
 
+uint64_t GDT[GDT_ENTRIES];
+
 uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t flags) {
 	// See: https://wiki.osdev.org/images/f/f3/GDT_Entry.png
     uint64_t descriptor;
@@ -19,8 +21,6 @@ uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t flags) {
 }
 
 void gdt_init(void) {
-	uint64_t GDT[GDT_ENTRIES];
-
 	// First entry must be all zeros.
 	GDT[_GDT_NULL] = createGDTEntry(0, 0, 0);
 	// Second entry: code segment.

@@ -1,0 +1,7 @@
+megs: 32
+ata0-master: type=disk, path=./jotadOS.iso, status=inserted
+boot: disk
+mouse: enabled=0
+clock: sync=realtime
+cpu: ips=50000000
+display_library: x, options="gui_debug"

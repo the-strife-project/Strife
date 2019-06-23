@@ -1,43 +1,53 @@
 #include <IDT.h>
+#include <GDT.h>
 #include <types.h>
+#include <stdio.h>
+#include <PIC.h>
+#include <asm.h>
+#include <string.h>	// TODO: remove
 
 void idt_init(void) {
-	struct IDT_entry IDT[256];
-	uint32_t irq1_address = (uint32_t)irq1;
+	for(int i=0; i<256; i++) {
+		IDT_SET_ENT(IDT[i], 0, _KERNEL_CODESEGMENT, (uint32_t)unhandled_interrupt, 0);
+	}
 
-	// Remapping the PIC.
-	// ICW1: begin initialization.
-	write_port(0x20, 0x11);
-	write_port(0xA0, 0x11);
-	// ICW2: remap address of IDT.
-	write_port(0x21, 0x20);
-	write_port(0xA1, 0x28);
-	// ICW3: setup cascading (master/slaves).
-	write_port(0x21, 0x00);
-	write_port(0xA1, 0x00);
-	// ICW4: environment info. Running in 8086.
-	write_port(0x21, 0x01);
-	write_port(0xA1, 0x01);
-	// Initialization finished.
-
-	// Disable all IRQs at the moment.
-	write_port(0x21 , 0xFF);
-	write_port(0xA1 , 0xFF);
-
-	IDT[0x21].off_low = irq1_address & 0xFFFF;
-	IDT[0x21].selector = 0x08;
-	IDT[0x21].zero = 0;
-	IDT[0x21].type_attr = 0x8E;
-	IDT[0x21].off_high = (irq1_address & 0xFFFF0000) >> (4*4);
-
-	// Fill IDT.
 	struct IDT_ptr idtptr;
-	idtptr.size = sizeof(IDT);
-	idtptr.base = (uint32_t)IDT;
-
-	// Load it.
+	idtptr.size = sizeof(IDT)-1;
+	idtptr.base = (uint32_t)&IDT;
 	load_idt(&idtptr);
+}
 
-	// Enable ONLY the keyboard (IRQ 1).
-	write_port(0x21 , 0xFD);
+/* TODO: MOVE THIS SHIT! */
+const char LMAO[] = "0123456789ABCDEF";
+void printHex(uint32_t xd) {
+	writec('0');
+	writec('x');
+
+	uint8_t h1 = (uint8_t)(xd >> 4*3);
+	uint8_t l1 = (uint8_t)(xd >> 4*2);
+	uint8_t h0 = (uint8_t)(xd >> 4);
+	uint8_t l0 = (uint8_t)(xd);
+
+	writec(LMAO[h1 / 16]);
+	writec(LMAO[h1 % 16]);
+	writec(LMAO[l1 / 16]);
+	writec(LMAO[l1 % 16]);
+	writec(LMAO[h0 / 16]);
+	writec(LMAO[h0 % 16]);
+	writec(LMAO[l0 / 16]);
+	writec(LMAO[l0 % 16]);
+}
+
+void unhandled_interrupt_handler(struct irq_frame *iframe) {
+	// TODO: modularize "writes"
+	char toWrite[] = "Interrupt or exception NOT HANDLED: ";
+	for(size_t i=0; i<strlen(toWrite); i++) writec(toWrite[i]);
+
+	printHex((*iframe).intno);
+	writec(' ');
+	printHex((*iframe).err);
+	writec('\n');
+
+	outb(PIC_IO_PIC1, PIC_EOI);
+	outb(PIC_IO_PIC2, PIC_EOI);
 }

@@ -11,10 +11,13 @@ def compile(path, prefix='', mode=True):
 
 	files = os.listdir(path)
 	for i in files:
-		if mode:
-			if i.split('.')[1] != 'c': continue
-		else:
-			if i.split('.')[1] != 's': continue
+		try:
+			if mode:
+				if i.split('.')[1] != 'c': continue
+			else:
+				if i.split('.')[1] != 's': continue
+		except:
+			continue
 
 		file = path + '/' + i
 		ofile = OBJ + '/' + prefix + i.split('.')[0] + '.o'
@@ -29,6 +32,8 @@ def compile(path, prefix='', mode=True):
 if __name__ == '__main__':
 	toCompile = compile('src/kernel')
 	toCompile += compile('src/kernel', mode=False)
+	toCompile += compile('src/kernel/drivers')
+	toCompile += compile('src/kernel/drivers', mode=False)
 	toCompile += compile('src/libc/string', 'string_')
 	toCompile += compile('src/libc/stdio', 'stdio_')
 

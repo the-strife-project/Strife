@@ -3,6 +3,9 @@ all: jotadOS.iso
 run: jotadOS.iso
 	qemu-system-x86_64 -cdrom jotadOS.iso
 
+debug: jotadOS.iso
+	bochs -f bochs.txt
+
 jotadOS.iso: clean bin/boot/grub/grub.cfg bin/boot/jotadOS.bin
 	grub-mkrescue -o jotadOS.iso bin
 
@@ -16,4 +19,4 @@ obj/boot.o: src/boot.s
 	i686-elf-as src/boot.s -o obj/boot.o
 
 clean:
-	rm obj/*.o bin/boot/jotadOS.bin jotadOS.iso &> /dev/null || true
+	rm obj/*.o bin/boot/jotadOS.bin jotadOS.iso jotadOS.iso.lock &> /dev/null || true
