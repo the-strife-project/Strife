@@ -1,7 +1,7 @@
 #ifndef GDT_H
 #define GDT_H
 
-#include <types.h>
+#include <common/types.h>
 
 struct GDT_ptr {
 	uint16_t size;

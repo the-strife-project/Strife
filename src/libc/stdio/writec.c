@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <tty.h>
+#include <libc/stdio.h>
+#include <kernel/drivers/tty.h>
 
 void writec(char c) {
 	switch(c) {

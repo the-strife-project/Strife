@@ -1,10 +1,10 @@
-#include <IDT.h>
-#include <GDT.h>
-#include <types.h>
-#include <stdio.h>
-#include <PIC.h>
-#include <asm.h>
-#include <string.h>	// TODO: remove
+#include <kernel/IDT.h>
+#include <kernel/GDT.h>
+#include <common/types.h>
+#include <libc/stdio.h>
+#include <kernel/PIC.h>
+#include <kernel/asm.h>
+#include <libc/string.h>	// TODO: remove
 
 void idt_init(void) {
 	for(int i=0; i<256; i++) {

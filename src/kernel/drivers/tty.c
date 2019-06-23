@@ -1,5 +1,5 @@
-#include <tty.h>
-#include <colors.h>
+#include <kernel/drivers/tty.h>
+#include <common/colors.h>
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;

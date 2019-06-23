@@ -1,7 +1,7 @@
 #ifndef IRQ_H
 #define IRQ_H
 
-#include <types.h>
+#include <common/types.h>
 
 struct irq_frame {
     uint32_t edi, esi, ebp, oesp, ebx, edx, ecx, eax;

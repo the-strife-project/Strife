@@ -1,8 +1,8 @@
 #ifndef IDT_H
 #define IDT_H
 
-#include <types.h>
-#include <IRQ.h>
+#include <common/types.h>
+#include <kernel/IRQ.h>
 
 struct IDT_entry {
 	uint16_t base_low;

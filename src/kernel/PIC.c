@@ -3,8 +3,8 @@
 	Check it out, it's listed in the sources.
 */
 
-#include <asm.h>
-#include <PIC.h>
+#include <kernel/asm.h>
+#include <kernel/PIC.h>
 
 static uint16_t irqmask = 0xFFFF & ~(1<<PIC_IRQ_SLAVE);
 

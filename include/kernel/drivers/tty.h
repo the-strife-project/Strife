@@ -1,7 +1,7 @@
 #ifndef TTY_H
 #define TTY_H
 
-#include <types.h>
+#include <common/types.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;

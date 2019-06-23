@@ -1,9 +1,9 @@
 #include <kernel/drivers/keyboard.h>
-#include <stdio.h>
-#include <asm.h>
-#include <GDT.h>
-#include <IDT.h>
-#include <PIC.h>
+#include <libc/stdio.h>
+#include <kernel/asm.h>
+#include <kernel/GDT.h>
+#include <kernel/IDT.h>
+#include <kernel/PIC.h>
 
 void keyboard_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);

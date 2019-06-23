@@ -1,4 +1,4 @@
-#include <GDT.h>
+#include <kernel/GDT.h>
 
 uint64_t GDT[GDT_ENTRIES];
 
