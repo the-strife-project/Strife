@@ -4,7 +4,7 @@
 #include <libc/stdio.h>
 #include <kernel/PIC.h>
 #include <kernel/asm.h>
-#include <libc/string.h>	// TODO: remove
+#include <libc/string.h>
 
 void idt_init(void) {
 	for(int i=0; i<256; i++) {

@@ -1,4 +1,4 @@
-megs: 32
+megs: 128
 ata0-master: type=disk, path=./jotadOS.iso, status=inserted
 boot: disk
 mouse: enabled=0
