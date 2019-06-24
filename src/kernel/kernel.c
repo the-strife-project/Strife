@@ -26,7 +26,7 @@ void kernel_main(uint32_t multiboot_magic, struct MultibootInfo_t* multiboot_inf
 	gdt_init();
 
 	printf("Beginning paging...\n");
-	paging_enable(multiboot_info->mem_upper / 4);
+	paging_enable(multiboot_info->mem_upper);
 
 	printf("Remapping PIC...\n");
 	pic_init();
@@ -37,7 +37,10 @@ void kernel_main(uint32_t multiboot_magic, struct MultibootInfo_t* multiboot_inf
 	printf("Starting keyboard...\n");
 	keyboard_init();
 
-	printf("\nAll set. %dKiB of RAM available.\n", multiboot_info->mem_upper);
+	int freeMemory = multiboot_info->mem_upper;
+	freeMemory -= ((uint32_t)ASM_KERNEL_END/1024)+4;
+	freeMemory -= 4096;
+	printf("\nAll set. %dKiB of RAM available.\n", freeMemory);
 	printf("\nType something. Press ESC for kernel panic simulation.\n");
 
 	while(1) {}

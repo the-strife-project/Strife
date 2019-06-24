@@ -11,7 +11,7 @@
 uint32_t page_directory[1024] __attribute__((aligned(4096)));
 uint32_t page_tables[1024][1024] __attribute__((aligned(4096)));
 
-uint32_t _maxmem = 0;
+uint32_t _maxmem = 0;	// Max memory in KiB.
 
 void paging_enable(uint32_t max) {
 	_maxmem = max;
@@ -29,8 +29,14 @@ void paging_enable(uint32_t max) {
 	// Set all page directories to the address, and enable RW and present.
 	for(uint16_t i=0; i<1024; i++) page_directory[i] = ((uint32_t)&page_tables[i][0]) | 3;
 
-	// Allocate for the kernel.
-	paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096)+1);
+	/*
+		Allocate for the kernel, and give 4MB of extra unused RAM
+		so that there's no issues with GRUB, as specified here:
+		https://youtu.be/BeSpPd3C3J8?t=128
+	*/
+	uint32_t _usedPages = ((uint32_t)ASM_KERNEL_END / 4096) + 1;
+	_usedPages += 4096;	// 4 MiB (4096 pages).
+	paging_setPresent(0, _usedPages);
 
 	// Load page directory and enable.
 	go_paging(page_directory);
@@ -99,6 +105,8 @@ uint32_t paging_findPages(uint32_t count) {
 	uint32_t continous = 0;
 	for(uint32_t i=0; i<1024; i++) {
 		for(uint32_t j=0; j<1024; j++) {
+			if((i+j)*4 >= _maxmem) kernel_panic(1);	// Out of memory.
+
 			uint8_t free = !(page_tables[i][j] & 1);
 			if(free) continous++;
 			else continous=0;
