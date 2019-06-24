@@ -19,9 +19,7 @@ void kernel_panic(uint32_t id) {
 
 	// Show the error.
 	terminal_goStart();
-	writes("\nKERNEL PANIC!\n");
-	writes(kp_messages[id]);
-	writes("\n\nPlease, reboot.");
+	printf("\nKERNEL PANIC!\n%s\n\nPlease, reboot.", kp_messages[id]);
 
 	// Don't to anything.
 	cli();

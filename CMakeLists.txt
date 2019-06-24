@@ -22,19 +22,20 @@ file(GLOB SRC_BOOT "src/boot.s")
 
 # Kernel
 file(GLOB SRC_KERNEL "src/kernel/*.s" "src/kernel/*.c")
-
 # Kernel - Drivers
 file(GLOB SRC_KERNEL_DRIVERS "src/kernel/drivers/*.s" "src/kernel/drivers/*.c")
-
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")
-
 # LibC - String
 file(GLOB SRC_LIBC_STRING "src/libc/string/*.c")
+# LibC - Math
+file(GLOB SRC_LIBC_MATH "src/libc/math/*.c")
+# LibC - Stdlib
+file(GLOB SRC_LIBC_STDLIB "src/libc/stdlib/*.c")
 
 set(SOURCES ${SRC_BOOT} ${SRC_KERNEL}
 	${SRC_KERNEL_DRIVERS}
-	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING}
+	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING} ${SRC_LIBC_MATH} ${SRC_LIBC_STDLIB}
 )
 
 add_executable(jotadOS ${SOURCES})
