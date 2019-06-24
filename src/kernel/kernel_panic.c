@@ -3,6 +3,7 @@
 #include <common/colors.h>
 #include <kernel/drivers/tty.h>
 #include <libc/stdio.h>
+#include <kernel/asm.h>
 
 static const char* kp_messages[] = {
 	[0] = "Kernel panic example.",
@@ -23,5 +24,6 @@ void kernel_panic(uint32_t id) {
 	writes("\n\nPlease, reboot.");
 
 	// Don't to anything.
+	cli();
 	while(1) {}
 }

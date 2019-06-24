@@ -4,4 +4,5 @@ rm -rf CMakeFiles \
 	CMakeCache.txt \
 	Makefile \
 	bin/boot/jotadOS.bin \
+	jotadOS.iso.lock \
 	jotadOS.iso &> /dev/null

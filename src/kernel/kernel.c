@@ -7,6 +7,7 @@
 #include <kernel/drivers/keyboard.h>
 #include <boot.h>
 #include <kernel/kernel_panic.h>
+#include <kernel/liballoc.h>
 
 void kernel_main(uint32_t multiboot_magic, struct MultibootInfo_t* multiboot_info) {
 	terminal_initialize();
@@ -21,15 +22,6 @@ void kernel_main(uint32_t multiboot_magic, struct MultibootInfo_t* multiboot_inf
 
 	writes("Beginning paging...\n");
 	paging_enable(multiboot_info->mem_upper / 4);
-
-	writes("Testing memory: ");
-	uint8_t* free = (uint8_t*)paging_allocPages(1);
-	paging_setAbsent((uint32_t)free, 1);
-	uint8_t* other = (uint8_t*)paging_allocPages(1);
-	if(free == other) {
-		writes("OK\n");
-	}
-	paging_setAbsent((uint32_t)other, 1);
 
 	writes("Remapping PIC...\n");
 	pic_init();
