@@ -28,14 +28,16 @@ file(GLOB SRC_KERNEL_DRIVERS_KEYBOARD "src/kernel/drivers/keyboard/*.s" "src/ker
 file(GLOB SRC_KERNEL_DRIVERS_TTY "src/kernel/drivers/TTY/*.c")
 # Kernel - GDT
 file(GLOB SRC_KERNEL_GDT "src/kernel/GDT/*.c")
+# Kernel - PIC
+file(GLOB SRC_KERNEL_PIC "src/kernel/PIC/*.c")
 # Kernel - IDT
 file(GLOB SRC_KERNEL_IDT "src/kernel/IDT/*.c" "src/kernel/IDT/*.s")
 # Kernel - Kernel panic
 file(GLOB SRC_KERNEL_KERNELPANIC "src/kernel/kernel_panic/*.c")
 # Kernel - Paging
 file(GLOB SRC_KERNEL_PAGING "src/kernel/paging/*.c" "src/kernel/paging/*.s")
-# Kernel - PIC
-file(GLOB SRC_KERNEL_PIC "src/kernel/PIC/*.c")
+# Kernel - PCI
+file(GLOB SRC_KERNEL_PCI "src/kernel/PCI/*.c")
 
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")
@@ -47,8 +49,9 @@ file(GLOB SRC_LIBC_MATH "src/libc/math/*.c")
 file(GLOB SRC_LIBC_STDLIB "src/libc/stdlib/*.c")
 
 set(SOURCES ${SRC_BOOT} ${SRC_KERNEL} ${SRC_KERNEL_DRIVERS_KEYBOARD}
-	${SRC_KERNEL_DRIVERS_TTY} ${SRC_KERNEL_GDT} ${SRC_KERNEL_IDT}
-	${SRC_KERNEL_KERNELPANIC} ${SRC_KERNEL_PAGING} ${SRC_KERNEL_PIC}
+	${SRC_KERNEL_DRIVERS_TTY} ${SRC_KERNEL_GDT} ${SRC_KERNEL_PIC}
+	${SRC_KERNEL_IDT} ${SRC_KERNEL_KERNELPANIC} ${SRC_KERNEL_PAGING}
+	${SRC_KERNEL_PCI}
 
 	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING} ${SRC_LIBC_MATH} ${SRC_LIBC_STDLIB}
 )

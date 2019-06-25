@@ -10,6 +10,7 @@
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/asm.h>
 #include <common/elf.h>
+#include <kernel/PCI/PCI.h>
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
@@ -45,6 +46,20 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 
 	printf("Setting IDT...\n");
 	idt_init();
+
+	printf("Scanning PCI devices...\n");
+
+	for(int i=0; i<8; i++) {
+		for(int j=0; j<32; j++) {
+			int nFunctions = PCI_hasFunctions(i, j) ? 8 : 1;
+			for(int k=0; k<nFunctions; k++) {
+				struct PCI_DeviceDescriptor dd = PCI_getDD(i, j, k);
+				if(dd.vendor_id == 0xFFFF) continue;
+
+				printf("Found device -> %d.%d\n", dd.class_id, dd.subclass_id);
+			}
+		}
+	}
 
 	printf("Starting keyboard...\n");
 	keyboard_init();
