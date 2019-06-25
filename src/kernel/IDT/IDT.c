@@ -1,8 +1,8 @@
-#include <kernel/IDT.h>
-#include <kernel/GDT.h>
+#include <kernel/IDT/IDT.h>
+#include <kernel/GDT/GDT.h>
 #include <common/types.h>
 #include <libc/stdio.h>
-#include <kernel/PIC.h>
+#include <kernel/PIC/PIC.h>
 #include <kernel/asm.h>
 #include <libc/string.h>
 

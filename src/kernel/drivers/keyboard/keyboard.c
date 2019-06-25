@@ -1,10 +1,10 @@
-#include <kernel/drivers/keyboard.h>
+#include <kernel/drivers/keyboard/keyboard.h>
 #include <libc/stdio.h>
 #include <kernel/asm.h>
-#include <kernel/GDT.h>
-#include <kernel/IDT.h>
-#include <kernel/PIC.h>
-#include <kernel/kernel_panic.h>
+#include <kernel/GDT/GDT.h>
+#include <kernel/PIC/PIC.h>
+#include <kernel/IDT/IDT.h>
+#include <kernel/kernel_panic/kernel_panic.h>
 
 void keyboard_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);

@@ -1,13 +1,14 @@
-#include <kernel/kernel_panic.h>
+#include <kernel/kernel_panic/kernel_panic.h>
 #include <common/types.h>
 #include <common/colors.h>
-#include <kernel/drivers/tty.h>
+#include <kernel/drivers/TTY/TTY.h>
 #include <libc/stdio.h>
 #include <kernel/asm.h>
 
 static const char* kp_messages[] = {
 	[0] = "Kernel panic example.",
-	[1] = "Out of memory :("
+	[1] = "Out of memory :(",
+	[2] = "Invalid multiboot signature!"
 };
 
 void kernel_panic(uint32_t id) {

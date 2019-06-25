@@ -1,20 +1,24 @@
-#include <kernel/drivers/tty.h>
+#include <kernel/drivers/TTY/TTY.h>
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
-#include <kernel/GDT.h>
-#include <kernel/paging.h>
-#include <kernel/PIC.h>
-#include <kernel/IDT.h>
-#include <kernel/drivers/keyboard.h>
+#include <kernel/GDT/GDT.h>
+#include <kernel/paging/paging.h>
+#include <kernel/PIC/PIC.h>
+#include <kernel/IDT/IDT.h>
+#include <kernel/drivers/keyboard/keyboard.h>
 #include <boot.h>
-#include <kernel/kernel_panic.h>
+#include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/asm.h>
 #include <common/elf.h>
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
-
 	terminal_initialize();
+
+	if (multiboot_magic != 0x2BADB002) {
+		kernel_panic(2);
+	}
+
 	printf("jotadOS\n\n");
 
 	printf("Setting GDT...\n");
@@ -22,7 +26,6 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 
 	printf("Beginning paging...\n");
 	paging_enable();
-	bochs_breakpoint();
 
 	// Protect modules.
 	multiboot_module_t* mods = (multiboot_module_t*)mbinfo->mods_addr;

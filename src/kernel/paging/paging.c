@@ -3,9 +3,9 @@
 		https://github.com/AlexandreRouma/LimeOS/blob/master/src/arch/i686/paging/paging.cpp
 */
 
-#include <kernel/paging.h>
+#include <kernel/paging/paging.h>
 #include <common/types.h>
-#include <kernel/kernel_panic.h>
+#include <kernel/kernel_panic/kernel_panic.h>
 #include <boot.h>
 #include <kernel/asm.h>
 

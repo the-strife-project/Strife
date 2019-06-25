@@ -22,8 +22,21 @@ file(GLOB SRC_BOOT "src/boot.s")
 
 # Kernel
 file(GLOB SRC_KERNEL "src/kernel/*.s" "src/kernel/*.c")
-# Kernel - Drivers
-file(GLOB SRC_KERNEL_DRIVERS "src/kernel/drivers/*.s" "src/kernel/drivers/*.c")
+# Kernel - Drivers - Keyboard
+file(GLOB SRC_KERNEL_DRIVERS_KEYBOARD "src/kernel/drivers/keyboard/*.s" "src/kernel/drivers/keyboard/*.c")
+# Kernel - Drivers - TTY
+file(GLOB SRC_KERNEL_DRIVERS_TTY "src/kernel/drivers/TTY/*.c")
+# Kernel - GDT
+file(GLOB SRC_KERNEL_GDT "src/kernel/GDT/*.c")
+# Kernel - IDT
+file(GLOB SRC_KERNEL_IDT "src/kernel/IDT/*.c" "src/kernel/IDT/*.s")
+# Kernel - Kernel panic
+file(GLOB SRC_KERNEL_KERNELPANIC "src/kernel/kernel_panic/*.c")
+# Kernel - Paging
+file(GLOB SRC_KERNEL_PAGING "src/kernel/paging/*.c" "src/kernel/paging/*.s")
+# Kernel - PIC
+file(GLOB SRC_KERNEL_PIC "src/kernel/PIC/*.c")
+
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")
 # LibC - String
@@ -33,8 +46,10 @@ file(GLOB SRC_LIBC_MATH "src/libc/math/*.c")
 # LibC - Stdlib
 file(GLOB SRC_LIBC_STDLIB "src/libc/stdlib/*.c")
 
-set(SOURCES ${SRC_BOOT} ${SRC_KERNEL}
-	${SRC_KERNEL_DRIVERS}
+set(SOURCES ${SRC_BOOT} ${SRC_KERNEL} ${SRC_KERNEL_DRIVERS_KEYBOARD}
+	${SRC_KERNEL_DRIVERS_TTY} ${SRC_KERNEL_GDT} ${SRC_KERNEL_IDT}
+	${SRC_KERNEL_KERNELPANIC} ${SRC_KERNEL_PAGING} ${SRC_KERNEL_PIC}
+
 	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING} ${SRC_LIBC_MATH} ${SRC_LIBC_STDLIB}
 )
 
