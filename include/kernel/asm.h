@@ -32,4 +32,8 @@ inline void eflags_write(uint32_t flags) {
                  "popfl\n" : : "a" (flags));
 }
 
+inline void invlpg(uint32_t addr) {
+	asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
+}
+
 #endif

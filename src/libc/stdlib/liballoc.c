@@ -5,14 +5,11 @@
 #include <kernel/drivers/tty.h>
 
 // This right here is mine. The rest belongs to liballoc. See 'liballoc.h'.
-int liballoc_lock() {
-	cli();
-	return 0;
-}
-int liballoc_unlock() {
-	sti();
-	return 0;
-}
+
+// No locking/unlocking. Because fuck you. I'll probably regret this later.
+int liballoc_lock() { return 0; }
+int liballoc_unlock() { return 0; }
+
 void* liballoc_alloc(size_t p) {
 	uint32_t ptr = paging_allocPages((uint32_t)p);
 	return (void*)ptr;

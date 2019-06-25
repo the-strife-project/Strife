@@ -38,10 +38,14 @@ void printf(const char* fmt, ...) {
 				__writes(str);
 				readyToFormat = 0;
 			} else if(buff == 'x') {
-				__writes(htoa((uint32_t)va_arg(args, int)));
+				char* p = htoa((uint32_t)va_arg(args, int));
+				__writes(p);
+				jfree(p);
 				readyToFormat = 0;
 			} else if(buff == 'd') {
-				__writes(itoa(va_arg(args, int)));
+				char* p = itoa(va_arg(args, int));
+				__writes(p);
+				jfree(p);
 				readyToFormat = 0;
 			} else if(buff == 'c') {
 				writec((char)va_arg(args, int));

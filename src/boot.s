@@ -22,19 +22,40 @@ STACK_TOP:
 
 
 .section .text
+
+/* FPU Config */
+VAL_037F:
+	.hword 0x037F
+VAL_037E:
+	.hword 0x037E
+VAL_037A:
+	.hword 0x037A
+
 .global _start
 .type _start, @function
 _start:
 	mov $STACK_TOP, %esp
 	push %ebx
 	push %eax
+
+	/* Configure FPU */
+	cli
+	mov %cr0, %eax
+	or $0b00110010, %eax
+	and $0xFFFFFFFB, %eax
+	mov %eax, %cr0
+	fldcw VAL_037F
+	fldcw VAL_037E
+	fldcw VAL_037A
+	fninit
+
 	call kernel_main
 	cli
 
-	/* Enter an infinite loop */
 1:	hlt
 	jmp 1b
 
+.section .sizedetect
 .global ASM_KERNEL_END
 ASM_KERNEL_END:
 	/* Kernel size detection */

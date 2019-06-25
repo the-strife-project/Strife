@@ -7,8 +7,7 @@
 
 static const char* kp_messages[] = {
 	[0] = "Kernel panic example.",
-	[1] = "Out of memory :(",
-	[2] = "Invalid multiboot signature."
+	[1] = "Out of memory :("
 };
 
 void kernel_panic(uint32_t id) {
