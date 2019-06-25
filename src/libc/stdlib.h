@@ -2,7 +2,7 @@
 #define STDLIB_H
 
 #ifndef _LIBALLOC_H
-#include <libc/liballoc.h>
+#include <libc/stdlib/liballoc.h>
 #endif
 
 #ifndef _STRING_H

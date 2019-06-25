@@ -11,7 +11,7 @@ set(CMAKE_C_COMPILER "i686-elf-gcc")
 set(CMAKE_ASM_COMPILER "i686-elf-as")
 set(CMAKE_LINKER "i686-elf-gcc")
 
-set(CMAKE_C_FLAGS "-c -Iinclude -std=gnu99 -ffreestanding -O2 -Wall -Wextra ${CMAKE_C_FLAGS}")
+set(CMAKE_C_FLAGS "-c -I./src -std=gnu99 -ffreestanding -O2 -Wall -Wextra ${CMAKE_C_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "-T linker.ld -o bin/boot/jotadOS.bin -ffreestanding -O2 -nostdlib ${CMAKE_EXE_LINKER_FLAGS}")
 set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_EXE_LINKER_FLAGS} <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
