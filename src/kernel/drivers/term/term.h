@@ -9,7 +9,10 @@
 	abstraction layer for printing text to screen, no matter what method.
 */
 
+extern void load_BIOS_font(uint32_t fontBuffer);
+
 void term_init();
+void term_setWidthHeight(uint32_t width, uint32_t size);
 void term_goVGA();
 
 void term_writec(char c);

@@ -23,8 +23,6 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 		kernel_panic(2);
 	}
 
-	printf("jotadOS\n\n");
-
 	printf("Setting GDT...\n");
 	gdt_init();
 
@@ -52,11 +50,10 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 
 	printf("Going VGA. See you in a bit...\n");
 	VGA_setMode(VGA_WIDTH, VGA_HEIGHT, VGA_COLORDEPTH);
-	for(uint32_t y=0; y<VGA_HEIGHT; y++) {
-		for(uint32_t x=0; x<VGA_WIDTH; x++) {
-			VGA_putPixelRaw(x, y, 0b00001111);
-		}
-	}
+	term_goVGA();
+	term_clear();
+
+	printf("jotadOS");
 
 	/*printf("Starting keyboard...\n");
 	keyboard_init();

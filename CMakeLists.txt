@@ -43,7 +43,7 @@ file(GLOB SRC_KERNEL_DRIVERS_VGA "src/kernel/drivers/VGA/*.c")
 # Kernel - Memutils
 file(GLOB SRC_KERNEL_MEMUTILS "src/kernel/memutils/*.c")
 # Kernel - Drivers - Term
-file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c")
+file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c" "src/kernel/drivers/term/*.s")
 
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")

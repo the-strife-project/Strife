@@ -4,8 +4,8 @@
 #include <common/types.h>
 #include <common/colors16.h>
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+static const size_t TTY_WIDTH = 80;
+static const size_t TTY_HEIGHT = 25;
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;
