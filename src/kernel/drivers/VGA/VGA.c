@@ -88,12 +88,3 @@ void VGA_putPixelRaw(uint32_t x, uint32_t y, uint8_t colorIndex) {
 	uint8_t* pixelAddr = VGA_getFrameBufferSegment() + VGA_WIDTH*y + x;
 	*pixelAddr = colorIndex;
 }
-
-uint8_t VGA_getColorIndex(uint8_t r, uint8_t g, uint8_t b) {
-	// For now just return green.
-	return 0b00000100;
-}
-
-void VGA_putPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
-	VGA_putPixelRaw(x, y, VGA_getColorIndex(r, g, b));
-}

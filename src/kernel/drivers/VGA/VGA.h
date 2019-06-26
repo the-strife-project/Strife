@@ -17,11 +17,9 @@
 
 void VGA_writeRegisters(uint8_t* registers);
 uint8_t* VGA_getFrameBufferSegment();
-uint8_t VGA_getColorIndex(uint8_t r, uint8_t g, uint8_t b);
 
 void VGA_putPixelRaw(uint32_t x, uint32_t y, uint8_t colorIndex);
 uint8_t VGA_setMode(uint32_t width, uint32_t height, uint32_t colordepth);
-void VGA_putPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b);
 
 #define VGA_WIDTH 320
 #define VGA_HEIGHT 200

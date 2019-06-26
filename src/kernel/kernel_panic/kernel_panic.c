@@ -1,7 +1,6 @@
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <common/types.h>
-#include <common/colors.h>
-#include <kernel/drivers/TTY/TTY.h>
+#include <kernel/drivers/term/term.h>
 #include <libc/stdio.h>
 #include <kernel/asm.h>
 
@@ -15,10 +14,10 @@ void kernel_panic(uint32_t id) {
 	// Fill screen with red.
 	uint8_t bgcolor = VGA_COLOR_LIGHT_RED << 4;
 	bgcolor |= VGA_COLOR_BLUE;
-	terminal_fill(bgcolor);
+	term_fill(bgcolor);
 
 	// Show the error.
-	terminal_goStart();
+	term_goStart();
 	printf("\nKERNEL PANIC!\n%s\n\nPlease, reboot.", kp_messages[id]);
 
 	// Don't to anything.

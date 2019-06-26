@@ -1,4 +1,4 @@
 #!/bin/bash
-./clean.sh
+#./clean.sh
 cmake .
 make run

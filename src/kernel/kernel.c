@@ -1,4 +1,4 @@
-#include <kernel/drivers/TTY/TTY.h>
+#include <kernel/drivers/term/term.h>
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
 #include <kernel/GDT/GDT.h>
@@ -12,10 +12,12 @@
 #include <common/elf.h>
 #include <kernel/PCI/PCI.h>
 #include <kernel/drivers/VGA/VGA.h>
+#include <kernel/memutils/memutils.h>
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
-	terminal_initialize();
+	memutils_init(mbinfo);
+	term_init();
 
 	if (multiboot_magic != 0x2BADB002) {
 		kernel_panic(2);
@@ -48,9 +50,7 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("Setting IDT...\n");
 	idt_init();
 
-	printf("Scanning PCI devices...\n");
-	PCI_loadDrivers();
-
+	printf("Going VGA. See you in a bit...\n");
 	VGA_setMode(VGA_WIDTH, VGA_HEIGHT, VGA_COLORDEPTH);
 	for(uint32_t y=0; y<VGA_HEIGHT; y++) {
 		for(uint32_t x=0; x<VGA_WIDTH; x++) {
@@ -59,11 +59,9 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	}
 
 	/*printf("Starting keyboard...\n");
-	keyboard_init();*/
+	keyboard_init();
 
-	/*uint32_t freeRam = mbinfo->mem_upper;
-	freeRam -= paging_getUsedPages()*4;
-	printf("\nAll set. %dK of RAM available.\n", freeRam);
+	printf("\nAll set. %dK of RAM available.\n", getFreeMemory());
 	printf("\nType something. Press ESC for kernel panic simulation.\n");*/
 
 	while(1) {}

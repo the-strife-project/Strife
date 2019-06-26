@@ -40,6 +40,10 @@ file(GLOB SRC_KERNEL_PAGING "src/kernel/paging/*.c" "src/kernel/paging/*.s")
 file(GLOB SRC_KERNEL_PCI "src/kernel/PCI/*.c")
 # Kernel - Drivers - VGA
 file(GLOB SRC_KERNEL_DRIVERS_VGA "src/kernel/drivers/VGA/*.c")
+# Kernel - Memutils
+file(GLOB SRC_KERNEL_MEMUTILS "src/kernel/memutils/*.c")
+# Kernel - Drivers - Term
+file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c")
 
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")
@@ -53,7 +57,8 @@ file(GLOB SRC_LIBC_STDLIB "src/libc/stdlib/*.c")
 set(SOURCES ${SRC_BOOT} ${SRC_KERNEL} ${SRC_KERNEL_DRIVERS_KEYBOARD}
 	${SRC_KERNEL_DRIVERS_TTY} ${SRC_KERNEL_GDT} ${SRC_KERNEL_PIC}
 	${SRC_KERNEL_IDT} ${SRC_KERNEL_KERNELPANIC} ${SRC_KERNEL_PAGING}
-	${SRC_KERNEL_PCI} ${SRC_KERNEL_DRIVERS_VGA}
+	${SRC_KERNEL_PCI} ${SRC_KERNEL_DRIVERS_VGA} ${SRC_KERNEL_MEMUTILS}
+	${SRC_KERNEL_DRIVERS_TERM}
 
 	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING} ${SRC_LIBC_MATH} ${SRC_LIBC_STDLIB}
 )

@@ -1,12 +1,4 @@
 #include <libc/stdio.h>
-#include <kernel/drivers/TTY/TTY.h>
+#include <kernel/drivers/term/term.h>
 
-void writec(char c) {
-	switch(c) {
-		case '\n':
-			terminal_goDown();
-			break;
-		default:
-			terminal_writec(c);
-	}
-}
+void writec(char c) { term_writec(c); }
