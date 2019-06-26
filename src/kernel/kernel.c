@@ -11,6 +11,7 @@
 #include <kernel/asm.h>
 #include <common/elf.h>
 #include <kernel/PCI/PCI.h>
+#include <kernel/drivers/VGA/VGA.h>
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
@@ -48,26 +49,22 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	idt_init();
 
 	printf("Scanning PCI devices...\n");
+	PCI_loadDrivers();
 
-	for(int i=0; i<8; i++) {
-		for(int j=0; j<32; j++) {
-			int nFunctions = PCI_hasFunctions(i, j) ? 8 : 1;
-			for(int k=0; k<nFunctions; k++) {
-				struct PCI_DeviceDescriptor dd = PCI_getDD(i, j, k);
-				if(dd.vendor_id == 0xFFFF) continue;
-
-				printf("Found device -> %d.%d\n", dd.class_id, dd.subclass_id);
-			}
+	VGA_setMode(VGA_WIDTH, VGA_HEIGHT, VGA_COLORDEPTH);
+	for(uint32_t y=0; y<VGA_HEIGHT; y++) {
+		for(uint32_t x=0; x<VGA_WIDTH; x++) {
+			VGA_putPixelRaw(x, y, 0b00001111);
 		}
 	}
 
-	printf("Starting keyboard...\n");
-	keyboard_init();
+	/*printf("Starting keyboard...\n");
+	keyboard_init();*/
 
-	uint32_t freeRam = mbinfo->mem_upper;
+	/*uint32_t freeRam = mbinfo->mem_upper;
 	freeRam -= paging_getUsedPages()*4;
 	printf("\nAll set. %dK of RAM available.\n", freeRam);
-	printf("\nType something. Press ESC for kernel panic simulation.\n");
+	printf("\nType something. Press ESC for kernel panic simulation.\n");*/
 
 	while(1) {}
 }

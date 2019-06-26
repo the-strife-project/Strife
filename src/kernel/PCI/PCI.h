@@ -11,6 +11,7 @@ uint16_t PCI_read(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
 void PCI_write(int8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t value);
 uint8_t PCI_hasFunctions(uint8_t bus, uint8_t slot);
 struct PCI_DeviceDescriptor PCI_getDD(uint8_t bus, uint8_t slot, uint8_t func);
+void PCI_loadDrivers();
 
 struct PCI_DeviceDescriptor {
 	uint32_t portBase;

@@ -1,5 +1,6 @@
 #include <kernel/PCI/PCI.h>
 #include <kernel/asm.h>
+#include <libc/stdio.h>
 
 /*
 	31			30-24		23-16		15-11		10-8		7-0
@@ -53,4 +54,30 @@ struct PCI_DeviceDescriptor PCI_getDD(uint8_t bus, uint8_t slot, uint8_t func) {
 	ret.interrupt = PCI_read(bus, slot, func, 0x3C);
 
 	return ret;
+}
+
+void PCI_loadDrivers() {
+	for(int i=0; i<8; i++) {
+		for(int j=0; j<32; j++) {
+			int nFunctions = PCI_hasFunctions(i, j) ? 8 : 1;
+			for(int k=0; k<nFunctions; k++) {
+				struct PCI_DeviceDescriptor dd = PCI_getDD(i, j, k);
+				if(dd.vendor_id == 0xFFFF) continue;
+
+				/*switch(dd.class_id) {
+					case 0x03:
+						// Graphics.
+						switch(dd.subclass_id) {
+							case 0x00:
+								// VGA.
+								printf("VGA found!\n");
+								break;
+						}
+						break;
+				}*/
+
+				printf("Found device -> %d.%d\n", dd.class_id, dd.subclass_id);
+			}
+		}
+	}
 }
