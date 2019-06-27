@@ -8,7 +8,6 @@
 	1 for Graphics
 */
 uint8_t term_mode = 0;
-uint32_t BIOS_font_addr;
 
 size_t term_width;
 size_t term_height;
@@ -46,19 +45,20 @@ void __term_putliteralchar(char c) {
 	if(term_mode == 0) {
 		// TTY
 		TTY_putentryat(c, term_fg, term_column, term_row);
-	} else {
-		// Graphics
-		for(int y=0; y<16; y++) {
-			for(int x=0; x<8; x++) {
-				uint32_t colorToWrite = term_bg;
-				if(isBitSet(c, y, x)) colorToWrite = term_fg;
+		return;
+	}
 
-				VESA_putPixel(
-					term_column*8+x,
-					term_row*16+y,
-					colorToWrite
-				);
-			}
+	// Graphics
+	for(int y=0; y<16; y++) {
+		for(int x=0; x<8; x++) {
+			uint32_t colorToWrite = term_bg;
+			if(isBitSet(c, y, x)) colorToWrite = term_fg;
+
+			VESA_putPixel(
+				term_column*8+x,
+				term_row*16+y,
+				colorToWrite
+			);
 		}
 	}
 
@@ -70,6 +70,9 @@ void term_writec(char c) {
 		case '\n':
 			term_goDown();
 			break;
+		case '\xc3':
+			// Latin-1.
+			break;
 		default:
 			__term_putliteralchar(c);
 	}
@@ -77,7 +80,7 @@ void term_writec(char c) {
 
 void term_goDown() {
 	term_column = 0;
-	if(++term_row == term_width) term_row = 0;
+	if(++term_row == term_height) term_row = 0;
 	/* Scrolling should be implemented here. */
 }
 

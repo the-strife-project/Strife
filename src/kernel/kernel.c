@@ -57,8 +57,8 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("Going graphics. See you in a bit...\n");
 	VESA_init(800, 600, 32);
 	term_goGraphics(800, 600);
+	term_setFGC(0x0000FF00);
 
-	term_fill(0x00);
 	printf("jotadOS - %dK of RAM available.\n", getFreeMemory());
 	printf("\nType something. Press ESC for kernel panic simulation.\n");
 
