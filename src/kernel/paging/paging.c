@@ -33,6 +33,7 @@ void paging_enable() {
 	paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096) + 1);
 
 	// Load page directory and enable.
+	outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 	go_paging(page_directory);
 }
 

@@ -8,22 +8,23 @@ enable_language(ASM)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS " ")
 
 set(CMAKE_C_COMPILER "i686-elf-gcc")
-set(CMAKE_ASM_COMPILER "i686-elf-as")
+set(CMAKE_ASM_COMPILER "nasm")
 set(CMAKE_LINKER "i686-elf-gcc")
 
 set(CMAKE_C_FLAGS "-c -I./src -std=gnu99 -ffreestanding -O2 -Wall -Wextra ${CMAKE_C_FLAGS}")
+set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_COMPILER> <SOURCE> -o <OBJECT> -f elf32")
 set(CMAKE_EXE_LINKER_FLAGS "-T linker.ld -o bin/boot/jotadOS.bin -ffreestanding -O2 -nostdlib ${CMAKE_EXE_LINKER_FLAGS}")
 set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_EXE_LINKER_FLAGS} <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 include_directories(jotadOS "./")
 
 # Boot
-file(GLOB SRC_BOOT "src/boot.s")
+file(GLOB SRC_BOOT "src/boot.asm")
 
 # Kernel
-file(GLOB SRC_KERNEL "src/kernel/*.s" "src/kernel/*.c")
+file(GLOB SRC_KERNEL "src/kernel/*.asm" "src/kernel/*.c")
 # Kernel - Drivers - Keyboard
-file(GLOB SRC_KERNEL_DRIVERS_KEYBOARD "src/kernel/drivers/keyboard/*.s" "src/kernel/drivers/keyboard/*.c")
+file(GLOB SRC_KERNEL_DRIVERS_KEYBOARD "src/kernel/drivers/keyboard/*.asm" "src/kernel/drivers/keyboard/*.c")
 # Kernel - Drivers - TTY
 file(GLOB SRC_KERNEL_DRIVERS_TTY "src/kernel/drivers/TTY/*.c")
 # Kernel - GDT
@@ -31,11 +32,11 @@ file(GLOB SRC_KERNEL_GDT "src/kernel/GDT/*.c")
 # Kernel - PIC
 file(GLOB SRC_KERNEL_PIC "src/kernel/PIC/*.c")
 # Kernel - IDT
-file(GLOB SRC_KERNEL_IDT "src/kernel/IDT/*.c" "src/kernel/IDT/*.s")
+file(GLOB SRC_KERNEL_IDT "src/kernel/IDT/*.c" "src/kernel/IDT/*.asm")
 # Kernel - Kernel panic
 file(GLOB SRC_KERNEL_KERNELPANIC "src/kernel/kernel_panic/*.c")
 # Kernel - Paging
-file(GLOB SRC_KERNEL_PAGING "src/kernel/paging/*.c" "src/kernel/paging/*.s")
+file(GLOB SRC_KERNEL_PAGING "src/kernel/paging/*.c" "src/kernel/paging/*.asm")
 # Kernel - PCI
 file(GLOB SRC_KERNEL_PCI "src/kernel/PCI/*.c")
 # Kernel - Drivers - VGA
@@ -43,7 +44,7 @@ file(GLOB SRC_KERNEL_DRIVERS_VGA "src/kernel/drivers/VGA/*.c")
 # Kernel - Memutils
 file(GLOB SRC_KERNEL_MEMUTILS "src/kernel/memutils/*.c")
 # Kernel - Drivers - Term
-file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c" "src/kernel/drivers/term/*.s")
+file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c" "src/kernel/drivers/term/*.asm")
 
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")

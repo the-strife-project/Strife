@@ -11,7 +11,6 @@
 #include <kernel/asm.h>
 #include <common/elf.h>
 #include <kernel/PCI/PCI.h>
-#include <kernel/drivers/VGA/VGA.h>
 #include <kernel/memutils/memutils.h>
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -48,9 +47,9 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("Setting IDT...\n");
 	idt_init();
 
-	printf("Going VGA. See you in a bit...\n");
-	VGA_setMode(VGA_WIDTH, VGA_HEIGHT, VGA_COLORDEPTH);
-	term_goVGA();
+	printf("Going VESA. See you in a bit...\n");
+
+	//term_goVGA();
 	term_clear();
 
 	printf("jotadOS");

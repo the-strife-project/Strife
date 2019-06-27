@@ -48,7 +48,7 @@ void __term_putliteralchar(char c) {
 		TTY_putentryat(c, term_fg, term_column, term_row);
 	} else {
 		// VGA
-		for(int y=0; y<16; y++) {
+		/*for(int y=0; y<16; y++) {
 			for(int x=0; x<8; x++) {
 				uint8_t colorToWrite = term_bg;
 				if(isBitSet(c, y, x)) colorToWrite = term_fg;
@@ -59,7 +59,7 @@ void __term_putliteralchar(char c) {
 					colorToWrite
 				);
 			}
-		}
+		}*/
 	}
 
 	if(++term_column == term_width) term_goDown();
@@ -95,11 +95,11 @@ void term_fill(uint8_t color) {
 		}
 	} else {
 		// VGA
-		for(size_t y=0; y<(term_height+1)*16; y++) {
+		/*for(size_t y=0; y<(term_height+1)*16; y++) {
 			for(size_t x=0; x<term_width*8; x++) {
 				VGA_putPixelRaw(x, y, term_bg);
 			}
-		}
+		}*/
 	}
 }
 

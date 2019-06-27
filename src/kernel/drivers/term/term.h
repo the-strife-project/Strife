@@ -2,7 +2,7 @@
 #define TERM_H
 
 #include <kernel/drivers/TTY/TTY.h>
-#include <kernel/drivers/VGA/VGA.h>
+//#include <kernel/drivers/VGA/VGA.h>
 
 /*
 	This is basically a wrapper around TTY and VGA, so it's an
