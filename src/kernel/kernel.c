@@ -6,12 +6,15 @@
 #include <kernel/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>
 #include <kernel/drivers/keyboard/keyboard.h>
+#include <kernel/drivers/clock/clock.h>
 #include <boot.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/asm.h>
 #include <common/elf.h>
 #include <kernel/PCI/PCI.h>
 #include <kernel/memutils/memutils.h>
+#include <kernel/drivers/VESA/VESA.h>
+
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
@@ -47,18 +50,17 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("Setting IDT...\n");
 	idt_init();
 
-	printf("Going VESA. See you in a bit...\n");
-
-	//term_goVGA();
-	term_clear();
-
-	printf("jotadOS");
-
-	/*printf("Starting keyboard...\n");
+	printf("Loading drivers...\n");
 	keyboard_init();
+	clock_init();
 
-	printf("\nAll set. %dK of RAM available.\n", getFreeMemory());
-	printf("\nType something. Press ESC for kernel panic simulation.\n");*/
+	printf("Going graphics. See you in a bit...\n");
+	VESA_init(800, 600, 32);
+	term_goGraphics(800, 600);
+
+	term_fill(0x00);
+	printf("jotadOS - %dK of RAM available.\n", getFreeMemory());
+	printf("\nType something. Press ESC for kernel panic simulation.\n");
 
 	while(1) {}
 }
