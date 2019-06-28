@@ -24,4 +24,5 @@ void term_clear(void);
 uint8_t term_getCurrentMode();
 void term_setFGC(uint32_t color);
 void term_setBGC(uint32_t color);
+void term_backspace();
 #endif

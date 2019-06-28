@@ -17,6 +17,9 @@ size_t term_column;
 uint32_t term_bg;
 uint32_t term_fg;
 
+// This will be used in order to do some offsets in the font.
+uint8_t lat1 = 0;
+
 void term_init(void) {
 	term_mode = 0;
 	term_setWidthHeight(TTY_WIDTH*8, TTY_HEIGHT*16	);
@@ -52,7 +55,7 @@ void __term_putliteralchar(char c) {
 	for(int y=0; y<16; y++) {
 		for(int x=0; x<8; x++) {
 			uint32_t colorToWrite = term_bg;
-			if(isBitSet(c, y, x)) colorToWrite = term_fg;
+			if(isBitSet(lat1, c, y, x)) colorToWrite = term_fg;
 
 			VESA_putPixel(
 				term_column*8+x,
@@ -70,8 +73,24 @@ void term_writec(char c) {
 		case '\n':
 			term_goDown();
 			break;
+		case '\xc2':
+			// Latin-1
+			lat1 = 2;
+			break;
 		case '\xc3':
-			// Latin-1.
+			// Latin-1
+			lat1 = 3;
+			break;
+		case '\t':
+			for(int i=0; i<4; i++) __term_putliteralchar(' ');
+			break;
+		case '\b':
+			term_backspace();
+			for(int y=0; y<16; y++) {
+				for(int x=0; x<8; x++) {
+					VESA_putPixel(term_column*8+x, term_row*16+y, term_bg);
+				}
+			}
 			break;
 		default:
 			__term_putliteralchar(c);
@@ -116,3 +135,9 @@ void term_clear() {
 uint8_t term_getCurrentMode() { return term_mode; }
 void term_setFGC(uint32_t color) { term_fg = color; }
 void term_setBGC(uint32_t color) { term_bg = color; }
+void term_backspace() {
+	if(--term_column == 0xFFFFFFFF) {
+		--term_row;
+		term_column = term_width-1;
+	}
+}

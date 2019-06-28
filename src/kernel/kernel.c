@@ -14,6 +14,7 @@
 #include <kernel/PCI/PCI.h>
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/VESA/VESA.h>
+#include <kernel/splash.h>
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -59,8 +60,10 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	term_goGraphics(800, 600);
 	term_setFGC(0x0000FF00);
 
-	printf("jotadOS - %dK of RAM available.\n", getFreeMemory());
-	printf("\nType something. Press ESC for kernel panic simulation.\n");
+	showSplash("jotadOS", 4, (800-(4*8*7))/2, 32);
+
+	printf("%dK of RAM available.\n", getFreeMemory());
+	printf("\nGo ahead, type something. You're free to use all the screen.\n\n");
 
 	while(1) {}
 }

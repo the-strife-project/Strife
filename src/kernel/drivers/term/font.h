@@ -3,6 +3,6 @@
 
 #include <common/types.h>
 
-uint8_t isBitSet(char c, int y, int x);
+uint8_t isBitSet(uint8_t lat1, char c, int y, int x);
 
 #endif
