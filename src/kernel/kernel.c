@@ -63,7 +63,11 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	showSplash("jotadOS", 4, (800-(4*8*7))/2, 32);
 
 	printf("%dK of RAM available.\n", getFreeMemory());
-	printf("\nGo ahead, type something. You're free to use all the screen.\n\n");
+	printf("\nGo ahead, type something\n");
 
-	while(1) {}
+	while(1) {
+		printf("> ");
+		char* r = readLine();
+		printf("< (%d) %s\n", strlen(r), r);
+	}
 }

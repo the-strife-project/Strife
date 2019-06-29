@@ -4,17 +4,20 @@
 #include <kernel/GDT/GDT.h>
 #include <kernel/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>
+#include <kernel/drivers/term/term.h>
+#include <kernel/asm.h>
 
-int ticks;
+int ticks = 0;
 
 void clock_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);
 	ticks++;
+
+	if(ticks % 10 == 0) blinkCursor();
 }
 
 void clock_init(void) {
 	IDT_SET_ENT(IDT[CLOCK_IDT_ENTRY], 0, _KERNEL_CODESEGMENT, (uint32_t)IDT_clock, 0);
-	ticks = 0;
 }
 
 void clock_start(void) {

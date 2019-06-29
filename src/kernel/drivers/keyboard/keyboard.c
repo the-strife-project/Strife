@@ -1,5 +1,6 @@
 #include <kernel/drivers/keyboard/keyboard.h>
 #include <libc/stdio.h>
+#include <libc/stdlib.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/PIC/PIC.h>
@@ -27,10 +28,31 @@ uint8_t accent3 = 0;	// ¨
 uint8_t ctrl =  0;
 uint8_t alt = 0;
 
-// 'bk' is for 'bufferKey'.
-void bk(char* a) {
-	printf(a);
+/*
+	The keyboard buffer will be stored at 0x7E00.
+	There are more than 400KiB free there.
+*/
+char* buffer = (char*)0x7E00;
+int buffered;
+uint8_t show;
+void bk(char* a) {	// Buffer key
+	if(strcmp(a, "\b") == 0) {
+		// If the buffer is empty, don't do anything.
+		if(buffered) {
+			buffer[--buffered] = 0;
+			if(buffer[buffered-1] == '\xc2' || buffer[buffered-1] == '\xc3') {
+				buffer[--buffered] = 0;
+			}
+			if(show) printf("%s", a);
+		}
+		return;
+	}
+	if(show) printf("%s", a);
+	strcat(buffer, a);
+	buffered += strlen(a);
 }
+char* keyboard_getBuffer() { return buffer; }
+int keyboard_getBuffered() { return buffered; }
 
 void keyboard_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);
@@ -184,7 +206,6 @@ void keyboard_handler(void) {
 
 void keyboard_init(void) {
 	IDT_SET_ENT(IDT[KEYBOARD_IDT_ENTRY], 0, _KERNEL_CODESEGMENT, (uint32_t)IDT_keyboard, 0);
-	keyboard_resume();
 
 	// Discard already pressed keys.
 	inb(KEYBOARD_DATA_PORT);
@@ -194,6 +215,10 @@ void keyboard_init(void) {
 void keyboard_pause(void) {
 	pic_disable_irq(1);
 }
-void keyboard_resume(void) {
+void keyboard_resume(uint8_t show_) {
+	// Reset the buffer.
+	*buffer = 0;
+	buffered = 0;
+	show = show_;
 	pic_enable_irq(1);
 }

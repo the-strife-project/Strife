@@ -18,7 +18,7 @@ void idt_init(void) {
 }
 
 void unhandled_interrupt_handler(struct irq_frame *iframe) {
-	printf("Int or Exc not handled: 0x%x - 0x%x\n", (*iframe).intno, (*iframe).err);
+	printf("E: 0x%x - 0x%x: %x\n", (*iframe).intno, (*iframe).err, (*iframe).eip);
 
 	outb(PIC_IO_PIC1, PIC_EOI);
 	outb(PIC_IO_PIC2, PIC_EOI);

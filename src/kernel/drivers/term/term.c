@@ -20,9 +20,13 @@ uint32_t term_fg;
 // This will be used in order to do some offsets in the font.
 uint8_t lat1 = 0;
 
+// This is whether or not the cursor is shown.
+uint8_t cursor = 0;
+uint8_t __tcursor = 0;
+
 void term_init(void) {
 	term_mode = 0;
-	term_setWidthHeight(TTY_WIDTH*8, TTY_HEIGHT*16	);
+	term_setWidthHeight(TTY_WIDTH*8, TTY_HEIGHT*16);
 
 	term_row = 0;
 	term_column = 0;
@@ -87,7 +91,7 @@ void term_writec(char c) {
 		case '\b':
 			term_backspace();
 			for(int y=0; y<16; y++) {
-				for(int x=0; x<8; x++) {
+				for(int x=0; x<16; x++) {
 					VESA_putPixel(term_column*8+x, term_row*16+y, term_bg);
 				}
 			}
@@ -140,4 +144,29 @@ void term_backspace() {
 		--term_row;
 		term_column = term_width-1;
 	}
+}
+
+void showCursor() { cursor = 1; }
+void hideCursor() { cursor = 0; }
+
+void blinkCursor() {
+	if(!cursor) return;
+
+	char toWrite = '_';
+	if(!__tcursor) toWrite = ' ';
+
+	for(int y=0; y<16; y++) {
+		for(int x=0; x<8; x++) {
+			uint32_t colorToWrite = term_bg;
+			if(isBitSet(lat1, toWrite, y, x)) colorToWrite = term_fg;
+
+			VESA_putPixel(
+				term_column*8+x,
+				term_row*16+y,
+				colorToWrite
+			);
+		}
+	}
+
+	__tcursor = !__tcursor;
 }
