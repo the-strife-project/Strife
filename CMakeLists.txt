@@ -29,8 +29,8 @@ file(GLOB SRC_KERNEL_DRIVERS_KEYBOARD "src/kernel/drivers/keyboard/*.asm" "src/k
 file(GLOB SRC_KERNEL_DRIVERS_TTY "src/kernel/drivers/TTY/*.c")
 # Kernel - GDT
 file(GLOB SRC_KERNEL_GDT "src/kernel/GDT/*.c")
-# Kernel - PIC
-file(GLOB SRC_KERNEL_PIC "src/kernel/PIC/*.c")
+# Kernel - Drivers - PIC
+file(GLOB SRC_KERNEL_PIC "src/kernel/drivers/PIC/*.c")
 # Kernel - IDT
 file(GLOB SRC_KERNEL_IDT "src/kernel/IDT/*.c" "src/kernel/IDT/*.asm")
 # Kernel - Kernel panic

@@ -1,5 +1,5 @@
 #include <kernel/drivers/VESA/VESA.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
 #include <kernel/kernel_panic/kernel_panic.h>

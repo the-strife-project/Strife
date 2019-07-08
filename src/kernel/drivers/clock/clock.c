@@ -2,7 +2,7 @@
 #include <libc/stdio.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>
 #include <kernel/drivers/term/term.h>
 #include <kernel/asm.h>

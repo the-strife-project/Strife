@@ -3,7 +3,7 @@
 #include <libc/stdlib.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/drivers/keyboard/kb_layout.h>

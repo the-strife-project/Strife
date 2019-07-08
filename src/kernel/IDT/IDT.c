@@ -2,7 +2,7 @@
 #include <kernel/GDT/GDT.h>
 #include <common/types.h>
 #include <libc/stdio.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 #include <kernel/asm.h>
 #include <libc/string.h>
 

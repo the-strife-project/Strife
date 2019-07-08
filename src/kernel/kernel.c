@@ -3,7 +3,7 @@
 #include <libc/stdlib.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/paging/paging.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>
 #include <kernel/drivers/keyboard/keyboard.h>
 #include <kernel/drivers/clock/clock.h>

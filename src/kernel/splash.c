@@ -4,6 +4,7 @@
 #include <kernel/splash.h>
 #include <kernel/drivers/term/font.h>
 #include <kernel/drivers/term/term.h>
+#include <libc/stdlib.h>
 
 uint32_t __getGradient(uint32_t origin, uint32_t end, int maxstep, int step) {
 	uint8_t origin_r = (origin & 0x00FF0000) >> 16;
@@ -41,7 +42,7 @@ uint32_t __getGradient(uint32_t origin, uint32_t end, int maxstep, int step) {
 
 void showSplash(char* toWrite, int splashSize, int marginx, int marginy) {
 	// For each character.
-	for(int i=0; i<7; i++) {
+	for(size_t i=0; i<strlen(toWrite); i++) {
 		// (8x16 dimensions)
 		for(int y=0; y<16; y++) {
 			for(int x=0; x<8; x++) {

@@ -4,7 +4,7 @@
 */
 
 #include <kernel/asm.h>
-#include <kernel/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.h>
 
 static uint16_t irqmask = 0xFFFF & ~(1<<PIC_IRQ_SLAVE);
 
