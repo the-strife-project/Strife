@@ -74,7 +74,11 @@ void bk(char* a) {	// Buffer key
 		if(__kbcursor < buffered) {
 			// Move characters at the right (from current character) one position to the left.
 			char* saux = jmalloc(buffered);	// supr auxiliar
-			strcpy(saux, buffer+__kbcursor+1);
+			uint8_t diff = 1;
+			if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') {
+				diff++;
+			}
+			strcpy(saux, buffer+__kbcursor+diff);
 			printf("%s ", saux);
 
 			// Move the cursor back.
@@ -84,8 +88,6 @@ void bk(char* a) {	// Buffer key
 			}
 
 			// Overwrite the buffer.
-			int diff = 1;
-			if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') diff++;
 			strcpy(buffer + __kbcursor, saux);
 			jfree(saux);
 
