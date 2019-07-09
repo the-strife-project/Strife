@@ -18,7 +18,6 @@ uint8_t differentiate = 0;
 uint8_t altgr = 0;
 uint8_t Lshift = 0;
 uint8_t Rshift = 0;
-uint8_t numb = 0;
 uint8_t mayb = 0;
 
 uint8_t accent0 = 0;	// ^
@@ -172,9 +171,8 @@ void keyboard_handler(void) {
 			mayb = !mayb;
 			break;
 		case 0x45:
-			// Num block
+			// Num block. I'm not interested.
 			handle = (char*)1;
-			numb = !numb;
 			break;
 		case 0x1A:
 			// `
@@ -244,8 +242,7 @@ void keyboard_handler(void) {
 		else if(accent1) handle = KB_LAYOUT_AC1[keycode];
 		else if(accent2) handle = KB_LAYOUT_AC2[keycode];
 		else if(accent3) handle = KB_LAYOUT_AC3[keycode];
-		else if(numb) handle = KB_LAYOUT_NUM[keycode];
-		else handle = KB_LAYOUT_NONUM[keycode];
+		else handle = KB_LAYOUT[keycode];
 	}
 
 	if(!handle) return;
