@@ -66,15 +66,57 @@ void bk(char* a) {	// Buffer key
 			__kbcursor--;
 		}
 		return;
-	} else if(strcmp(a, "[LEFT]") == 0) {
-		// Similar to above.
-		if(__kbcursor) {
-			term_left();
-			__kbcursor--;
-			if(buffer[__kbcursor-1] == '\xc2' || buffer[__kbcursor-1] == '\xc3') {
-				__kbcursor--;
+	} else if(strcmp(a, "[SUPR]") == 0) {
+		/*
+			This is really similar to above.
+			However, there are too many differences to make this only one method.
+		*/
+		if(__kbcursor < buffered) {
+			// Move characters at the right (from current character) one position to the left.
+			char* saux = jmalloc(buffered);	// supr auxiliar
+			strcpy(saux, buffer+__kbcursor+1);
+			printf("%s ", saux);
+
+			// Move the cursor back.
+			for(size_t i=0; i<strlen(saux)+1; i++) {
+				if(saux[i] == '\xc2' || saux[i] == '\xc3') continue;
+				term_left();
 			}
+
+			// Overwrite the buffer.
+			int diff = 1;
+			if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') diff++;
+			strcpy(buffer + __kbcursor, saux);
+			jfree(saux);
+
+			// Pull the counters back.
+			if(diff == 2) {
+				buffered--;
+			}
+			buffer[--buffered] = 0;
 		}
+		return;
+	} else if(strcmp(a, "[LEFT]") == 0) {
+		if(!__kbcursor) return;
+		term_left();
+		__kbcursor--;
+		if(buffer[__kbcursor-1] == '\xc2' || buffer[__kbcursor-1] == '\xc3') {
+			__kbcursor--;
+		}
+		return;
+	} else if(strcmp(a, "[RIGHT]") == 0) {
+		if(__kbcursor >= buffered) return;
+		term_right();
+		__kbcursor++;
+		if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') {
+			__kbcursor++;
+		}
+		return;
+	} else if(strcmp(a, "[HOME]") == 0) {
+		while(__kbcursor) bk("[LEFT]");
+		return;
+	} else if(strcmp(a, "[END]") == 0) {
+		while(__kbcursor < buffered) bk("[RIGHT]");
 		return;
 	}
 	// Print the new characters.
@@ -223,6 +265,30 @@ void keyboard_handler(void) {
 			if(!differentiate) break;
 			handle = (char*)1;
 			bk("[LEFT]");
+			break;
+		case 0x53:
+			// Supr
+			if(!differentiate) break;
+			handle = (char*)1;
+			bk("[SUPR]");
+			break;
+		case 0x4D:
+			// ->
+			if(!differentiate) break;
+			handle = (char*)1;
+			bk("[RIGHT]");
+			break;
+		case 0x47:
+			// Home
+			if(!differentiate) break;
+			handle = (char*)1;
+			bk("[HOME]");
+			break;
+		case 0x4F:
+			// End
+			if(!differentiate) break;
+			handle = (char*)1;
+			bk("[END]");
 			break;
 	}
 	if(handle) return;

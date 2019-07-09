@@ -148,6 +148,10 @@ void term_left() {
 		term_column = term_width-1;
 	}
 }
+void term_right() {
+	if(cursorIsInverted) blinkCursor();
+	if(++term_column == term_width) term_goDown();
+}
 
 void showCursor() { cursor = 1; }
 void hideCursor() { cursor = 0; }
