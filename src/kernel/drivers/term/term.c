@@ -22,7 +22,7 @@ uint8_t lat1 = 0;
 
 // This is whether or not the cursor is shown.
 uint8_t cursor = 0;
-uint8_t __tcursor = 0;
+uint8_t cursorIsInverted = 0;
 
 void term_init(void) {
 	term_mode = 0;
@@ -30,7 +30,7 @@ void term_init(void) {
 
 	term_row = 0;
 	term_column = 0;
-	term_fg = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+	term_fg = vga_entry_color(7, 0);
 
 	term_clear();
 }
@@ -70,11 +70,13 @@ void __term_putliteralchar(char c) {
 	}
 
 	if(++term_column == term_width) term_goDown();
+	cursorIsInverted = 0;
 }
 
 void term_writec(char c) {
 	switch(c) {
 		case '\n':
+			if(cursorIsInverted) blinkCursor();
 			term_goDown();
 			break;
 		case '\xc2':
@@ -89,9 +91,9 @@ void term_writec(char c) {
 			for(int i=0; i<4; i++) __term_putliteralchar(' ');
 			break;
 		case '\b':
-			term_backspace();
+			term_left();
 			for(int y=0; y<16; y++) {
-				for(int x=0; x<16; x++) {
+				for(int x=0; x<8; x++) {
 					VESA_putPixel(term_column*8+x, term_row*16+y, term_bg);
 				}
 			}
@@ -139,7 +141,8 @@ void term_clear() {
 uint8_t term_getCurrentMode() { return term_mode; }
 void term_setFGC(uint32_t color) { term_fg = color; }
 void term_setBGC(uint32_t color) { term_bg = color; }
-void term_backspace() {
+void term_left() {
+	if(cursorIsInverted) blinkCursor();
 	if(--term_column == 0xFFFFFFFF) {
 		--term_row;
 		term_column = term_width-1;
@@ -152,21 +155,18 @@ void hideCursor() { cursor = 0; }
 void blinkCursor() {
 	if(!cursor) return;
 
-	char toWrite = '_';
-	if(!__tcursor) toWrite = ' ';
-
+	// Basically, invert the colors.
 	for(int y=0; y<16; y++) {
 		for(int x=0; x<8; x++) {
-			uint32_t colorToWrite = term_bg;
-			if(isBitSet(lat1, toWrite, y, x)) colorToWrite = term_fg;
-
-			VESA_putPixel(
-				term_column*8+x,
-				term_row*16+y,
-				colorToWrite
-			);
+			size_t px = term_column*8+x;
+			size_t py = term_row*16+y;
+			if(VESA_getPixel(px, py) == term_fg) {
+				VESA_putPixel(px, py, term_bg);
+			} else {
+				VESA_putPixel(px, py, term_fg);
+			}
 		}
 	}
 
-	__tcursor = !__tcursor;
+	cursorIsInverted = !cursorIsInverted;
 }

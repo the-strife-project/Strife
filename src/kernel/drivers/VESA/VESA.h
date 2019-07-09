@@ -89,5 +89,6 @@ void VESA_setMode(uint16_t mode);
 
 void VESA_init(uint16_t width, uint16_t height, uint8_t colordepth);
 void VESA_putPixel(uint16_t x, uint16_t y, uint32_t color);
+uint32_t VESA_getPixel(uint16_t x, uint16_t y);
 
 #endif

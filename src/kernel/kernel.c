@@ -54,6 +54,7 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("Loading drivers...\n");
 	keyboard_init();
 	clock_init();
+	clock_start();
 
 	printf("Going graphics. See you in a bit...\n");
 	VESA_init(800, 600, 32);
@@ -64,10 +65,12 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 
 	printf("%dK of RAM available.\n", getFreeMemory());
 	printf("\nGo ahead, type something\n");
+	showCursor();
 
 	while(1) {
 		printf("> ");
 		char* r = readLine();
 		printf("< (%d) %s\n", strlen(r), r);
+		jfree(r);
 	}
 }

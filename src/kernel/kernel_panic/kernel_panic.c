@@ -16,8 +16,8 @@ void kernel_panic(uint32_t id) {
 	// Fill screen with red.
 	if(!term_getCurrentMode()) {
 		// Text.
-		uint8_t bgcolor = VGA_COLOR_LIGHT_RED << 4;
-		bgcolor |= VGA_COLOR_BLUE;
+		uint8_t bgcolor = 12 << 4;
+		bgcolor |= 1;
 		term_setBGC(bgcolor);
 	} else {
 		// Graphics.

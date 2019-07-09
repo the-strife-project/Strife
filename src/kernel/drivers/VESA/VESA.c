@@ -123,6 +123,12 @@ void VESA_putPixel(uint16_t x, uint16_t y, uint32_t color) {
 	uint32_t pixel = y * VESA_currentMode_width * VESA_currentMode_bpp/8;
 	pixel += x * VESA_currentMode_bpp/8;
 	pixel += VESA_framebuffer;
-
 	*((uint32_t*)pixel) = color;
+}
+
+uint32_t VESA_getPixel(uint16_t x, uint16_t y) {
+	uint32_t pixel = y * VESA_currentMode_width * VESA_currentMode_bpp/8;
+	pixel += x * VESA_currentMode_bpp/8;
+	pixel += VESA_framebuffer;
+	return *((uint32_t*)pixel);
 }

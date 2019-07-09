@@ -7,6 +7,7 @@
 #include <kernel/IDT/IDT.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/drivers/keyboard/kb_layout.h>
+#include <kernel/drivers/term/term.h>
 
 /*
 	'differentiate' marks whether the first byte of the interrupt
@@ -34,22 +35,67 @@ uint8_t alt = 0;
 */
 char* buffer = (char*)0x7E00;
 int buffered;
+int __kbcursor;
 uint8_t show;
 void bk(char* a) {	// Buffer key
 	if(strcmp(a, "\b") == 0) {
 		// If the buffer is empty, don't do anything.
-		if(buffered) {
-			buffer[--buffered] = 0;
-			if(buffer[buffered-1] == '\xc2' || buffer[buffered-1] == '\xc3') {
-				buffer[--buffered] = 0;
+		if(buffered && __kbcursor) {
+			// Move characters at the right one position to the left.
+			char* baux = jmalloc(buffered);	// backspace auxiliar
+			strcpy(baux, buffer+__kbcursor);
+			term_left();
+			printf("%s ", baux);
+
+			// Move the cursor back.
+			for(size_t i=0; i<strlen(baux)+1; i++) {
+				if(baux[i] == '\xc2' || baux[i] == '\xc3') continue;
+				term_left();
 			}
-			if(show) printf("%s", a);
+
+			// Overwrite the buffer.
+			int diff = 1;
+			if(buffer[__kbcursor-2] == '\xc2' || buffer[__kbcursor-2] == '\xc3') diff++;
+			strcpy(buffer + __kbcursor - diff, baux);
+			jfree(baux);
+
+			// Pull the counters back.
+			if(diff == 2) {
+				buffered--; __kbcursor--;
+			}
+			buffer[--buffered] = 0;
+			__kbcursor--;
+		}
+		return;
+	} else if(strcmp(a, "[LEFT]") == 0) {
+		// Similar to above.
+		if(__kbcursor) {
+			term_left();
+			__kbcursor--;
+			if(buffer[__kbcursor-1] == '\xc2' || buffer[__kbcursor-1] == '\xc3') {
+				__kbcursor--;
+			}
 		}
 		return;
 	}
-	if(show) printf("%s", a);
-	strcat(buffer, a);
+	// Print the new characters.
+	char* aux = jmalloc(buffered+strlen(a));	// Quick and dirty.
+	strcpy(aux, a);
+	strcat(aux, buffer+__kbcursor);
+	if(show) printf("%s", aux);
+
+	// Move the cursor back as many positions as printable character 'aux' has.
+	for(size_t i=0; i<strlen(aux)-strlen(a); i++) {
+		if(aux[i+strlen(a)] == '\xc2' || aux[i+strlen(a)] == '\xc3') continue;
+		term_left();
+	}
+
+	// Update the buffer.
+	strcpy(buffer+__kbcursor, aux);
+	jfree(aux);
+
 	buffered += strlen(a);
+	__kbcursor += strlen(a);
 }
 char* keyboard_getBuffer() { return buffer; }
 int keyboard_getBuffered() { return buffered; }
@@ -174,11 +220,16 @@ void keyboard_handler(void) {
 				}
 			}
 			break;
+		case 0x4B:
+			// <-
+			if(!differentiate) break;
+			handle = (char*)1;
+			bk("[LEFT]");
+			break;
 	}
 	if(handle) return;
 
 	if(keycode >= 128) return;	// Key release.
-
 
 	if(altgr)
 		handle = KB_LAYOUT_ALTGR[keycode];
@@ -219,6 +270,7 @@ void keyboard_resume(uint8_t show_) {
 	// Reset the buffer.
 	*buffer = 0;
 	buffered = 0;
+	__kbcursor = 0;
 	show = show_;
 	pic_enable_irq(1);
 }
