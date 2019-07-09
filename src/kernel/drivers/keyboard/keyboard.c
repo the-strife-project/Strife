@@ -90,9 +90,7 @@ void bk(char* a) {	// Buffer key
 			jfree(saux);
 
 			// Pull the counters back.
-			if(diff == 2) {
-				buffered--;
-			}
+			if(diff == 2) buffered--;
 			buffer[--buffered] = 0;
 		}
 		return;
@@ -205,6 +203,7 @@ void keyboard_handler(void) {
 		case 0x0E:
 			// Backspace.
 			handle = (char*)1;
+			accent0 = accent1 = accent2 = accent3 = 0;
 			bk("\b");
 			break;
 		case 0x3A:
@@ -270,6 +269,7 @@ void keyboard_handler(void) {
 			// Supr
 			if(!differentiate) break;
 			handle = (char*)1;
+			accent0 = accent1 = accent2 = accent3 = 0;
 			bk("[SUPR]");
 			break;
 		case 0x4D:
@@ -291,19 +291,22 @@ void keyboard_handler(void) {
 			bk("[END]");
 			break;
 	}
-	if(handle) return;
+	if(handle) {
+		differentiate = 0;
+		return;
+	}
 
 	if(keycode >= 128) return;	// Key release.
 
 	if(altgr)
 		handle = KB_LAYOUT_ALTGR[keycode];
-	else if(Lshift || Rshift || mayb)
+	else if(Lshift || Rshift || mayb) {
 		if(accent0) handle = KB_LAYOUT_SHIFT_AC0[keycode];
 		else if(accent1) handle = KB_LAYOUT_SHIFT_AC1[keycode];
 		else if(accent2) handle = KB_LAYOUT_SHIFT_AC2[keycode];
 		else if(accent3) handle = KB_LAYOUT_SHIFT_AC3[keycode];
 		else handle = KB_LAYOUT_SHIFT[keycode];
-	else {
+	} else {
 		if(accent0) handle = KB_LAYOUT_AC0[keycode];
 		else if(accent1) handle = KB_LAYOUT_AC1[keycode];
 		else if(accent2) handle = KB_LAYOUT_AC2[keycode];
@@ -311,7 +314,23 @@ void keyboard_handler(void) {
 		else handle = KB_LAYOUT[keycode];
 	}
 
-	if(!handle) return;
+	if(!handle) {
+		if(accent0 || accent1 || accent2 || accent3) {
+			if(accent0) {
+				bk("^");
+			} else if(accent1) {
+				bk("`");
+			} else if(accent2) {
+				bk("´");
+			} else if(accent3) {
+				bk("¨");
+			}
+			accent0 = accent1 = accent2 = accent3 = 0;
+			handle = KB_LAYOUT[keycode];
+			if(handle) bk(handle);
+		}
+		return;
+	}
 
 	bk(handle);
 	differentiate = 0;

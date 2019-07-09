@@ -105,8 +105,35 @@ void term_writec(char c) {
 
 void term_goDown() {
 	term_column = 0;
-	if(++term_row == term_height) term_row = 0;
-	/* Scrolling should be implemented here. */
+	if(++term_row == term_height) {
+		// Time to scroll.
+		term_row--;
+
+		// Basically, starting from row 1, move each pixel 16 positions up.
+		for(size_t y=16; y<term_height*16; y++) {
+			for(size_t x=0; x<term_width*8; x++) {
+				VESA_putPixel(
+					x,
+					y-16,
+					VESA_getPixel(
+						x,
+						y
+					)
+				);
+			}
+		}
+
+		// Finally, clear the last line.
+		for(size_t y=0; y<16; y++) {
+			for(size_t x=0; x<term_width*8; x++) {
+				VESA_putPixel(
+					x,
+					y + (term_height-1)*16,
+					term_bg
+				);
+			}
+		}
+	}
 }
 
 void term_goStart() {
