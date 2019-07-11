@@ -345,6 +345,12 @@ void keyboard_init(void) {
 	// Discard already pressed keys.
 	inb(KEYBOARD_DATA_PORT);
 	inb(KEYBOARD_STATUS_PORT);
+
+	// Set typematic rate and delay.
+	outb(KEYBOARD_DATA_PORT, 0xF3);
+	while (inb(KEYBOARD_STATUS_PORT) & 2) {}
+	outb(KEYBOARD_DATA_PORT, 0x20);
+	while(inb(KEYBOARD_DATA_PORT) != 0xFA) {}
 }
 
 void keyboard_pause(void) {
