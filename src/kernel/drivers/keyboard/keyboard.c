@@ -292,6 +292,16 @@ void keyboard_handler(void) {
 			handle = (char*)1;
 			bk("[END]");
 			break;
+		case 0x5B:
+			// Left super
+			if(!differentiate) break;
+			handle = (char*)1;
+			break;
+		case 0x5C:
+			// Right super
+			if(!differentiate) break;
+			handle = (char*)1;
+			break;
 	}
 	if(handle) {
 		differentiate = 0;

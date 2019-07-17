@@ -1,0 +1,108 @@
+#include <kernel/drivers/ATA_PIO/ATA_PIO.h>
+#include <libc/stdlib.h>
+#include <libc/stdio.h>
+#include <kernel/asm.h>
+
+struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
+	struct ATA_INTERFACE* ret = jmalloc(sizeof(struct ATA_INTERFACE));
+
+	ret->master = master;
+	ret->dataPort = portBase;
+	ret->errorPort = portBase + 0x1;
+	ret->sectorCountPort = portBase + 0x2;
+	ret->lbaLowPort = portBase + 0x3;
+	ret->lbaMidPort = portBase + 0x4;
+	ret->lbaHiPort = portBase + 0x5;
+	ret->devicePort = portBase + 0x6;
+	ret->commandPort = portBase + 0x7;
+	ret->controlPort = portBase + 0x206;
+
+	return ret;
+}
+
+uint8_t ATA_identify(struct ATA_INTERFACE* iface) {
+	outb(iface->devicePort, iface->master ? 0xA0 : 0xB0);
+	outb(iface->controlPort, 0);
+
+	outb(iface->devicePort, 0xA0);
+	uint8_t status = inb(iface->commandPort);
+	if(status == 0xFF) return 0;
+
+	outb(iface->devicePort, iface->master ? 0xA0 : 0xB0);
+	outb(iface->sectorCountPort, 0);
+	outb(iface->lbaLowPort, 0);
+	outb(iface->lbaMidPort, 0);
+	outb(iface->lbaHiPort, 0);
+	outb(iface->commandPort, 0xEC); // Identify command
+
+	status = inb(iface->commandPort);
+	if(!status) return 0;
+
+	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+		status = inb(iface->commandPort);
+	}
+
+	if(status & 0x01) return 0;
+
+	for(int i=0; i<256; i++) inw(iface->dataPort);
+	return 1;
+}
+
+uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
+	if(sector > 0x0FFFFFFF) return 0;
+
+	outb(iface->devicePort, (iface->master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
+	outb(iface->errorPort, 0);
+	outb(iface->sectorCountPort, 1);
+	outb(iface->lbaLowPort, sector & 0x000000FF);
+	outb(iface->lbaMidPort, (sector & 0x0000FF00) >> 8);
+	outb(iface->lbaHiPort, (sector & 0x00FF0000) >> 16);
+	outb(iface->commandPort, 0x20);	// Read command.
+
+	uint8_t status = inb(iface->commandPort);
+	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+		status = inb(iface->commandPort);
+	}
+
+	if(status & 1) return 0;
+
+	uint8_t* ret = jmalloc(BYTES_PER_SECTOR);
+	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
+		uint16_t data = inw(iface->dataPort);
+		ret[i] = data & 0xFF;
+		ret[i+1] = (data >> 8) & 0xFF;
+	}
+
+	return ret;
+}
+
+void ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents) {
+	if(sector > 0x0FFFFFFF) return;
+
+	outb(iface->devicePort, (iface->master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
+	outb(iface->errorPort, 0);
+	outb(iface->sectorCountPort, 1);
+	outb(iface->lbaLowPort, sector & 0x000000FF);
+	outb(iface->lbaMidPort, (sector & 0x0000FF00) >> 8);
+	outb(iface->lbaHiPort, (sector & 0x00FF0000) >> 16);
+	outb(iface->commandPort, 0x30);	// Write command.
+
+	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
+		uint16_t data = contents[i];
+		data |= ((uint16_t)contents[i+1]) << 8;
+		outw(iface->dataPort, data);
+		expensiveNOP();
+	}
+}
+
+void ATA_flush(struct ATA_INTERFACE* iface) {
+	outb(iface->devicePort, iface->master ? 0xE0 : 0xF0);
+	outb(iface->commandPort, 0xE7);	// Flush command.
+
+	uint8_t status = inb(iface->commandPort);
+	if(!status) return;
+
+	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+		status = inb(iface->commandPort);
+	}
+}

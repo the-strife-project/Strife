@@ -47,6 +47,8 @@ file(GLOB SRC_KERNEL_MEMUTILS "src/kernel/memutils/*.c")
 file(GLOB SRC_KERNEL_DRIVERS_TERM "src/kernel/drivers/term/*.c" "src/kernel/drivers/term/*.asm")
 # Kernel - Drivers - Clock
 file(GLOB SRC_KERNEL_DRIVERS_CLOCK "src/kernel/drivers/clock/*.c" "src/kernel/drivers/clock/*.asm")
+# Kernel - Drivers - ATA_PIO
+file(GLOB SRC_KERNEL_DRIVERS_ATA_PIO "src/kernel/drivers/ATA_PIO/*.c")
 
 # LibC - Stdio
 file(GLOB SRC_LIBC_STDIO "src/libc/stdio/*.c")
@@ -61,7 +63,7 @@ set(SOURCES ${SRC_BOOT} ${SRC_KERNEL} ${SRC_KERNEL_DRIVERS_KEYBOARD}
 	${SRC_KERNEL_DRIVERS_TTY} ${SRC_KERNEL_GDT} ${SRC_KERNEL_PIC}
 	${SRC_KERNEL_IDT} ${SRC_KERNEL_KERNELPANIC} ${SRC_KERNEL_PAGING}
 	${SRC_KERNEL_PCI} ${SRC_KERNEL_DRIVERS_VESA} ${SRC_KERNEL_MEMUTILS}
-	${SRC_KERNEL_DRIVERS_TERM} ${SRC_KERNEL_DRIVERS_CLOCK}
+	${SRC_KERNEL_DRIVERS_TERM} ${SRC_KERNEL_DRIVERS_CLOCK} ${SRC_KERNEL_DRIVERS_ATA_PIO}
 
 	${SRC_LIBC_STDIO} ${SRC_LIBC_STRING} ${SRC_LIBC_MATH} ${SRC_LIBC_STDLIB}
 )

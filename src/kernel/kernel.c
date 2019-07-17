@@ -15,6 +15,7 @@
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/splash.h>
+#include <kernel/drivers/ATA_PIO/ATA_PIO.h>
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -64,6 +65,22 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	showSplash("jotadOS", 4, (800-(4*8*7))/2, 32);
 
 	printf("%dK of RAM available.\n", getFreeMemory());
+
+	// ATA TEST
+	struct ATA_INTERFACE* test = newATA(1, 0x1F0);
+	if(!ATA_identify(test)) {
+		printf("This hard disk cannot be accessed.\n");
+		while(1) {}
+	}
+	char* firstSector = jmalloc(512);
+	strcpy(firstSector, "Hello!\n\0");
+	ATA_write28(test, 1, (uint8_t*)firstSector);
+	jfree(firstSector);
+	ATA_flush(test);
+	firstSector = (char*)ATA_read28(test, 0);
+	printf("%s", firstSector);
+	jfree(firstSector);
+
 	printf("\nGo ahead, type something\n");
 	showCursor();
 
