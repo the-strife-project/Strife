@@ -60,11 +60,9 @@ uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 	outb(iface->commandPort, 0x20);	// Read command.
 
 	uint8_t status = inb(iface->commandPort);
-	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+	while((status & 0x80) == 0x80 && (status & 0x01) != 0x01) {
 		status = inb(iface->commandPort);
 	}
-
-	if(status & 1) return 0;
 
 	uint8_t* ret = jmalloc(BYTES_PER_SECTOR);
 	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
@@ -79,30 +77,36 @@ uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 void ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents) {
 	if(sector > 0x0FFFFFFF) return;
 
+	cli();
 	outb(iface->devicePort, (iface->master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
 	outb(iface->errorPort, 0);
 	outb(iface->sectorCountPort, 1);
 	outb(iface->lbaLowPort, sector & 0x000000FF);
 	outb(iface->lbaMidPort, (sector & 0x0000FF00) >> 8);
 	outb(iface->lbaHiPort, (sector & 0x00FF0000) >> 16);
+
+	for(int i=0; i<5; i++) inb(iface->commandPort);
+
 	outb(iface->commandPort, 0x30);	// Write command.
 
 	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
 		uint16_t data = contents[i];
 		data |= ((uint16_t)contents[i+1]) << 8;
 		outw(iface->dataPort, data);
-		expensiveNOP();
 	}
+	sti();
 }
 
 void ATA_flush(struct ATA_INTERFACE* iface) {
+	cli();
 	outb(iface->devicePort, iface->master ? 0xE0 : 0xF0);
 	outb(iface->commandPort, 0xE7);	// Flush command.
 
 	uint8_t status = inb(iface->commandPort);
 	if(!status) return;
 
-	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+	while((status & 0x80) == 0x80 && (status & 0x01) != 0x01) {
 		status = inb(iface->commandPort);
 	}
+	sti();
 }

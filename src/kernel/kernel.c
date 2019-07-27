@@ -72,13 +72,10 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 		printf("This hard disk cannot be accessed.\n");
 		while(1) {}
 	}
-	char* firstSector = jmalloc(512);
-	strcpy(firstSector, "Hello!\n\0");
-	ATA_write28(test, 1, (uint8_t*)firstSector);
-	jfree(firstSector);
+	ATA_write28(test, 0, (uint8_t*)"Hello! This is a test!\n\0");
 	ATA_flush(test);
-	firstSector = (char*)ATA_read28(test, 0);
-	printf("%s", firstSector);
+	char* firstSector = (char*)ATA_read28(test, 0);
+	printf("Read: %s", firstSector);
 	jfree(firstSector);
 
 	printf("\nGo ahead, type something\n");

@@ -6,7 +6,7 @@ In order to compile jotadOS, you need the following things:
 - `i686-elf-as`
 - `qemu` and/or `bochs` (optional)
 - `cmake` (and `make`)
-- `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `grub2`, `xorriso`
+- `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `grub2`, `xorriso`, `mtools`
 
 The last two set of tools can be obtained via your package manager.
 
@@ -30,6 +30,7 @@ make -j8
 make install
 
 cd ../gcc-9.1.0
+./configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
 make all-gcc -j8
 make all-target-libgcc -j8
 make install-gcc
