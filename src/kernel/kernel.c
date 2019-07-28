@@ -68,12 +68,14 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 
 	// ATA TEST
 	struct ATA_INTERFACE* test = newATA(1, 0x1F0);
-	if(!ATA_identify(test)) {
+	if(ATA_identify(test) != 0) {
 		printf("This hard disk cannot be accessed.\n");
 		while(1) {}
 	}
-	ATA_write28(test, 0, (uint8_t*)"Hello! This is a test!\n\0");
-	ATA_flush(test);
+	if(ATA_write28(test, 0, (uint8_t*)"Hello! This is a test!\n\0") != 0) {
+		printf("Something went utterly wrong.\n");
+		while(1) {}
+	}
 	char* firstSector = (char*)ATA_read28(test, 0);
 	printf("Read: %s", firstSector);
 	jfree(firstSector);

@@ -26,7 +26,7 @@ uint8_t ATA_identify(struct ATA_INTERFACE* iface) {
 
 	outb(iface->devicePort, 0xA0);
 	uint8_t status = inb(iface->commandPort);
-	if(status == 0xFF) return 0;
+	if(status == 0xFF) return 1;
 
 	outb(iface->devicePort, iface->master ? 0xA0 : 0xB0);
 	outb(iface->sectorCountPort, 0);
@@ -36,22 +36,28 @@ uint8_t ATA_identify(struct ATA_INTERFACE* iface) {
 	outb(iface->commandPort, 0xEC); // Identify command
 
 	status = inb(iface->commandPort);
-	if(!status) return 0;
+	if(!status) return 1;
 
 	while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
 		status = inb(iface->commandPort);
 	}
 
-	if(status & 0x01) return 0;
+	if(status & 0x01) return 1;
 
 	for(int i=0; i<256; i++) inw(iface->dataPort);
-	return 1;
+	return 0;
 }
 
 uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 	if(sector > 0x0FFFFFFF) return 0;
 
 	outb(iface->devicePort, (iface->master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
+
+	// Wait for drive select to finish.
+	uint8_t status;
+	for(int i=0; i<5; i++) status = inb(iface->commandPort);
+	if(status == 0xFF) return 0;
+
 	outb(iface->errorPort, 0);
 	outb(iface->sectorCountPort, 1);
 	outb(iface->lbaLowPort, sector & 0x000000FF);
@@ -59,10 +65,8 @@ uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 	outb(iface->lbaHiPort, (sector & 0x00FF0000) >> 16);
 	outb(iface->commandPort, 0x20);	// Read command.
 
-	uint8_t status = inb(iface->commandPort);
-	while((status & 0x80) == 0x80 && (status & 0x01) != 0x01) {
-		status = inb(iface->commandPort);
-	}
+	status = inb(iface->commandPort);
+	while((status & 0x80) && !(status & 0x01)) status = inb(iface->commandPort);
 
 	uint8_t* ret = jmalloc(BYTES_PER_SECTOR);
 	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
@@ -74,39 +78,49 @@ uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 	return ret;
 }
 
-void ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents) {
-	if(sector > 0x0FFFFFFF) return;
-
+uint8_t ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents) {
+	if(sector > 0x0FFFFFFF) return 1;
 	cli();
+
+	// WRITE
 	outb(iface->devicePort, (iface->master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
+
+	// Check that drive select worked.
+	uint8_t status;
+	for(int i=0; i<5; i++) status = inb(iface->commandPort);
+	if(status == 0xFF) return 1;
+
 	outb(iface->errorPort, 0);
 	outb(iface->sectorCountPort, 1);
 	outb(iface->lbaLowPort, sector & 0x000000FF);
 	outb(iface->lbaMidPort, (sector & 0x0000FF00) >> 8);
 	outb(iface->lbaHiPort, (sector & 0x00FF0000) >> 16);
-
-	for(int i=0; i<5; i++) inb(iface->commandPort);
-
 	outb(iface->commandPort, 0x30);	// Write command.
 
+	// Wait until BSY=0 and DRQ=1.
+	while((status & 0x80) || !(status & 0x08)) status = inb(iface->commandPort);
+
+	// Check ERR and DF are not set.
+	if(status & (0x01 || 0x20)) return 2;
+
+	// Start sending the data.
 	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
 		uint16_t data = contents[i];
 		data |= ((uint16_t)contents[i+1]) << 8;
 		outw(iface->dataPort, data);
 	}
-	sti();
-}
 
-void ATA_flush(struct ATA_INTERFACE* iface) {
-	cli();
-	outb(iface->devicePort, iface->master ? 0xE0 : 0xF0);
+	// FLUSH
+	// No need to drive select again.
 	outb(iface->commandPort, 0xE7);	// Flush command.
 
-	uint8_t status = inb(iface->commandPort);
-	if(!status) return;
+	for(int i=0; i<5; i++) status = inb(iface->commandPort);
+	if(!status) return 3;
 
-	while((status & 0x80) == 0x80 && (status & 0x01) != 0x01) {
+	while((status & 0x80) && !(status & 0x01)) {
 		status = inb(iface->commandPort);
 	}
 	sti();
+
+	return 0;
 }

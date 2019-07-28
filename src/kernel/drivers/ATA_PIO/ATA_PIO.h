@@ -23,7 +23,6 @@ void expensiveNOP();
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase);
 uint8_t ATA_identify(struct ATA_INTERFACE* iface);
 uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector);
-void ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents);
-void ATA_flush(struct ATA_INTERFACE* iface);
+uint8_t ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents);
 
 #endif
