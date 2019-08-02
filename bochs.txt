@@ -1,6 +1,6 @@
 megs: 64
-ata0-master: type=disk, path=./jotadOS.iso, status=inserted
-boot: disk
+ata0-master: type=cdrom, path=./jotadOS.iso, status=inserted
+boot: cdrom
 mouse: enabled=0
 clock: sync=realtime
 cpu: ips=50000000

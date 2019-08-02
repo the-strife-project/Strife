@@ -1,4 +1,3 @@
 #!/bin/bash
-#./clean.sh
-cmake .
-make debug
+./build.sh
+bochs -f bochs.txt

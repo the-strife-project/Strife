@@ -165,12 +165,14 @@ CHECK_KERNEL:
 
 KERNEL_FOUND:
 ; We have the directory record of the kernel @ bx
-; Get its size and LBA.
+; Save it for later.
 push bx
 
+; TODO: load a small chunk and move it to 1M.
 add bx, 10	; Data length (size)
 mov ebx, [bx]
 shr ebx, 9
+shr ebx, 2
 inc ebx
 mov [dapack_blkcount], bx
 pop bx
@@ -189,7 +191,7 @@ lba_not_supported:
 	call print
 	jmp $
 
-kernelbin db "A.TXT", 0x3B, "1"
+kernelbin db "KERNEL.BIN", 0x3B, "1"
 kernelbin_len equ ($ - kernelbin)
 
 times 510-($-$$) db 0

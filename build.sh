@@ -52,3 +52,15 @@ echo -e "\e[1;33mLibc done.\e[0m"
 
 # The whole kernel
 i686-elf-gcc -T linker.ld -I./src -std=gnu99 -ffreestanding -O2 -nostdlib obj/*.o -o iso/kernel.bin
+echo -e "\e[1;33mKernel linking done.\e[0m"
+
+# JBoot
+nasm src/JBoot/jboot.asm -o iso/jboot.bin
+echo -e "\e[1;33mJBoot compiled.\e[0m"
+
+# Create ISO
+genisoimage -no-emul-boot -b jboot.bin -o jotadOS.iso iso
+echo -e "\e[1;33mIso file created.\e[0m"
+
+echo
+echo -e "\e[1;36mCompilation successful!\e[0m"

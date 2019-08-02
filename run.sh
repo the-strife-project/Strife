@@ -1,4 +1,3 @@
 #!/bin/bash
-#./clean.sh
-cmake .
-make run
+./build.sh
+qemu-system-x86_64 -cdrom jotadOS.iso
