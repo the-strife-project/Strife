@@ -7,7 +7,6 @@
 #include <kernel/IDT/IDT.h>
 #include <kernel/drivers/keyboard/keyboard.h>
 #include <kernel/drivers/clock/clock.h>
-#include <boot.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/asm.h>
 #include <common/elf.h>
@@ -19,32 +18,15 @@
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
-void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
-	memutils_init(mbinfo);
+void kernel_main(void) {
+	memutils_init();
 	term_init();
-
-	if (multiboot_magic != 0x2BADB002) {
-		kernel_panic(2);
-	}
 
 	printf("Setting GDT...\n");
 	gdt_init();
 
 	printf("Beginning paging...\n");
 	paging_enable();
-
-	// Protect modules.
-	multiboot_module_t* mods = (multiboot_module_t*)mbinfo->mods_addr;
-    for (uint32_t i = 0; i < mbinfo->mods_count; i++) {
-        paging_setPresent(mods[i].mod_start, ((mods[i].mod_end - mods[i].mod_start) / 4096) + 1);
-	}
-
-	// Protect kernel symbols.
-	paging_setPresent(mbinfo->u.elf_sec.addr, paging_sizeToPages(mbinfo->u.elf_sec.size * mbinfo->u.elf_sec.num));
-    struct ELFSectionHeader_t* kern_sections = (struct ELFSectionHeader_t*)mbinfo->u.elf_sec.addr;
-    for (uint32_t i = 0; i < mbinfo->u.elf_sec.num; i++) {
-        paging_setPresent(kern_sections[i].addr, paging_sizeToPages(kern_sections[i].size));
-	}
 
 	printf("Remapping PIC...\n");
 	pic_init();
@@ -67,7 +49,7 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	printf("%dK of RAM available.\n", getFreeMemory());
 
 	// ATA TEST
-	struct ATA_INTERFACE* test = newATA(1, 0x1F0);
+	/*struct ATA_INTERFACE* test = newATA(1, 0x1F0);
 	if(ATA_identify(test) != 0) {
 		printf("This hard disk cannot be accessed.\n");
 		while(1) {}
@@ -78,7 +60,7 @@ void kernel_main(uint32_t multiboot_magic, struct multiboot_info* mbinfo) {
 	}
 	char* firstSector = (char*)ATA_read28(test, 0);
 	printf("Read: %s", firstSector);
-	jfree(firstSector);
+	jfree(firstSector);*/
 
 	printf("\nGo ahead, type something\n");
 	showCursor();

@@ -2,10 +2,11 @@
 #define MEMUTILS_H
 
 #include <common/types.h>
-#include <boot.h>
+#include <kernel/boot.h>
 #include <kernel/paging/paging.h>
 
-void memutils_init(struct multiboot_info* mbinfo);
+void memutils_init();
 uint32_t getFreeMemory();
+uint32_t getAllMemory();
 
 #endif
