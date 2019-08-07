@@ -6,13 +6,14 @@
 #include <kernel/paging/paging.h>
 #include <common/types.h>
 #include <kernel/kernel_panic/kernel_panic.h>
-#include <boot.h>
+#include <kernel/memutils/memutils.h>
+#include <kernel/boot.h>
 #include <kernel/asm.h>
 
 uint32_t page_directory[1024] __attribute__((aligned(4096)));
 uint32_t page_tables[1024][1024] __attribute__((aligned(4096)));
 
-uint32_t _maxmem = 0;	// Max memory in KiB.
+uint32_t _maxmem = 0;	// Max memory in bytes.
 
 void paging_enable() {
 	// Init page tables.
@@ -28,6 +29,9 @@ void paging_enable() {
 	// Set all page directories to the address, and enable RW and present.
 	for(uint16_t i=0; i<1024; i++)
 		page_directory[i] = ((uint32_t)&page_tables[i][0]) | PD_RW | PD_PRESENT;
+
+	// Set max mememory.
+	_maxmem = getAllMemory()*1024;
 
 	// Allocate for the kernel.
 	paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096) + 1);
@@ -95,7 +99,9 @@ uint32_t paging_findPages(uint32_t count) {
 	uint32_t startPage = 0;
 	for(uint32_t i=0; i<1024; i++) {
 		for(uint32_t j=0; j<1024; j++) {
-			if ((page_tables[i][j] & PT_PRESENT) == 0) {
+			if(i * 0x400000 + j*0x1000 > _maxmem) kernel_panic(1);	// Out of memory.
+
+			if (!(page_tables[i][j] & PT_PRESENT)) {
                 continous++;
 			} else {
 				continous = 0;

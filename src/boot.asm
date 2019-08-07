@@ -1,15 +1,8 @@
-%define ALIGN    1 ;(1<<0) ; Align loaded modules on page boundaries
-%define MEMINFO  2 ;(1<<1) ; Provide memory map
-%define FLAGS    3 ;(ALIGN | MEMINFO)
-%define MAGIC    0x1BADB002
-%define CHECKSUM -(MAGIC + FLAGS)
-
-; Declare a multiboot header that marks the program as a kernel.
+; Multiboot? Deez nuts! Ha! Got himmm!
+; It's totally not a multiboot header.
+; But I need somewhere to locate '_start'.
 section .multiboot
-align 4
-dd MAGIC
-dd FLAGS
-dd CHECKSUM
+dd _start
 
 ; Set stack
 section .bss

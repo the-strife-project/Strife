@@ -3,14 +3,12 @@
 ## Dependencies
 In order to compile jotadOS, you need the following things:
 - `i686-elf-gcc`
-- `i686-elf-as`
+- `nasm`
 - `qemu` and/or `bochs` (optional)
-- `cmake` (and `make`)
-- `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `grub2`, `xorriso`, `mtools`
+- `python`, `genisoimage`
+- `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `xorriso`, `mtools`
 
-The last two set of tools can be obtained via your package manager.
-
-In order to compile `i686-elf-gcc` and `i686-elf-as`, open a terminal and do the following (do NOT copy paste):
+In order to compile `i686-elf-gcc`, open a terminal and do the following (do NOT copy paste):
 ```
 export PREFIX="$HOME/opt/cross"
 export TARGET=i686-elf
@@ -40,13 +38,13 @@ make install-target-libgcc	# This might fail. Ignore it in that case.
 Now write `PATH="$HOME/opt/cross/bin:$PATH"` at the end of your shell profile (.bashrc, .zshrc...)
 
 ## Compilation
-To compile jotadOS, open a new terminal in the directory, and run `./build.sh`.
+To compile jotadOS, open a new terminal in the directory, and run `./build`.
 
-You can use `./run.sh` to compile and run `qemu`, or `./debug.sh` to compile and run `bochs`.
+You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `bochs`.
 
 ## Sources
-I have used several sources in order to do this project.
-- https://osdev.org
+I have used several sources in order to do this project (ordered by importance).
+- https://osdev.org <-- Mainly this one.
 - https://www.youtube.com/channel/UCQdZltW7bh1ta-_nCH7LWYw
 - https://github.com/mkilgore/protura
 - https://github.com/AlexandreRouma/LimeOS

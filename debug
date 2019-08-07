@@ -1,3 +1,3 @@
 #!/bin/bash
-./build.sh
+./build || exit
 bochs -f bochs.txt
