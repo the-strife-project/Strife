@@ -1,0 +1,15 @@
+This driver is a piece of shit.
+I couldn't make a working ATAPI driver, so I'm just using
+BIOS interrupts (yeah, I know...).
+
+I stopped working on the project for a while because I got
+stuck on this, so the only chance that I keep developing it
+is if I fall down to a shit driver.
+
+Anyways, it's hardly ever going to be used, only at install,
+so it isn't that big of a deal.
+
+I might make this good in the future, but probably not.
+So if you're reading this and you know how to code an ATAPI
+driver, I would definitely merge a pull request upstream.
+(In which case, please, flood it with comments.)

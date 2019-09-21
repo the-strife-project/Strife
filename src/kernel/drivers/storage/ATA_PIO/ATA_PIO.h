@@ -18,8 +18,6 @@ struct ATA_INTERFACE {
 	uint16_t controlPort;
 };
 
-void expensiveNOP();
-
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase);
 uint8_t ATA_identify(struct ATA_INTERFACE* iface);
 uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector);

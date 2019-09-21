@@ -14,7 +14,8 @@
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/splash.h>
-#include <kernel/drivers/ATA_PIO/ATA_PIO.h>
+
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -46,22 +47,32 @@ void kernel_main(void) {
 
 	showSplash("jotadOS", 4, (800-(4*8*7))/2, 32);
 
+	// Check where we're booting from.
+	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
+	if(0 && bootDriveID == 0xE0) {
+		// Load installation program.
+		ATAPI_read(1, 0x10);
+		printf("%s\n", (char*)(ATAPI_PIO_BUFFER));
+
+		printf("You're booting from a CD!\n");
+		printf("This means that you got jotadOS booting, which is quite cool.\n");
+		printf("However, you won't be able to do anything but install the OS onto the hard disk.\n\n");
+
+		printf("Note that you should ONLY be running jotadOS in a virtual machine,\n");
+		printf("as it's incompatible with any other operating system.\n\n");
+
+		printf("Now, write \"Please, install.\" without quotes to install jotadOS into the\n");
+		printf("primary master ATA drive (make sure it's there from the VM config!).\n");
+		printf("Any other input will stop the installation.\n\n");
+
+		printf("-> ");
+		showCursor();
+		/*char* installInput =*/ readLine();
+
+		while(1) {}
+	}
+
 	printf("%dK of RAM available.\n", getFreeMemory());
-
-	// ATA TEST
-	/*struct ATA_INTERFACE* test = newATA(1, 0x1F0);
-	if(ATA_identify(test) != 0) {
-		printf("This hard disk cannot be accessed.\n");
-		while(1) {}
-	}
-	if(ATA_write28(test, 0, (uint8_t*)"Hello! This is a test!\n\0") != 0) {
-		printf("Something went utterly wrong.\n");
-		while(1) {}
-	}
-	char* firstSector = (char*)ATA_read28(test, 0);
-	printf("Read: %s", firstSector);
-	jfree(firstSector);*/
-
 	printf("\nGo ahead, type something\n");
 	showCursor();
 

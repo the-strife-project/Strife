@@ -7,18 +7,12 @@
 */
 
 #include <common/types.h>
+#include <kernel/V86/V86.h>
 
 #define VESA_INT 0x10
 #define VESA_GET_INFO 0x4F00
 #define VESA_GET_MODE_INFO 0x4F01
 #define VESA_SET_MODE 0x4F02
-
-struct regs16_t {
-	uint16_t di, si, bp, sp, bx, dx, cx, ax;
-	uint16_t gs, fs, es, ds, eflags;
-} __attribute__((packed));
-
-extern void int32(uint8_t intnum, struct regs16_t *regs);
 
 struct VBE_info_structure {
 	char signature[4];	// Should be VESA if everything worked.
