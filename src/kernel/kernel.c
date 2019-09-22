@@ -15,8 +15,6 @@
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/splash.h>
 
-#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
-
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
 void kernel_main(void) {
@@ -51,9 +49,6 @@ void kernel_main(void) {
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
 	if(0 && bootDriveID == 0xE0) {
 		// Load installation program.
-		ATAPI_read(1, 0x10);
-		printf("%s\n", (char*)(ATAPI_PIO_BUFFER));
-
 		printf("You're booting from a CD!\n");
 		printf("This means that you got jotadOS booting, which is quite cool.\n");
 		printf("However, you won't be able to do anything but install the OS onto the hard disk.\n\n");

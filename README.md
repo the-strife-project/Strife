@@ -4,7 +4,7 @@
 In order to compile jotadOS, you need the following things:
 - `i686-elf-gcc`
 - `nasm`
-- `qemu` and/or `bochs` (optional)
+- `qemu` and/or `bochs` and/or `VirtualBox`
 - `python`, `genisoimage`
 - `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `xorriso`, `mtools`
 

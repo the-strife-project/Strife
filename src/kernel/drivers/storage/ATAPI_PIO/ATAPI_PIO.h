@@ -4,7 +4,8 @@
 #include <common/types.h>
 #define ATAPI_PIO_DRIVE 0xE0
 #define LBA_READ_INT 0x13
-#define ATAPI_PIO_BUFFER 0x7E00
+#define ATAPI_PIO_DAPACK 0x7E00
+#define ATAPI_PIO_BUFFER 0x8000
 //                       ↑ yep
 
 struct dapack {
