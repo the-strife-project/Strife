@@ -37,10 +37,11 @@ struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
 		// Run through the directory records of 'last' until one matches dirs[dirs_i].
 		uint8_t found = 0;
 		for(uint32_t i=0; i < last_len && !found; ) {
-			// Check if the record length is ok.
+			// Check if the record length is ok. If it's zero, it couldn't be found.
 			if(!
 				*(uint8_t*)(
 					ATAPI_PIO_BUFFER +
+					i +
 					ISO9660_DIR_RECORD_LENGTH
 				)
 			) break;
@@ -64,19 +65,11 @@ struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
 				last_len = *(uint32_t*)(ATAPI_PIO_BUFFER + i + ISO9660_DIR_EAR_LENGTH);
 			} else {
 				// Nope, go for the next one
-				uint8_t currentDRlength = *(uint8_t*)(
+				i += *(uint8_t*)(
 					ATAPI_PIO_BUFFER +
 					i +
 					ISO9660_DIR_RECORD_LENGTH
 				);
-
-				/*
-					If the length of the current directory record is zero,
-					there is nothing left to do, the file could not be found
-					at all.
-				*/
-				if(!currentDRlength) break;
-				i += currentDRlength;
 			}
 		}
 
