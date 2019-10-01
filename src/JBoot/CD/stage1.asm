@@ -165,7 +165,7 @@ LOAD_PVD:
 welcome db "JBoot", 0x0A, 0x0D, 0x00
 nolba db "BIOS lacks support for LBA addressing.", 0x00
 noboot db "Boot directory could not be found.", 0x00
-nostage2 db "boot.bin not found!", 0x00
+nostage2 db "CDs2.bin not found!", 0x00
 
 start:
 ; Clear screen.
@@ -253,7 +253,7 @@ lba_not_supported:
 boot db "BOOT"
 boot_len equ ($ - boot)
 
-stage2 db "STAGE2.BIN", 0x3B, "1"
+stage2 db "CDS2.BIN", 0x3B, "1"
 stage2_len equ ($ - stage2)
 
 times 510-($-$$) db 0

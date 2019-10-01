@@ -14,6 +14,7 @@
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/splash.h>
+#include <kernel/install/install.h>
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -47,24 +48,14 @@ void kernel_main(void) {
 
 	// Check where we're booting from.
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
-	if(0 && bootDriveID == 0xE0) {
-		// Load installation program.
-		printf("You're booting from a CD!\n");
-		printf("This means that you got jotadOS booting, which is quite cool.\n");
-		printf("However, you won't be able to do anything but install the OS onto the hard disk.\n\n");
-
-		printf("Note that you should ONLY be running jotadOS in a virtual machine,\n");
-		printf("as it's incompatible with any other operating system.\n\n");
-
-		printf("Now, write \"Please, install.\" without quotes to install jotadOS into the\n");
-		printf("primary master ATA drive (make sure it's there from the VM config!).\n");
-		printf("Any other input will stop the installation.\n\n");
-
-		printf("-> ");
-		showCursor();
-		/*char* installInput =*/ readLine();
-
-		while(1) {}
+	if(bootDriveID == 0xE0) {
+		// It's the CD. Run the installation program.
+		/*
+			This REALLY should not be part of the kernel.
+			Might change it at some point, I don't care tbh.
+		*/
+		install();
+		// That should not return.
 	}
 
 	printf("%dK of RAM available.\n", getFreeMemory());

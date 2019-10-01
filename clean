@@ -2,4 +2,5 @@
 rm -rf obj \
 	iso \
 	jotadOS.iso.lock \
+	hdd10M.img \
 	jotadOS.iso &> /dev/null

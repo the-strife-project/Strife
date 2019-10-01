@@ -1,4 +1,4 @@
-; Second stage of JBoot.
+; Second stage of JBoot, CD version.
 
 BITS 16
 ORG 0x8C00
@@ -6,7 +6,7 @@ ORG 0x8C00
 ; Reference some methods: print, readsector and findfile.
 ; This is some serious preprocessor magic. Basically "includes" the methods
 ; without including the code. I made 'nasmPP.py' just so I can do this.
-%reference "jboot.asm"
+%reference "stage1.asm"
 
 jmp start
 
@@ -120,7 +120,7 @@ continue:
 
 ; Bear in mind that we can't read the ELF directly, as BIOS interrupts run on real mode.
 
-; Instead, we'll be loading one blocks at a time (2K) to 0x9000.
+; Instead, we'll be loading one block at a time (2K) to 0x9000.
 ; Some "dapack" variables are also exported from "jboot.asm".
 ; This is very convenient.
 mov word [dapack_blkcount], 1

@@ -34,7 +34,20 @@ void paging_enable() {
 	_maxmem = getAllMemory()*1024;
 
 	// Allocate for the kernel.
-	paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096) + 1);
+	/*
+		I was using the following before:
+			paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096) + 1);
+
+		However, this only protects the code section,
+		not the data nor bss, and this causes some global variables
+		(such as the PIC mask) to be overwritten when allocating
+		dynamic memory. A good solution would be to read the ELF and
+		set present only the segments declared there, but that would
+		be way harder.
+		Instead, I'm following the shit solution which is just protect
+		a size that I think is reasonable. I'm choosing 2M.
+	*/
+	paging_setPresent(0, ((2*1024*1024) / 4096) + 1);
 
 	// Load page directory and enable.
 	go_paging(page_directory);

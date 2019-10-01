@@ -25,7 +25,7 @@ void pic_enable_irq(int irq) {
 }
 
 void pic_disable_irq(int irq) {
-	irqmask = irqmask & (1 << irq);
+	irqmask = irqmask | (1 << irq);
 	pic_set_mask();
 	sti();
 }
