@@ -45,8 +45,8 @@ find src/kernel -type f -iname *.c | xargs -n1 bash -c '_compileGCC $1 || exit 2
 echo -e "\e[1;33mKernel C files done.\e[0m"
 
 # Kernel (asm)
-find src/kernel -type f -iname *.asm | xargs -n1 bash -c '_compileASM $1 || exit 255'
-find src/ -iname boot.asm | xargs -n1 bash -c '_compileASM $1 || exit 255'
+find src/kernel -type f -iname *.asm | xargs -n1 bash -c '_compileASM $1 || exit 255' || exit
+find src/ -iname boot.asm | xargs -n1 bash -c '_compileASM $1 || exit 255' || exit
 echo -e "\e[1;33mKernel asm files done.\e[0m"
 
 # Libc

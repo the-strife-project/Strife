@@ -2,7 +2,7 @@
 #define IDT_H
 
 #include <common/types.h>
-#include <kernel/IRQ.h>
+#include <kernel/GDT/GDT.h>
 
 struct IDT_entry {
 	uint16_t base_low;
@@ -33,10 +33,13 @@ struct IDT_ptr {
 
 struct IDT_entry IDT[256];
 
-extern void unhandled_interrupt(void);
+extern uint32_t* default_ISR_array;
+extern uint32_t empty_ISR;
 extern void load_idt(struct IDT_ptr* idtptr);
 
+void ISR_ignoreUP(uint8_t intno);
+void ISR_ignoreDOWN(uint8_t intno);
+
 void idt_init(void);
-void irq_global_handler(struct irq_frame *iframe);
 
 #endif

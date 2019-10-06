@@ -3,6 +3,7 @@
 #include <libc/stdio.h>
 #include <kernel/asm.h>
 #include <kernel/drivers/PIC/PIC.h>
+#include <kernel/IDT/IDT.h>
 
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
 	struct ATA_INTERFACE* ret = jmalloc(sizeof(struct ATA_INTERFACE));
@@ -17,6 +18,8 @@ struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
 	ret->devicePort = portBase + 0x6;
 	ret->commandPort = portBase + 0x7;
 	ret->controlPort = portBase + 0x206;
+
+	ISR_ignoreUP(0x2F);
 
 	return ret;
 }

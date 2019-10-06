@@ -37,26 +37,19 @@ void install() {
 
 	printf("\nHere we go!\n");
 
-	// Read MBR.
+	// Copy MBR.
 	printf("Copying MBR... ");
-	//char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
-	//struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
-	ATAPI_read(1, 0x10);
-	/*if(!stage1_e) {
+	char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
+	struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
+	if(!stage1_e) {
 		printf("[FAILED]\n"
 		"Couldn't find HDDS1.BIN in the BOOT directory of the CD.\n"
 		"Installation stopped.\n"
 		);
 		while(1) {}
-	}*/
-	//uint8_t* stage1 = ISO9660_read(stage1_e);
-
-	//uint8_t* aux = jmalloc(512);
-	//for(int i=0; i<512; i++) aux[i] = stage1[i];
-
-	// Copy MBR.
-	JOTAFS_writeMBR((uint8_t*)primarymaster);
-
+	}
+	uint8_t* stage1 = ISO9660_read(stage1_e);
+	JOTAFS_writeMBR(stage1);
 	printf("[OK]\n");
 
 	//printf("\nInstallation successful!\n");
