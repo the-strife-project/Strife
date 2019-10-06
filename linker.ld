@@ -27,5 +27,7 @@ SECTIONS {
 		*(.bss)
 	}
 
-	/* Add stuff here as needed. */
+	.sizedetect BLOCK(4K) : ALIGN(4K) {
+		*(.sizedetect)
+	}
 }

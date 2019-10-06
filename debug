@@ -1,3 +1,4 @@
 #!/bin/bash
 ./build || exit
+head -c 10485760 /dev/zero > hdd10M.img
 bochs -f bochs.txt

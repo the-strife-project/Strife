@@ -15,7 +15,7 @@ void* liballoc_alloc(size_t p) {
 	return (void*)ptr;
 }
 int liballoc_free(void* ptr, size_t p) {
-	paging_setAbsent((uint32_t)ptr, (uint32_t)p);
+	paging_setFree((uint32_t)ptr, (uint32_t)p);
 	return 0;
 }
 // End of my stuff.

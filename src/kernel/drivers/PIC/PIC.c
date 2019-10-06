@@ -1,9 +1,3 @@
-/*
-	This whole file is almost a copy-paste of "PROTURA".
-	Check it out, it's listed in the sources.
-*/
-
-#include <kernel/asm.h>
 #include <kernel/drivers/PIC/PIC.h>
 
 static uint16_t irqmask = 0xFFFF & ~(1<<PIC_IRQ_SLAVE);
@@ -20,14 +14,12 @@ void pic_set_mask(void) {
 
 void pic_enable_irq(int irq) {
 	irqmask = irqmask & ~(1 << irq);
-	pic_set_mask();
-	sti();
+	pic_refresh();
 }
 
 void pic_disable_irq(int irq) {
 	irqmask = irqmask | (1 << irq);
-	pic_set_mask();
-	sti();
+	pic_refresh();
 }
 
 // Note: ICW = Initialization command words

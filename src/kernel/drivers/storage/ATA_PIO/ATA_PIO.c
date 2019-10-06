@@ -2,6 +2,7 @@
 #include <libc/stdlib.h>
 #include <libc/stdio.h>
 #include <kernel/asm.h>
+#include <kernel/drivers/PIC/PIC.h>
 
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
 	struct ATA_INTERFACE* ret = jmalloc(sizeof(struct ATA_INTERFACE));
@@ -120,7 +121,7 @@ uint8_t ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* conte
 	while((status & 0x80) && !(status & 0x01)) {
 		status = inb(iface->commandPort);
 	}
-	sti();
 
+	pic_refresh();
 	return 0;
 }

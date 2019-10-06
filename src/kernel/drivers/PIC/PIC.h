@@ -7,7 +7,15 @@
 #define PIC_IRQ0 0x20
 #define PIC_EOI 0x20
 
+#include <kernel/asm.h>
+
 void pic_set_mask(void);
+
+inline void pic_refresh(void) {
+	pic_set_mask();
+	sti();
+}
+
 void pic_enable_irq(int irq);
 void pic_disable_irq(int irq);
 void pic_init(void);

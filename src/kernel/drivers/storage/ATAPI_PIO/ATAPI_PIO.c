@@ -22,5 +22,5 @@ void ATAPI_read(uint16_t nblocks, uint32_t lba) {
 	regs.si = ATAPI_PIO_DAPACK;
 
 	// Here we go!
-	int32(LBA_READ_INT, &regs);
+	V86(LBA_READ_INT, &regs);
 }

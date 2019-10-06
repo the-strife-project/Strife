@@ -20,6 +20,9 @@ void idt_init(void) {
 void unhandled_interrupt_handler(struct irq_frame *iframe) {
 	printf("E: 0x%x - 0x%x: %x\n", (*iframe).intno, (*iframe).err, (*iframe).eip);
 
+	// (Bochs breakpoint)
+	outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
+
 	outb(PIC_IO_PIC1, PIC_EOI);
 	outb(PIC_IO_PIC2, PIC_EOI);
 }

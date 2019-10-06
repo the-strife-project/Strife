@@ -152,7 +152,7 @@ void term_fill(uint32_t color) {
 	} else {
 		// VESA
 		// This must be optimized!
-		for(size_t y=0; y<(term_height+1)*16; y++) {
+		for(size_t y=0; y<term_height*16; y++) {
 			for(size_t x=0; x<term_width*8; x++) {
 				VESA_putPixel(x, y, term_bg);
 			}

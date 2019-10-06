@@ -1,5 +1,6 @@
 megs: 64
-ata0-master: type=cdrom, path=./jotadOS.iso, status=inserted
+ata0-master: type=disk, path=./hdd10M.img, status=inserted
+ata1-master: type=cdrom, path=./jotadOS.iso, status=inserted
 boot: cdrom
 mouse: enabled=0
 clock: sync=realtime

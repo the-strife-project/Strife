@@ -1,8 +1,3 @@
-/*
-	This is based almost completely on the following code:
-		https://github.com/AlexandreRouma/LimeOS/blob/master/src/arch/i686/paging/paging.cpp
-*/
-
 #include <kernel/paging/paging.h>
 #include <common/types.h>
 #include <kernel/kernel_panic/kernel_panic.h>
@@ -13,49 +8,34 @@
 uint32_t page_directory[1024] __attribute__((aligned(4096)));
 uint32_t page_tables[1024][1024] __attribute__((aligned(4096)));
 
-uint32_t _maxmem = 0;	// Max memory in bytes.
-
-void paging_enable() {
+void paging_init() {
 	// Init page tables.
-	// Set all page tables to RW, and the physical page address.
-	// Here I use uint32_t in order to not have overflow issues and such.
 	for(uint32_t i=0; i<1024; i++) {
 		for(uint32_t j=0; j<1024; j++) {
-			page_tables[i][j] = ((i * 0x400000) + (j * 0x1000)) | PT_RW;
+			page_tables[i][j] = ((j*0x1000) + (i*0x400000)) | PT_RW;
 		}
 	}
 
-	// Fill page directory.
-	// Set all page directories to the address, and enable RW and present.
-	for(uint16_t i=0; i<1024; i++)
-		page_directory[i] = ((uint32_t)&page_tables[i][0]) | PD_RW | PD_PRESENT;
+	// Fill page directory with page tables.
+	for(uint32_t i=0; i<1024; i++) {
+		page_directory[i] = ((uint32_t)page_tables[i]) | PD_RW | PD_PRESENT;
+	}
 
-	// Set max mememory.
-	_maxmem = getAllMemory()*1024;
+	// Get available pages and mark them as present.
+	paging_setPresent(0, getAllMemory() >> 2);	// Divided by 4 because it's in KiB.
 
-	// Allocate for the kernel.
-	/*
-		I was using the following before:
-			paging_setPresent(0, ((uint32_t)ASM_KERNEL_END / 4096) + 1);
-
-		However, this only protects the code section,
-		not the data nor bss, and this causes some global variables
-		(such as the PIC mask) to be overwritten when allocating
-		dynamic memory. A good solution would be to read the ELF and
-		set present only the segments declared there, but that would
-		be way harder.
-		Instead, I'm following the shit solution which is just protect
-		a size that I think is reasonable. I'm choosing 2M.
-	*/
-	paging_setPresent(0, ((2*1024*1024) / 4096) + 1);
-
-	// Load page directory and enable.
-	go_paging(page_directory);
+	// Mark pages in use for the kernel.
+	paging_setUsed(0, ((uint32_t)ASM_KERNEL_END >> 12)+1);
 }
+
+void paging_enable() { go_paging(page_directory); }
+void paging_disable() { goback_paging(); }
+
+
 
 void paging_mapPage(uint32_t phy, uint32_t virt, uint16_t flags) {
 	uint32_t pdi = virt >> 22;
-	uint32_t pti = (virt >> 12) & 0x03FF;	// 10 low bits of >> 4KiB.
+	uint32_t pti = virt >> 12 & 0x03FF;	// 10 low bits of >> 4KiB.
 	page_tables[pdi][pti] = phy | flags;
 	invlpg(virt);
 }
@@ -71,40 +51,39 @@ uint16_t paging_getFlags(uint32_t virt) {
 	uint32_t pti = (virt >> 12) & 0x03FF;
 	return page_tables[pdi][pti] & 0xFFF;
 }
-void paging_setFlags(uint32_t virt, uint32_t count, uint16_t flags) {
+
+
+
+void paging_setFlagUp(uint32_t virt, uint32_t count, uint32_t flag) {
 	uint32_t page_n = virt / 4096;
 	for(uint32_t i=page_n; i<page_n+count; i++) {
-		page_tables[i/1024][i%1024] &= 0xFFFFF000;	// Clear flags
-		page_tables[i/1024][i%1024] |= flags;
+		page_tables[i / 1024][i % 1024] |= flag;
 		invlpg(i * 4096);
 	}
 }
 
-uint16_t paging_getDirectoryFlags(uint32_t virt) {
-	return page_directory[virt >> 22] & 0xFFF;
-}
-void paging_setDirectoryFlags(uint32_t virt, uint32_t count, uint16_t flags) {
-	uint32_t pdi = virt >> 22;
-    for (uint32_t i = pdi; i < pdi + count; i++) {
-		page_directory[i] &= 0xFFFFF000;
-		page_directory[i] |= flags;
+void paging_setFlagDown(uint32_t virt, uint32_t count, uint32_t flag) {
+	uint32_t page_n = virt / 4096;
+	for(uint32_t i=page_n; i<page_n+count; i++) {
+		page_tables[i / 1024][i % 1024] &= ~flag;
+		invlpg(i * 4096);
 	}
 }
 
-inline void paging_setPresent(uint32_t virt, uint32_t count) {
-	uint32_t page_n = virt / 4096;
-    for (uint32_t i = page_n; i < page_n + count; i++) {
-        page_tables[i / 1024][i % 1024] |= PT_PRESENT;
-        invlpg(i * 4096);
-	}
+void paging_setPresent(uint32_t virt, uint32_t count) {
+	paging_setFlagUp(virt, count, PT_PRESENT);
 }
-inline void paging_setAbsent(uint32_t virt, uint32_t count) {
-	uint32_t page_n = virt / 4096;
-    for (uint32_t i = page_n; i < page_n + count; i++) {
-        page_tables[i / 1024][i % 1024] &= 0xFFFFFFFE; // Clears first bit. Can't use PT_PRESENT because its not a uint32_t
-        invlpg(i * 4096);
-	}
+void paging_setAbsent(uint32_t virt, uint32_t count) {
+	paging_setFlagDown(virt, count, PT_PRESENT);
 }
+void paging_setUsed(uint32_t virt, uint32_t count) {
+	paging_setFlagUp(virt, count, PT_USED);
+}
+void paging_setFree(uint32_t virt, uint32_t count) {
+	paging_setFlagDown(virt, count, PT_USED);
+}
+
+
 
 uint32_t paging_findPages(uint32_t count) {
 	uint32_t continous = 0;
@@ -112,16 +91,13 @@ uint32_t paging_findPages(uint32_t count) {
 	uint32_t startPage = 0;
 	for(uint32_t i=0; i<1024; i++) {
 		for(uint32_t j=0; j<1024; j++) {
-			if(i * 0x400000 + j*0x1000 > _maxmem) kernel_panic(1);	// Out of memory.
-
-			if (!(page_tables[i][j] & PT_PRESENT)) {
-                continous++;
-			} else {
+			if(!(page_tables[i][j] & PT_PRESENT) || (page_tables[i][j] & PT_USED)) {
 				continous = 0;
                 startDir = i;
 				startPage = j + 1;
+			} else {
+				if(++continous == count) return (startDir * 0x400000) + (startPage * 0x1000);
 			}
-			if(continous == count) return (startDir * 0x400000) + (startPage * 0x1000);
 		}
 	}
 
@@ -131,7 +107,7 @@ uint32_t paging_findPages(uint32_t count) {
 
 uint32_t paging_allocPages(uint32_t count) {
 	uint32_t ptr = paging_findPages(count);
-	paging_setPresent(ptr, count);
+	paging_setUsed(ptr, count);
 	return ptr;
 }
 
@@ -139,15 +115,9 @@ uint32_t paging_getUsedPages() {
 	uint32_t n = 0;
 	for(uint32_t i=0; i<1024; i++) {
 		for(uint32_t j=0; j<1024; j++) {
-			uint8_t flags = page_tables[i][j] & 0x01;
+			uint8_t flags = page_tables[i][j] & PT_USED;
 			if(flags == 1) n++;
 		}
 	}
-	return n;
-}
-
-uint32_t paging_sizeToPages(uint32_t size) {
-	uint32_t n = size / 4096;
-    if((size % 4096) > 0) n++;
 	return n;
 }

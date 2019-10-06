@@ -4,6 +4,8 @@
 #include <kernel/drivers/term/term.h>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 
 void install() {
 	printf("%s", "You're booting from a CD!\n"
@@ -14,7 +16,7 @@ void install() {
 
 	// Check the drive is there.
 	struct ATA_INTERFACE* primarymaster = newATA(1, 0x1F0);
-	if(ATA_identify(primarymaster) != 0) {
+	if(JOTAFS_init(primarymaster) != 0) {
 		printf("You must insert an HDD into the primary master ATA drive.\n"
 		"Then, please reboot.\n");
 		while(1) {}
@@ -34,27 +36,29 @@ void install() {
 	}
 
 	printf("\nHere we go!\n");
-	printf("TODO tee-hee.");
 
-	/*
-	// Start USTAR.
-	USTAR_init(primarymaster);
-
-	// Copy the stage 1.
-	printf("Copying stage 1 bootloader... ");
-	char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
-	struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
-	if(!stage1_e) {
+	// Read MBR.
+	printf("Copying MBR... ");
+	//char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
+	//struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
+	ATAPI_read(1, 0x10);
+	/*if(!stage1_e) {
 		printf("[FAILED]\n"
 		"Couldn't find HDDS1.BIN in the BOOT directory of the CD.\n"
 		"Installation stopped.\n"
 		);
 		while(1) {}
-	}
-	uint8_t* stage1 = ISO9660_read(stage1_e);
+	}*/
+	//uint8_t* stage1 = ISO9660_read(stage1_e);
+
+	//uint8_t* aux = jmalloc(512);
+	//for(int i=0; i<512; i++) aux[i] = stage1[i];
+
+	// Copy MBR.
+	JOTAFS_writeMBR((uint8_t*)primarymaster);
+
 	printf("[OK]\n");
 
-	printf("\nInstallation successful!\n");
-	*/
+	//printf("\nInstallation successful!\n");
 	while(1) {}
 }

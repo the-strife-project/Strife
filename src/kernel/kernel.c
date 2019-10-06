@@ -9,7 +9,6 @@
 #include <kernel/drivers/clock/clock.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/asm.h>
-#include <common/elf.h>
 #include <kernel/PCI/PCI.h>
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/VESA/VESA.h>
@@ -26,6 +25,7 @@ void kernel_main(void) {
 	gdt_init();
 
 	printf("Beginning paging...\n");
+	paging_init();
 	paging_enable();
 
 	printf("Remapping PIC...\n");
@@ -54,11 +54,12 @@ void kernel_main(void) {
 			This REALLY should not be part of the kernel.
 			Might change it at some point, I don't care tbh.
 		*/
-		install();
+		//install();
 		// That should not return.
 	}
 
-	printf("%dK of RAM available.\n", getFreeMemory());
+	printf("Kernel size: %dKiB\n", (int)ASM_KERNEL_END>>10);
+	printf("%dKiB of RAM available.\n", getFreeMemory());
 	printf("\nGo ahead, type something\n");
 	showCursor();
 

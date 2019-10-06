@@ -11,7 +11,7 @@ global STACK_BOTTOM
 global STACK_TOP
 
 STACK_BOTTOM:
-resb 16384
+resb 0x4000
 STACK_TOP:
 
 

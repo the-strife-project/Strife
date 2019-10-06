@@ -103,5 +103,4 @@ You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `
 I have used several sources in order to do this project (ordered by importance).
 - https://osdev.org <-- Mainly this one.
 - https://www.youtube.com/channel/UCQdZltW7bh1ta-_nCH7LWYw
-- https://github.com/mkilgore/protura
-- https://github.com/AlexandreRouma/LimeOS
+- http://ctyme.com/rbrown.htm

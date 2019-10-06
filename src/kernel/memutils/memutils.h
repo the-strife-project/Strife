@@ -3,7 +3,6 @@
 
 #include <common/types.h>
 #include <kernel/boot.h>
-#include <kernel/paging/paging.h>
 
 void memutils_init();
 uint32_t getFreeMemory();

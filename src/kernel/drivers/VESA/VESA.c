@@ -3,6 +3,7 @@
 #include <libc/stdio.h>
 #include <libc/stdlib.h>
 #include <kernel/kernel_panic/kernel_panic.h>
+#include <kernel/paging/paging.h>
 
 uint16_t VESA_currentMode = 0xFFFF;
 uint16_t VESA_currentMode_width = 0;
@@ -25,7 +26,7 @@ uint16_t* VESA_getModes() {
 	regs.ax = VESA_GET_INFO;
 	regs.es = 0;	// Output segment.
 	regs.di = 0x7E00;	// Output offset.
-	int32(VESA_INT, &regs);
+	V86(VESA_INT, &regs);
 	pic_set_mask();
 
 	struct VBE_info_structure* info = (struct VBE_info_structure*)info_addr;
@@ -52,7 +53,7 @@ struct VBE_mode_info* VESA_getModeInfo(uint16_t mode) {
 	regs.cx = mode;
 	regs.es = 0;	// Output segment.
 	regs.di = 0x7E00;	// Output offset.
-	int32(VESA_INT, &regs);
+	V86(VESA_INT, &regs);
 	pic_set_mask();
 
 	struct VBE_mode_all_info* aux = (struct VBE_mode_all_info*)0x7E00;
@@ -77,7 +78,7 @@ void VESA_setMode(uint16_t mode) {
 	// Set 15th bit to zero.
 	regs.bx &= 0b0111111111111111;
 
-	int32(VESA_INT, &regs);
+	V86(VESA_INT, &regs);
 	pic_set_mask();
 }
 
@@ -100,6 +101,16 @@ void VESA_init(uint16_t width, uint16_t height, uint8_t colordepth) {
 			VESA_currentMode_height = height;
 			VESA_currentMode_bpp = colordepth;
 			VESA_framebuffer = info->framebuffer;
+
+			// Map the pages of the framebuffer.
+			uint32_t fb_psize = width * height * (colordepth >> 3);
+			for(uint32_t z=0; z<fb_psize; z+=4096)
+				paging_mapPage(
+					VESA_framebuffer + z,
+					VESA_framebuffer + z,
+					PT_PRESENT | PT_RW | PT_USED
+				);
+
 			jfree(info);
 			break;
 		}

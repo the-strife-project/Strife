@@ -2,7 +2,6 @@
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 #include <libc/stdlib.h>
 
-#include <libc/stdio.h>
 /*
 	Example for ISO9660_getdir
 	dirs = {"boot"}
@@ -79,9 +78,7 @@ struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
 		}
 	}
 
-	struct ISO9660_entity* ret = (struct ISO9660_entity*)(
-		jmalloc(sizeof(struct ISO9660_entity))
-	);
+	struct ISO9660_entity* ret = (struct ISO9660_entity*)jmalloc(sizeof(struct ISO9660_entity));
 	ret->LBA = last_LBA;
 	ret->length = last_len;
 
