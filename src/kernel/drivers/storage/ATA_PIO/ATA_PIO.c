@@ -24,7 +24,7 @@ struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
 	return ret;
 }
 
-uint8_t ATA_identify(struct ATA_INTERFACE* iface) {
+uint8_t ATA_identify(struct ATA_INTERFACE* iface, uint16_t* retdata) {
 	outb(iface->devicePort, iface->master ? 0xA0 : 0xB0);
 	outb(iface->controlPort, 0);
 
@@ -48,7 +48,7 @@ uint8_t ATA_identify(struct ATA_INTERFACE* iface) {
 
 	if(status & 0x01) return 1;
 
-	for(int i=0; i<256; i++) inw(iface->dataPort);
+	for(int i=0; i<256; i++) retdata[i] = inw(iface->dataPort);
 	return 0;
 }
 
@@ -127,4 +127,9 @@ uint8_t ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* conte
 
 	pic_refresh();
 	return 0;
+}
+
+uint8_t ATA_clear28(struct ATA_INTERFACE* iface, uint32_t sector) {
+	uint8_t emptysector[512] = {0};
+	return ATA_write28(iface, sector, emptysector);
 }

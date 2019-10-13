@@ -17,8 +17,8 @@ The second sector is the superblock, which contains the following fields:
 | 8   | 4   | Number of inodes |
 | 12   | 4   | Number of chunks |
 | 16  | 4   | First unallocated inode |
-| 20  | 4   | Sector of the first inode |
-| 24  | 4   | Sector of the first chunk |
+| 20  | 4   | LBA sector of the first inode (reserved: 2) |
+| 24  | 4   | LBA sector of the first chunk |
 
 From the third to the (3 + Number of inodes) sector, inodes are present. Each one is structured as follows:
 
@@ -46,6 +46,7 @@ From the third to the (3 + Number of inodes) sector, inodes are present. Each on
 | 80  | 4   | User ID |
 | 84  | 1   | File is an app (executable), either 0 or 1 |
 | 85  | 1   | File is a directory, 0 or 1 |
+| 86  | 1   | Whether this inode is in use, 0 or 1 |
 
 Some inodes are reserved.
 
@@ -57,4 +58,4 @@ Some inodes are reserved.
 
 A directory is a file with its inode's 85th byte set to 1. Its blocks contain file entries (which have no separators between). Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but ':' (58) and terminated with a null byte, and 4 bytes specifying the inode number of that entry.
 
-The remaining sectors are chunks. Each one is 512 sectors long. The first sector of a chunk is a bitmap. The first bit indicates whether the remaining bits are all 1. As for the rest, the nth bit marks whether the nth block of the chunk is free (0) or in use (1). The other 511 sectors are blocks, that is, raw data.
+The remaining sectors are chunks. Each one is 512 sectors long. The first sector of a chunk is a "bytemap". The first byte indicates whether the remaining bytes are all 1. As for the rest, the nth byte marks whether the nth block of the chunk is free (0) or in use (1). The other 511 sectors are blocks, that is, raw data.

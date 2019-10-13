@@ -19,8 +19,9 @@ struct ATA_INTERFACE {
 };
 
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase);
-uint8_t ATA_identify(struct ATA_INTERFACE* iface);
+uint8_t ATA_identify(struct ATA_INTERFACE* iface, uint16_t* retdata);
 uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector);
 uint8_t ATA_write28(struct ATA_INTERFACE* iface, uint32_t sector, uint8_t* contents);
+uint8_t ATA_clear28(struct ATA_INTERFACE* iface, uint32_t sector);
 
 #endif

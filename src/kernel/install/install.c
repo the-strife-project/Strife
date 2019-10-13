@@ -5,7 +5,6 @@
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 
 void install() {
 	printf("%s", "You're booting from a CD!\n"
@@ -21,6 +20,15 @@ void install() {
 		"Then, please reboot.\n");
 		while(1) {}
 	}
+
+	// Check if the disk is already formatted with JOTAFS.
+	struct JOTAFS_SUPERBLOCK* currentSB = JOTAFS_readSB();
+	if(currentSB->signature == 0x000CACADEBACA000) {
+		printf("jotadOS seems to be already installed on the hard disk.\n"
+			"Proceed with caution.\n\n"
+		);
+	}
+	jfree(currentSB);
 
 	printf("%s", "Now, write \"yes\" without quotes to install jotadOS into the\n"
 		"primary master ATA drive. Any other input will stop the installation.\n\n");
@@ -51,6 +59,14 @@ void install() {
 	uint8_t* stage1 = ISO9660_read(stage1_e);
 	JOTAFS_writeMBR(stage1);
 	printf("[OK]\n");
+
+	// Format disk.
+	printf("Formatting disk... ");
+	JOTAFS_format();
+	printf("[OK]\n");
+
+	// Add JBoot's second stage.
+	
 
 	//printf("\nInstallation successful!\n");
 	while(1) {}
