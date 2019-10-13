@@ -7,7 +7,7 @@ SECTIONS {
 
 	/* Put the multiboot header. Next, the .text section. */
 	.text BLOCK(4K) : ALIGN(4K) {
-		*(.multiboot)
+		*(.ezlocation)
 		*(.text)
 	}
 

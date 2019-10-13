@@ -1,7 +1,5 @@
-; Multiboot? Deez nuts! Ha! Got himmm!
-; It's totally not a multiboot header.
-; But I need somewhere to locate '_start'.
-section .multiboot
+; The first section of the ELF will be used to locate the entry point.
+section .ezlocation
 dd _start
 
 ; Set stack

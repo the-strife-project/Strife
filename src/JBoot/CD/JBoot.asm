@@ -1,14 +1,159 @@
-; Second stage of JBoot, CD version.
+; This will basically prepare the filesystem and some functions.
+; Then, it will load the stage 2.
 
 BITS 16
-ORG 0x8C00
+ORG 0x7C00
 
-; Reference some methods: print, readsector and findfile.
-; This is some serious preprocessor magic. Basically "includes" the methods
-; without including the code. I made 'nasmPP.py' just so I can do this.
-%reference "stage1.asm"
+; First, save the boot drive ID, which is in DL.
+; This way, we will know where we're booting from.
+; We will only use that drive.
+mov [bootDriveID], dl
 
 jmp start
+
+; Some neat functions and constants.
+print:
+	mov ah, 0x0E
+	xor bh, bh
+	.print_L:
+		lodsb
+		test al, al
+		jz .print_end
+		int 0x10
+		jmp .print_L
+	.print_end:
+	ret
+
+bootDriveID: db 0
+
+dapack:
+    dapack_size:            db  0x10
+    dapack_null:            db  0x00
+    dapack_blkcount:        dw  0x0001	; 1 block = 1 sector (2K in ATAPI)
+    dapack_boffset:         dw  0x9000
+    dapack_bsegment:        dw  0x0000
+    dapack_start:           dd  0x00000000
+    dapack_upper_lba_bits:  dd  0x00000000
+
+readsector:
+	; Input:  eax = LBA
+	; Output: blocks starting at dapack_boffset
+	mov dword [dapack_start], eax
+
+	; Invoke the interrupt
+	mov ah, 0x42
+	mov dl, [bootDriveID]
+	xor bx, bx
+	mov ds, bx
+	mov si, dapack
+	int 0x13
+	ret
+
+filenameLength dw 1
+filename dw 1
+
+findfile:
+	; Input:  [esp+2] = directory record address
+	;         [esp+4] = length of filename (only low byte used)
+	;         [esp+6] = filename*
+	; Output: In case of success: ax = 0, bx = (start of directory record)
+	;         In case of failure: ax = 1
+
+	; First, save the data in the stack
+	mov bx, [esp+2]
+	mov ax, [esp+4]
+	mov [filenameLength], ax
+	mov ax, [esp+6]
+	mov [filename], ax
+
+	.findfile_L:
+		; Get the size (al)
+		mov al, [bx]
+		; If it's zero, the kernel is not there.
+		test al, al
+		jz .findfile_notfound
+
+		; Check if filename length matches.
+		mov ah, [bx+32]
+		cmp ah, byte [filenameLength]
+		; If they don't match, keep seeking.
+		jnz .findfile_keep
+
+		; At this point, they do match. Now compare the strings.
+		call findfile_check
+		test ax, ax
+		jz findfile_found
+
+		; The filenames don't match.
+		.findfile_keep:
+		mov al, [bx]
+		xor ah, ah
+		add bx, ax
+		jmp .findfile_L
+
+	.findfile_notfound:
+		; Not found. ax = 1
+		xor ax, ax
+		inc ax
+		ret
+
+	findfile_check:
+		; Compares the filename.
+		; Returns 0 in case of success, 1 otherwise.
+		pusha
+		add bx, 33
+		mov ax, bx
+		; ax is the base of the string in the CD.
+
+		xor cx, cx
+		.findfile_check_L:
+			; First character.
+			mov bx, [filename]
+			add bx, cx
+			mov dh, [bx]
+			; Second character.
+			mov bx, ax
+			add bx, cx
+			mov dl, [bx]
+			; Compare.
+			cmp dh, dl
+			jnz .findfile_check_fail
+
+			; At this point, the characters match.
+			; Are we done?
+			inc cx
+			cmp cx, word [filenameLength]
+			jz .findfile_check_success	; Yes
+			jmp .findfile_check_L	; Nope
+
+			.findfile_check_fail:
+			popa
+			xor ax, ax
+			inc ax
+			ret
+			.findfile_check_success:
+			; We're done.
+			popa
+			xor ax, ax
+			ret
+
+	findfile_found:
+		; Found. ax = 0
+		xor ax, ax
+		ret
+
+LOAD_PVD:
+	mov eax, 0x10
+	PVD_L:
+		call readsector
+		mov bx, [dapack_boffset]
+		mov bl, [bx]
+		cmp bl, 0x01
+		jz PVD_FOUND
+		inc eax
+		jmp PVD_L
+	PVD_FOUND:
+	ret
 
 checkA20:
 	; Source: https://wiki.osdev.org/A20_Line
@@ -46,6 +191,9 @@ checkA20:
 	popf
 	ret
 
+welcome db "JBoot", 0x0A, 0x0D, 0x00
+nolba db "BIOS lacks support for LBA addressing.", 0x00
+noboot db "Boot directory could not be found.", 0x00
 noa20 db "A20 could not be enabled.", 0
 loading db "Loading kernel...", 0x0A, 0x0D, 0x00
 nokernel db "kernel.bin could not be found!", 0
@@ -54,6 +202,24 @@ nomem db "BIOS does not support memory detection!", 0
 memno20 db "BIOS returns memory detection with 24 bytes. This has never been seen!", 0
 
 start:
+; Clear screen.
+mov ax, 0x0003
+int 0x10
+
+; Print welcome.
+mov si, welcome
+call print
+
+; Check if LBA is supported by the BIOS.
+mov ah, 0x41
+mov bx, 0x55AA
+int 0x13
+jc lba_not_supported
+cmp bx, 0xAA55
+jnz lba_not_supported
+
+; LBA is supported at this point.
+
 ; Now, check whether A20 is enabled.
 call checkA20
 test ax, ax
@@ -101,34 +267,62 @@ pop ds
 mov si, loading
 call print
 
-; Find "kernel.bin". We saved the boot directory extent before. Remember?
-push kernelbin
-push kernelbin_len
-push 0x8000
+
+
+; Load Primary Volume Descriptor onto memory.
+call LOAD_PVD
+; PVD is now @ 0x9000
+
+; Load the root directory.
+mov bx, 0x9000	; Base
+add bx, 156	; Directory Record of root
+add bx, 2	; LBA
+mov eax, dword [bx]
+call readsector
+
+; Find boot directory.
+push boot
+push boot_len
+push 0x9000
 call findfile
 add esp, 6
 test ax, ax
-jz continue
+jz continue_BOOT
+
+; No boot directory.
+mov si, noboot
+call print
+jmp $
+
+continue_BOOT:
+; Directory record address @ bx.
+; Load boot directory record.
+mov word [dapack_blkcount], 0x0001	; The boot directory is not so big.
+add bx, 2	; Extent
+mov eax, [bx]
+call readsector
+
+; Find "kernel.bin".
+push kernelbin
+push kernelbin_len
+push 0x9000
+call findfile
+add esp, 6
+test ax, ax
+jz continue_KERNEL
 
 ; No kernel?
 mov si, nokernel
 call print
 jmp $
 
-continue:
+continue_KERNEL:
 ; The kernel directory record is now @ bx.
 
 ; Bear in mind that we can't read the ELF directly, as BIOS interrupts run on real mode.
-
 ; Instead, we'll be loading one block at a time (2K) to 0x9000.
-; Some "dapack" variables are also exported from "jboot.asm".
-; This is very convenient.
 mov word [dapack_blkcount], 1
 mov word [dapack_boffset], 0x9000
-
-; At first I thought about moving chunks of 10 blocks, and dealing with the
-; remainder later, but moving one block at a time will produce a code
-; way shorter and easier to understand.
 
 ; We'll load the ELF at 2M, and then parse it and load the kernel at 1M.
 ; This will work as long as the kernel is below 1M of size. If that point ever
@@ -252,7 +446,6 @@ mov ebx, 0x20002C
 mov dl, byte [ebx]
 push dx	; Save it in the stack
 ; Now, the size of each one is 32 bits. Because the ELF contains 32 bit instructions.
-; (According to specs).
 
 ; Get the start of the program header.
 mov ebx, 0x20001C
@@ -322,7 +515,7 @@ PHT:
 	cmp dh, dl
 	jl PHT
 
-; Everything set. Use the fake multiboot header (at the beginning) to locate
+; Everything set. Use the section at the beginning to locate
 ; the entry point ('_start').
 
 jmp (codedesc - gdt):protectedMode
@@ -332,6 +525,7 @@ BITS 32
 mov ebx, 0x100000
 mov eax, dword [ebx]
 jmp eax
+
 
 BITS 16
 BIOS_NO_MEM:
@@ -351,5 +545,12 @@ flatdesc db 0xff, 0xff, 0, 0, 0, 10010010b, 11001111b, 0
 codedesc db 0xff, 0xff, 0, 0, 0, 10011010b, 11001111b, 0
 gdt_end:
 
+lba_not_supported:
+	mov si, nolba
+	call print
+	jmp $
+
+boot db "BOOT"
+boot_len equ ($ - boot)
 kernelbin db "KERNEL.BIN", 0x3B, "1"
 kernelbin_len equ ($ - kernelbin)

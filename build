@@ -58,21 +58,18 @@ i686-elf-gcc -T linker.ld -I./src -std=gnu99 -ffreestanding -O2 -nostdlib obj/*.
 echo -e "\e[1;33mKernel linking done.\e[0m"
 
 # JBoot
-src/JBoot/nasmPP.py src/JBoot/CD/stage1.asm || exit 255
-src/JBoot/nasmPP.py src/JBoot/HDD/stage1.asm || exit 255
-nasm src/JBoot/CD/stage1.asm.npp -f bin -o iso/boot/CDs1.bin || exit 255
-nasm src/JBoot/HDD/stage1.asm.npp -f bin -o iso/boot/HDDs1.bin || exit 255
+nasm src/JBoot/CD/JBoot.asm -f bin -o iso/boot/CD.bin || exit 255
 
-src/JBoot/nasmPP.py src/JBoot/CD/stage2.asm || exit 255
+src/JBoot/nasmPP.py src/JBoot/HDD/stage1.asm || exit 255
 src/JBoot/nasmPP.py src/JBoot/HDD/stage2.asm || exit 255
-nasm src/JBoot/CD/stage2.asm.npp -f bin -o iso/boot/CDs2.bin || exit 255
+nasm src/JBoot/HDD/stage1.asm.npp -f bin -o iso/boot/HDDs1.bin || exit 255
 nasm src/JBoot/HDD/stage2.asm.npp -f bin -o iso/boot/HDDs2.bin || exit 255
-rm -rf src/JBoot/{CD,HDD}/*.asm.npp
+rm -rf src/JBoot/HDD/*.asm.npp
 echo -e "\e[1;33mJBoot compiled.\e[0m"
 
 # Create ISO
-genisoimage -no-emul-boot -b boot/CDs1.bin -o jotadOS.iso iso
+genisoimage -no-emul-boot -b boot/CD.bin -o jotadOS.iso iso
 echo -e "\e[1;33mIso file created.\e[0m"
 
-echo
 echo -e "\e[1;36mCompilation successful!\e[0m"
+echo
