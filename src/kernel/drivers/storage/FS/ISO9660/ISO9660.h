@@ -12,8 +12,8 @@
 
 // It can be either a directory record or a file itself.
 struct ISO9660_entity {
-	uint16_t LBA;
-	uint16_t length;
+	uint32_t LBA;
+	uint32_t length;
 };
 
 struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz);

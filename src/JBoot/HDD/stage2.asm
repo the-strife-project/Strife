@@ -1,13 +1,23 @@
 ; Second stage of JBoot, HDD version.
 
 BITS 16
-ORG 0x8C00
+ORG 0x8000
+
+%define SECTOR_BUFFER 0x9000
+%define INODE_NBLOCKS 20
+%define INODE_DBP0 24
+%define INODE_SIBP 64
+%define INODE_DIBP 68
+%define INODE_TIBP 72
+%define INODE_QIBP 76
 
 ; Reference some methods: print and readsector.
 ; This is some serious preprocessor magic. Basically "includes" the methods
 ; without including the code. I made 'nasmPP.py' just so I can do this.
 %reference "stage1.asm"
 
+; Reset the stack
+mov esp, 0xFFFF
 jmp start
 
 checkA20:
@@ -46,6 +56,166 @@ checkA20:
 	popf
 	ret
 
+
+
+
+
+
+
+
+
+
+
+; This is a port of JOTAFS_getrecursive from JOTAFS_readwholefile.c
+; edi <- level
+; esi <- recLBA
+; ecx <- i
+last_maxlevel db 0
+getrecursive:
+	push edi
+	push esi
+	push ecx
+	; if(level > last_maxlevel) last_maxlevel = level;
+	mov eax, edi
+	cmp al, byte [last_maxlevel]
+	jna .last_maxlevel_updated
+	mov byte [last_maxlevel], al
+	.last_maxlevel_updated:
+	; uint32_t* contents = (uint32_t*)ATA_read28(iface, recLBA);
+	mov eax, esi
+	call readsector
+
+	; uint32_t idx = i-10;
+	mov eax, dword [esp]
+	sub eax, 10
+	; if(last_maxlevel > 1) idx -= 1 << 7;		// 128
+	cmp byte [last_maxlevel], 1
+	jna .check1
+	mov ebx, 1
+	shl ebx, 7
+	sub eax, ebx
+	.check1:
+	; if(last_maxlevel > 2) idx -= 1 << (7*2);	// 128**2
+	cmp byte [last_maxlevel], 2
+	jna .check2
+	mov ebx, 1
+	shl ebx, 14
+	sub eax, ebx
+	.check2:
+	; if(last_maxlevel > 3) idx -= 1 << (7*3);	// 128**3
+	cmp byte [last_maxlevel], 3
+	jna .check3
+	mov ebx, 1
+	shl ebx, 21
+	sub eax, ebx
+	.check3:
+	; idx >>= 7*(level-1);	// Divide by 128**(level-1)
+	;xor ecx, ecx
+	;mov cl, byte [esp+8]
+	mov ecx, dword [esp+8]
+	dec ecx
+	; ( Note: 7*a = (8*a)-a = (a << 3)-a )
+	push ecx
+	shl ecx, 3
+	sub ecx, dword [esp]
+	add esp, 4
+	shr eax, cl
+
+	; uint32_t next_recLBA = contents[idx];
+	mov eax, dword [SECTOR_BUFFER+(4*eax)]
+
+	; if(level > 1) toRet = JOTAFS_getrecursive(level-1, i, next_recLBA);
+	cmp dword [esp+8], 1
+	jna .finish_recursion
+	mov edi, [esp+8]
+	dec edi
+	mov esi, eax
+	mov ecx, [esp]
+	call getrecursive
+	.finish_recursion:
+
+	; last_maxlevel = 0;
+	mov byte [last_maxlevel], 0
+	; Pop the stack.
+	pop ecx
+	pop esi
+	pop edi
+	ret
+
+
+
+
+
+
+
+
+; Equivalent to JOTAFS_gimmetheblocc
+; This assumes that the inode is loaded at SECTOR_BUFFER.
+; ecx <- i
+gimmetheblocc:
+	push ecx
+	push ebx
+
+	xor ebx, ebx
+	inc ebx
+	shl ebx, 21	; 128**3
+	add ebx, 9
+	cmp ecx, ebx
+	jna .gtb1
+
+	mov edi, 4
+	mov esi, dword [SECTOR_BUFFER+INODE_QIBP]
+	call getrecursive
+	jmp .gimmetheblocc_end
+
+	.gtb1:
+	xor ebx, ebx
+	inc ebx
+	shl ebx, 14
+	add ebx, 9
+	cmp ecx, ebx
+	jna .gtb2
+
+	mov edi, 3
+	mov esi, dword [SECTOR_BUFFER+INODE_TIBP]
+	call getrecursive
+	jmp .gimmetheblocc_end
+
+	.gtb2:
+	xor ebx, ebx
+	inc ebx
+	shl ebx, 7
+	add ebx, 9
+	cmp ecx, ebx
+	jna .gtb3
+
+	mov edi, 2
+	mov esi, dword [SECTOR_BUFFER+INODE_DIBP]
+	call getrecursive
+	jmp .gimmetheblocc_end
+
+	.gtb3:
+	cmp ecx, 9
+	jna .gtb4
+
+	mov edi, 1
+	mov esi, dword [SECTOR_BUFFER+INODE_SIBP]
+	call getrecursive
+	jmp .gimmetheblocc_end
+
+	.gtb4:
+	mov eax, SECTOR_BUFFER+INODE_DBP0
+	mov eax, dword [eax+(4*ecx)]
+
+	.gimmetheblocc_end:
+	pop ebx
+	pop ecx
+	ret
+
+
+
+
+
 noa20 db "A20 could not be enabled.", 0
 loading db "Loading kernel...", 0x0A, 0x0D, 0x00
 booting db "Booting...", 0x0A, 0x0D, 0x00
@@ -53,7 +223,7 @@ nomem db "BIOS does not support memory detection!", 0
 memno20 db "BIOS returns memory detection with 24 bytes. This has never been seen!", 0
 
 start:
-; Now, check whether A20 is enabled.
+; Check whether A20 is enabled.
 call checkA20
 test ax, ax
 jnz A20_ENABLED
@@ -101,27 +271,28 @@ mov si, loading
 call print
 
 ; Bear in mind that we can't read the ELF directly, as BIOS interrupts run on real mode.
-
-; Instead, we'll be loading one sector at a time (512B) to 0x9000.
+; Thus, we'll be loading one sector at a time (512B) to SECTOR_BUFFER.
 ; Some "dapack" variables are also exported from "jboot.asm".
 ; This is very convenient.
-mov word [dapack_blkcount], 1
-mov word [dapack_boffset], 0x9000
+mov word [dapack_boffset], SECTOR_BUFFER
 
 ; Load the ELF at 2M, and then parse it and load the kernel at 1M.
 
-; Get the size of the ELF.
-; In JBoot-HDD, it's already there, we have the second sector in memory.
-push dword [0x8000 + 0x0C]
-; And save the starting sector too.
-push dword [0x8000 + 0x08]
+; Get the size of the ELF in blocks.
+mov eax, 3	; 2 (reserved) + 1 (kernel's inode)
+call readsector
+mov edx, dword [SECTOR_BUFFER + INODE_NBLOCKS]
 
 ; Offsetless count.
 xor ecx, ecx
 LOAD_KERNEL:
-	; Compute starting LBA for current block and read it.
-	mov eax, [esp]	; Offset
-	add eax, ecx	; + current offsetless LBA
+	push edx
+	; Load the inode. POTENTIAL IMPROVEMENT.
+	mov eax, 3
+	call readsector
+	; Get the LBA sector of the block.
+	call gimmetheblocc
+	; Read it.
 	call readsector
 
 	; Calculate the current block's starting position.
@@ -135,7 +306,7 @@ LOAD_KERNEL:
 	.LOAD_KERNEL_L:
 		; Get current doubleword.
 		mov ebx, ecx
-		add ebx, 0x9000
+		add ebx, SECTOR_BUFFER
 		mov ebx, dword [ebx]
 
 		; Move it.
@@ -151,7 +322,8 @@ LOAD_KERNEL:
 	pop ecx
 
 	inc ecx
-	cmp ecx, dword [esp+4]
+	pop edx
+	cmp ecx, edx
 	jl LOAD_KERNEL
 
 ; The whole ELF is now in memory!

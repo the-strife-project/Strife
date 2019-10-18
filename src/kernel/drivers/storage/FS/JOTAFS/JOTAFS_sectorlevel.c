@@ -97,7 +97,7 @@ uint32_t JOTAFS_getFreeLBAInode(void) {
 		struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, offset);
 		uint8_t used = inode->isUsed;
 		jfree(inode);
-		if(used) break;
+		if(!used) break;
 	}
 	return offset;
 }

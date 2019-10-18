@@ -14,9 +14,16 @@
 			the LBA sector that contains 128 LBA addresses.
 	realLBA: the previously filled block that contains the actual data.
 */
+static uint8_t last_maxlevel = 0;
 void JOTAFS_updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t realLBA) {
+	if(level > last_maxlevel) last_maxlevel = level;
 	uint32_t* contents = (uint32_t*)ATA_read28(iface, recLBA);
-	uint32_t idx = (i-10) / (1 << (7*level));	// (i-10) / (128**level)
+	// Time to do some annoying substractions.
+	uint32_t idx = i-10;
+	if(last_maxlevel > 1) idx -= 1 << 7;		// 128
+	if(last_maxlevel > 2) idx -= 1 << (7*2);	// 128**2
+	if(last_maxlevel > 3) idx -= 1 << (7*3);	// 128**3
+	idx >>= 7*(level-1);	// Divide by 128**(level-1)
 
 	if(level > 1) {
 		// Doubly or more IBP.
@@ -32,13 +39,15 @@ void JOTAFS_updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t
 	}
 
 	ATA_write28(iface, recLBA, (uint8_t*)contents);
-	jfree(contents);
 
 	// Are we done?
-	if(level == 1) return;	// Yep.
-
-	// Nope. Go to the next level!
-	JOTAFS_updaterecursive(level-1, i, contents[idx], realLBA);
+	uint32_t contents_idx = contents[idx];
+	jfree(contents);
+	if(level != 1) {
+		// Nope. Go to the next level.
+		JOTAFS_updaterecursive(level-1, i, contents_idx, realLBA);
+	}
+	last_maxlevel = 0;
 }
 
 uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir) {
@@ -52,10 +61,10 @@ uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec
 	inode->uid = uid;
 	inode->isApp = exec;
 	inode->isDir = dir;
+	inode->isUsed = 1;
 
 	// Let's start filling up the blocks.
-	uint32_t size_in_blocks = size / 512;
-	if(size % 512) size_in_blocks++;
+	uint32_t size_in_blocks = inode->n_blocks;
 
 	uint32_t LBA_singly, LBA_doubly, LBA_triply, LBA_quadruply;
 	LBA_singly = LBA_doubly = LBA_triply = LBA_quadruply = 0;
@@ -70,11 +79,9 @@ uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec
 				and fill the remaining bytes with zeros so no extra
 				memory is written.
 			*/
-			uint8_t* contents = jmalloc(512);
+			uint8_t contents[512] = {0};
 			for(uint16_t i=0; i<size%512; i++) contents[i] = data[i];
-			for(uint16_t i=size%512; i<512; i++) contents[i] = 0;
 			ATA_write28(iface, thisblock, contents);
-			jfree(contents);
 		}
 		data += 512;
 		JOTAFS_markBlockAsUsed(thisblock);

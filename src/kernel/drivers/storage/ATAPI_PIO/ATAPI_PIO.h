@@ -7,6 +7,7 @@
 #define ATAPI_PIO_DAPACK 0x7E00
 #define ATAPI_PIO_BUFFER 0x8000
 //                       ↑ yep
+#define ATAPI_SECTOR_SIZE 0x800
 
 struct dapack {
 	uint8_t size;
@@ -19,5 +20,6 @@ struct dapack {
 } __attribute__((packed));
 
 void ATAPI_read(uint16_t nblocks, uint32_t lba);
+void ATAPI_granularread(uint32_t nblocks, uint32_t lba, uint8_t* output);
 
 #endif

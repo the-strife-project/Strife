@@ -3,6 +3,7 @@
 #include <libc/stdlib.h>
 #include <kernel/drivers/term/term.h>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 
@@ -57,6 +58,7 @@ void install() {
 		while(1) {}
 	}
 	uint8_t* stage1 = ISO9660_read(stage1_e);
+	jfree(stage1_e);
 	JOTAFS_writeMBR(stage1);
 	printf("[OK]\n");
 
@@ -65,9 +67,43 @@ void install() {
 	JOTAFS_format();
 	printf("[OK]\n");
 
-	// Add JBoot's second stage.
-	
+	// Copy JBoot's second stage.
+	printf("Copying JBoot's second stage... ");
+	char* stage2_p[] = {"BOOT", "HDDS2.BIN"};
+	struct ISO9660_entity* stage2_e = ISO9660_get(stage2_p, 2);
+	if(!stage2_e) {
+		printf("[FAILED]\n"
+		"Couldn't find HDDS2.BIN in the BOOT directory of the CD.\n"
+		"Installation stopped."
+		);
+		while(1) {}
+	}
+	uint8_t* stage2 = ISO9660_read(stage2_e);
+	JOTAFS_newfile(stage2_e->length, stage2, 0, 0, 0);
+	jfree(stage2_e);
+	printf("[OK]\n");
 
-	//printf("\nInstallation successful!\n");
+	// Copy the kernel.
+	printf("Copying the kernel... ");
+	char* kernel_p[] = {"BOOT", "KERNEL.BIN"};
+	struct ISO9660_entity* kernel_e = ISO9660_get(kernel_p, 2);
+	if(!kernel_e) {
+		printf("[FAILED]\n"
+		"This error is impossible.\n"
+		);
+		while(1) {}
+	}
+	/*
+		The kernel is actually too big to be read by ISO9660_read.
+		We have to read it granularly.
+	*/
+	uint8_t* kernel = jmalloc(kernel_e->length + 2048);
+	ATAPI_granularread(1+(kernel_e->length / 2048), kernel_e->LBA, kernel);
+	JOTAFS_newfile(kernel_e->length, kernel, 0, 0, 0);
+	jfree(kernel);
+	jfree(kernel_e);
+	printf("[OK]\n");
+
+	printf("\nInstallation successful!\nYou can reboot now.");
 	while(1) {}
 }

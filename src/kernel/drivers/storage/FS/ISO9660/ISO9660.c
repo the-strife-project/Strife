@@ -28,11 +28,6 @@ struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
 			last_LBA
 		);
 
-		/*
-			This would've been nicer with a struct, but as the length of
-			each directory record is not fixed, I think it's not possible to do.
-		*/
-
 		// Run through the directory records of 'last' until one matches dirs[dirs_i].
 		uint8_t found = 0;
 		for(uint32_t i=0; i < last_len && !found; ) {
@@ -81,7 +76,6 @@ struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
 	struct ISO9660_entity* ret = (struct ISO9660_entity*)jmalloc(sizeof(struct ISO9660_entity));
 	ret->LBA = last_LBA;
 	ret->length = last_len;
-
 	return ret;
 }
 

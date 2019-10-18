@@ -54,7 +54,7 @@ void kernel_main(void) {
 			This REALLY should not be part of the kernel.
 			Might change it at some point, I don't care tbh.
 		*/
-		//install();
+		install();
 		// That should not return.
 	}
 

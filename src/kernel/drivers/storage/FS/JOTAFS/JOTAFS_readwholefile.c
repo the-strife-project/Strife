@@ -2,18 +2,24 @@
 #include <libc/stdlib.h>
 
 // This method is kind of similar to JOTAFS_updaterecursive, but way simpler.
+static uint8_t last_maxlevel = 0;
 uint32_t JOTAFS_getrecursive(uint8_t level, uint32_t i, uint32_t recLBA) {
+	if(level > last_maxlevel) last_maxlevel = level;
 	uint32_t* contents = (uint32_t*)ATA_read28(iface, recLBA);
-	uint32_t idx = (i-10) / (1 << (7*level));	// (i-10) / (128**level)
+	uint32_t idx = i-10;
+	if(last_maxlevel > 1) idx -= 1 << 7;		// 128
+	if(last_maxlevel > 2) idx -= 1 << (7*2);	// 128**2
+	if(last_maxlevel > 3) idx -= 1 << (7*3);	// 128**3
+	idx >>= 7*(level-1);	// Divide by 128**(level-1)
 
 	uint32_t next_recLBA = contents[idx];
 	jfree(contents);
 
-	if(level > 1) {
-		return JOTAFS_getrecursive(level-1, i, next_recLBA);
-	} else {
-		return next_recLBA;
-	}
+	uint32_t toRet;
+	if(level > 1) toRet = JOTAFS_getrecursive(level-1, i, next_recLBA);
+	else toRet = next_recLBA;
+	last_maxlevel = 0;
+	return toRet;
 }
 
 uint32_t JOTAFS_gimmetheblocc(struct JOTAFS_INODE* inode, uint32_t i) {
@@ -40,9 +46,7 @@ uint8_t* JOTAFS_readwholefile(uint32_t LBAinode) {
 	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, LBAinode);
 	uint8_t* data = jmalloc(inode->size);
 
-	uint32_t size_in_blocks = inode->size / 512;
-	if(inode->size % 512) size_in_blocks++;
-
+	uint32_t size_in_blocks = inode->n_blocks;
 	for(uint32_t i=0; i<size_in_blocks; i++) {
 		// Get the block no. i
 		uint32_t thisblock = JOTAFS_gimmetheblocc(inode, i);

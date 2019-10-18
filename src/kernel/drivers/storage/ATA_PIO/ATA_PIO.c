@@ -19,6 +19,7 @@ struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
 	ret->commandPort = portBase + 0x7;
 	ret->controlPort = portBase + 0x206;
 
+	ISR_ignoreUP(0x2E);
 	ISR_ignoreUP(0x2F);
 
 	return ret;
