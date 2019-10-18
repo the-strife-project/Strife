@@ -1,6 +1,6 @@
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
-#include <libc/stdlib.h>
-#include <libc/stdio.h>
+#include <klibc/stdlib.h>
+#include <klibc/stdio.h>
 #include <kernel/asm.h>
 #include <kernel/drivers/PIC/PIC.h>
 #include <kernel/IDT/IDT.h>

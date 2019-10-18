@@ -1,4 +1,4 @@
-#include <libc/string.h>
+#include <klibc/string.h>
 
 void strinv(char* str) {
 	size_t s_str = strlen(str);

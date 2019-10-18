@@ -1,6 +1,6 @@
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
-#include <libc/math.h>
+#include <klibc/stdio.h>
+#include <klibc/stdlib.h>
+#include <klibc/math.h>
 
 /*
 	Converts an integer into a C string.

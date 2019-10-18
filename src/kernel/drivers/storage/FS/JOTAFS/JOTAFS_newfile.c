@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 /*
 	I recommend listening to "The Strokes - Hard to Explain" right now.

@@ -1,4 +1,4 @@
-#include <libc/string.h>
+#include <klibc/string.h>
 
 char strcmp(const char* a, const char* b) {
 	if(strlen(a) != strlen(b)) return 1;

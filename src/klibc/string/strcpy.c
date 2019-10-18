@@ -1,4 +1,4 @@
-#include <libc/string.h>
+#include <klibc/string.h>
 
 void strcpy(char* dest, const char* orig) {
 	size_t s_orig = strlen(orig);

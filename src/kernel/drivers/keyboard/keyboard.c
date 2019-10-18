@@ -1,6 +1,6 @@
 #include <kernel/drivers/keyboard/keyboard.h>
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
+#include <klibc/stdio.h>
+#include <klibc/stdlib.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/drivers/PIC/PIC.h>
@@ -176,6 +176,7 @@ void keyboard_handler(void) {
 		case 0x2A:
 			// Left shift down
 			Lshift = 1;
+			handle = (char*)1;
 			break;
 		case 0xAA:
 			// Left shift up
@@ -184,6 +185,7 @@ void keyboard_handler(void) {
 		case 0x36:
 			// Right shift down
 			Rshift = 1;
+			handle = (char*)1;
 			break;
 		case 0xB6:
 			// Right shift up

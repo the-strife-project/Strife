@@ -2,11 +2,11 @@
 #define STDLIB_H
 
 #ifndef _LIBALLOC_H
-#include <libc/stdlib/liballoc.h>
+#include <klibc/stdlib/liballoc.h>
 #endif
 
 #ifndef _STRING_H
-#include <libc/string.h>
+#include <klibc/string.h>
 #endif
 
 char* itoa(int n);

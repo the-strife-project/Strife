@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 uint32_t JOTAFS_newdir(uint32_t uid) { return JOTAFS_newfile(0, 0, uid, 0, 1); }
 

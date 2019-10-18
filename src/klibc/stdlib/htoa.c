@@ -1,5 +1,5 @@
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
+#include <klibc/stdio.h>
+#include <klibc/stdlib.h>
 
 /*
 	Gets the hex representation of an integer.

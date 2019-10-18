@@ -1,4 +1,4 @@
-#include <libc/stdlib/liballoc.h>
+#include <klibc/stdlib/liballoc.h>
 #include <common/types.h>
 #include <kernel/asm.h>
 #include <kernel/paging/paging.h>

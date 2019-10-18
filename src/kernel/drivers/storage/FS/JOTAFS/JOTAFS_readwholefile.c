@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 // This method is kind of similar to JOTAFS_updaterecursive, but way simpler.
 static uint8_t last_maxlevel = 0;

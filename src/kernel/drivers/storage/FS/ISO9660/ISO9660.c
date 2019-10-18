@@ -1,6 +1,6 @@
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 /*
 	Example for ISO9660_getdir

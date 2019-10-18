@@ -25,7 +25,7 @@ void ATAPI_read(uint16_t nblocks, uint32_t lba) {
 	V86(LBA_READ_INT, &regs);
 }
 
-#include <libc/stdio.h>
+#include <klibc/stdio.h>
 void ATAPI_granularread(uint32_t nblocks, uint32_t lba, uint8_t* output) {
 	for(uint32_t i=0; i<nblocks; i++) {
 		ATAPI_read(1, lba+i);

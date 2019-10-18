@@ -4,7 +4,7 @@
 #include <kernel/splash.h>
 #include <kernel/drivers/term/font.h>
 #include <kernel/drivers/term/term.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 uint32_t __getGradient(uint32_t origin, uint32_t end, int maxstep, int step) {
 	uint8_t origin_r = (origin & 0x00FF0000) >> 16;

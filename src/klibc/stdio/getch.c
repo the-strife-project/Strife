@@ -1,4 +1,4 @@
-#include <libc/stdio.h>
+#include <klibc/stdio.h>
 #include <kernel/drivers/keyboard/keyboard.h>
 
 char getch() {

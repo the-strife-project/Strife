@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 uint8_t JOTAFS_init(struct ATA_INTERFACE* _iface) {
 	iface = _iface;

@@ -1,5 +1,5 @@
 #include <kernel/drivers/clock/clock.h>
-#include <libc/stdio.h>
+#include <klibc/stdio.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/drivers/PIC/PIC.h>

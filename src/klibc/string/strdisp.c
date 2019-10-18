@@ -1,4 +1,4 @@
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 /*
 	Move the string n bytes to the right.

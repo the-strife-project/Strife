@@ -1,4 +1,4 @@
-#include <libc/math.h>
+#include <klibc/math.h>
 
 /*
 	Calculates a^b, being 'b' natural, and 'a' an integer.

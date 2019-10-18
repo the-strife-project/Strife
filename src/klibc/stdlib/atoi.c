@@ -1,5 +1,5 @@
-#include <libc/stdlib.h>
-#include <libc/math.h>
+#include <klibc/stdlib.h>
+#include <klibc/math.h>
 
 int atoi(char* str) {
 	size_t s_str = strlen(str);

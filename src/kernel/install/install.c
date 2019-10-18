@@ -1,6 +1,6 @@
 #include <kernel/install/install.h>
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
+#include <klibc/stdio.h>
+#include <klibc/stdlib.h>
 #include <kernel/drivers/term/term.h>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
@@ -37,6 +37,7 @@ void install() {
 	printf("-> ");
 	showCursor();
 	char* installInput = readLine();
+	hideCursor();
 	if(strcmp("yes", installInput) != 0) {
 		// Stop!
 		printf("\nInstallation stopped.\n");

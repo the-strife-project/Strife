@@ -1,5 +1,5 @@
-#include <libc/stdlib.h>
-#include <libc/math.h>
+#include <klibc/stdlib.h>
+#include <klibc/math.h>
 
 /*
 	Converts an hex string into a 32-bit integer.

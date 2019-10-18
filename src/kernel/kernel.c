@@ -1,6 +1,6 @@
 #include <kernel/drivers/term/term.h>
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
+#include <klibc/stdio.h>
+#include <klibc/stdlib.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/paging/paging.h>
 #include <kernel/drivers/PIC/PIC.h>

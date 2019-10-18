@@ -1,4 +1,4 @@
-#include <libc/stdlib.h>
+#include <klibc/stdlib.h>
 
 /*
 	strcat, but at the beginning.
