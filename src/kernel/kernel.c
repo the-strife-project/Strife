@@ -14,6 +14,10 @@
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/splash.h>
 #include <kernel/install/install.h>
+#include <kernel/syscalls/syscalls.h>
+#include <kernel/TSS/TSS.h>
+#include <kernel/usermode/usermode.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
@@ -58,15 +62,22 @@ void kernel_main(void) {
 		// That should not return.
 	}
 
-	printf("Kernel size: %dKiB\n", (int)ASM_KERNEL_END>>10);
-	printf("%dKiB of RAM available.\n", getFreeMemory());
-	printf("\nGo ahead, type something\n");
-	showCursor();
+	// Enable syscalls.
+	syscalls_init();
 
-	while(1) {
-		printf("> ");
-		char* r = readLine();
-		printf("< (%d) %s\n", strlen(r), r);
-		jfree(r);
-	}
+	// Load the TSS.
+	TSS_flush();
+
+	// Initialize the file system.
+	struct ATA_INTERFACE* primarymaster = newATA(1, 0x1F0);
+	JOTAFS_init(primarymaster);
+
+	// Run the MSS (Main Shell System).
+	uint32_t mss = paging_allocPages(2);
+	paging_setUser(mss, 2);
+	JOTAFS_readwholefile(4, (uint8_t*)(mss+4096));
+	jump_usermode(mss+4096);
+
+	printf("\n[[[ MSS RETURNED?!?!?! ]]]");
+	while(1) {}
 }

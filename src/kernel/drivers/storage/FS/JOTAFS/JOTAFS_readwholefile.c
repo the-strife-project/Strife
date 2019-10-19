@@ -42,9 +42,8 @@ uint32_t JOTAFS_gimmetheblocc(struct JOTAFS_INODE* inode, uint32_t i) {
 }
 
 // Similar as well to JOTAFS_newfile, but a piece of cake.
-uint8_t* JOTAFS_readwholefile(uint32_t LBAinode) {
+void JOTAFS_readwholefile(uint32_t LBAinode, uint8_t* buffer) {
 	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, LBAinode);
-	uint8_t* data = jmalloc(inode->size);
 
 	uint32_t size_in_blocks = inode->n_blocks;
 	for(uint32_t i=0; i<size_in_blocks; i++) {
@@ -56,10 +55,20 @@ uint8_t* JOTAFS_readwholefile(uint32_t LBAinode) {
 
 		// Append only the required.
 		uint16_t upper_bound = (i != size_in_blocks-1) ? 512 : (inode->size % 512);
-		for(uint16_t j=0; j<upper_bound; j++) data[(i*512) + j] = thisblock_contents[j];
+		for(uint16_t j=0; j<upper_bound; j++) buffer[(i*512) + j] = thisblock_contents[j];
 		jfree(thisblock_contents);
 	}
 
 	jfree(inode);
-	return data;
+}
+
+// This function should really not be called. It's wasteful.
+uint8_t* JOTAFS_allocate_and_readwholefile(uint32_t LBAinode) {
+	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, LBAinode);
+	uint64_t size = inode->size;
+	jfree(inode);
+
+	uint8_t* buffer = jmalloc(size);
+	JOTAFS_readwholefile(LBAinode, buffer);
+	return buffer;
 }

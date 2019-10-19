@@ -105,6 +105,23 @@ void install() {
 	jfree(kernel_e);
 	printf("[OK]\n");
 
+	// Here there would be the root directory.
+
+	// Copy the MSS.
+	printf("Copying MSS... ");
+	char* mss_p[] = {"MSS.BIN"};
+	struct ISO9660_entity* mss_e = ISO9660_get(mss_p, 1);
+	if(!mss_e) {
+		printf("[FAILED]\n"
+		"MSS.bin could not be found."
+		);
+		while(1) {}
+	}
+	uint8_t* mss = ISO9660_read(mss_e);
+	JOTAFS_newfile(mss_e->length, mss, 0, 0, 0);
+	jfree(mss_e);
+	printf("[OK]\n");
+
 	printf("\nInstallation successful!\nYou can reboot now.");
 	while(1) {}
 }

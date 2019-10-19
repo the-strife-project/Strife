@@ -67,6 +67,15 @@ nasm src/JBoot/HDD/stage2.asm.npp -f bin -o iso/boot/HDDs2.bin || exit 255
 rm -rf src/JBoot/HDD/*.asm.npp
 echo -e "\e[1;33mJBoot compiled.\e[0m"
 
+
+
+
+echo -e "\e[1;36mCompiling extras...\e[0m"
+
+# MSS
+nasm src/extra/MSS/MSS.asm -f bin -o iso/MSS.bin || exit 255
+echo -e "\e[1;33mMSS compiled.\e[0m"
+
 # Create ISO
 genisoimage -no-emul-boot -b boot/CD.bin -o jotadOS.iso iso
 echo -e "\e[1;33mIso file created.\e[0m"

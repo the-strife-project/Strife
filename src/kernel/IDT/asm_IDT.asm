@@ -8,13 +8,21 @@ default_ISR_ %+ i:
 	push ds
     push es
     push fs
+	push gs
 	pusha
+
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
 
 	push i
 	call default_interrupt_handler
 	add esp, 4
 
 	popa
+	pop gs
     pop fs
     pop es
 	pop ds

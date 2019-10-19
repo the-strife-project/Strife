@@ -36,6 +36,7 @@ void paging_setPresent(uint32_t virt, uint32_t count);
 void paging_setAbsent(uint32_t virt, uint32_t count);
 void paging_setUsed(uint32_t virt, uint32_t count);
 void paging_setFree(uint32_t virt, uint32_t count);
+void paging_setUser(uint32_t virt, uint32_t count);
 
 uint32_t paging_findPages(uint32_t count);
 uint32_t paging_allocPages(uint32_t count);

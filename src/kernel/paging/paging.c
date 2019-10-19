@@ -83,6 +83,14 @@ void paging_setFree(uint32_t virt, uint32_t count) {
 	paging_setFlagDown(virt, count, PT_USED);
 }
 
+void paging_setUser(uint32_t virt, uint32_t count) {
+	uint32_t page_n = virt / 4096;
+	for(uint32_t i=page_n; i<page_n+count; i+=1024) {
+		page_directory[i/1024] |= PD_ALL_PRIV;
+	}
+	paging_setFlagUp(virt, count, PT_ALL_PRIV);
+}
+
 
 
 uint32_t paging_findPages(uint32_t count) {

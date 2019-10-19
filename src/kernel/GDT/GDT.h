@@ -9,16 +9,21 @@ struct GDT_ptr {
 } __attribute__((packed));
 
 uint64_t createGDTEntry(uint32_t base, uint32_t limit, uint16_t abf);
-
 void gdt_init(void);
 
 #define _GDT_NULL 0
 #define _KERNEL_CODESEGMENT_N 1
 #define _KERNEL_DATASEGMENT_N 2
-#define GDT_ENTRIES 3
+#define _USER_CODESEGMENT_N 3
+#define _USER_DATASEGMENT_N 4
+#define _TSS_SEGMENT_N 5
+#define GDT_ENTRIES 6
 
 #define _KERNEL_CODESEGMENT (_KERNEL_CODESEGMENT_N << 3)
 #define _KERNEL_DATASEGMENT (_KERNEL_DATASEGMENT_N << 3)
+#define _USER_CODESEGMENT (_USER_CODESEGMENT_N << 3)
+#define _USER_DATASEGMENT (_USER_DATASEGMENT_N << 3)
+#define _TSS_SEGMENT (_TSS_SEGMENT_N << 3)
 
 // Source: https://wiki.osdev.org/GDT_Tutorial
 #define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)

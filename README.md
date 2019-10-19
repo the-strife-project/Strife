@@ -5,7 +5,7 @@
 
 jotadOS is an x86 operating system made in C from scratch based on the idea of compartmentalization.
 
-It has its own bootloader (JBoot), kernel, file system (JOTAFS), and user-space applications.
+It has its own bootloader (JBoot), kernel, drivers, file system (![JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md)), C library, and user-space applications.
 
 ## The jotadOS philosophy
 *(This philosophy is, as the implementation, licensed with the GNU GPL 3 license. See the LICENSE file in this directory.)*
@@ -104,3 +104,4 @@ I have used several sources in order to do this project (ordered by importance).
 - https://osdev.org <-- Mainly this one.
 - https://www.youtube.com/channel/UCQdZltW7bh1ta-_nCH7LWYw
 - http://ctyme.com/rbrown.htm
+- Intel 64 and IA-32 Architectures Software Developer's Manual

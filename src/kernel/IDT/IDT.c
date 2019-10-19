@@ -22,7 +22,47 @@ void idt_init(void) {
 void default_interrupt_handler(uint32_t intno) {
 	// I don't care about these.
 	if(!(ISR_ignore[intno / 32] & (1 << (intno % 32)))) {
-		printf("[[[ DISR: 0x%x ]]]\n", intno);
+		switch(intno) {
+			// These are taken from the Intel's Software Developer's Manual.
+			case 0:
+				printf("\n[[[ DIVIDE ERROR EXCEPTION ]]]\n");
+				break;
+			case 5:
+				printf("\n[[[ BOUND RANGE EXCEEDED EXCEPTION ]]]\n");
+				break;
+			case 6:
+				printf("\n[[[ INVALID OPCODE EXCEPTION ]]]\n");
+				break;
+			case 7:
+				printf("\n[[[ DEVICE NOT AVAILABLE EXCEPTION ]]]\n");
+				break;
+			case 8:
+				printf("\n[[[ DOUBLE FAULT EXCEPTION ]]]\n");
+				break;
+			case 10:
+				printf("\n[[[ INVALID TSS EXCEPTION ]]]\n");
+				break;
+			case 11:
+				printf("\n[[[ SEGMENT NOT PRESENT ]]]\n");
+				break;
+			case 12:
+				printf("\n[[[ STACK FAULT EXCEPTION ]]]\n");
+				break;
+			case 13:
+				printf("\n[[[ GENERAL PROTECTION EXCEPTION ]]]\n");
+				break;
+			case 14:
+				printf("\n[[[ PAGE FAULT EXCEPTION ]]]\n");
+				break;
+			case 16:
+				printf("\n[[[ FPU FLOATING-POINT ERROR ]]]\n");
+				break;
+			case 17:
+				printf("\n[[[ ALIGNMENT CHECK EXCEPTION ]]]\n");
+				break;
+			default:
+				printf("\n[[[ DISR: 0x%x ]]]\n", intno);
+		}
 		outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);	// Bochs breakpoint
 	}
 

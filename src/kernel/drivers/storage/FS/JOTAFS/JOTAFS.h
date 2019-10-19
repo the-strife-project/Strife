@@ -64,6 +64,7 @@ void JOTAFS_add2dir(uint32_t LBAinode, char* filename, uint32_t lba);
 
 // JOTAFS_readwholefile.c
 uint32_t JOTAFS_gimmetheblocc(struct JOTAFS_INODE* inode, uint32_t i);
-uint8_t* JOTAFS_readwholefile(uint32_t inode);
+void JOTAFS_readwholefile(uint32_t inode, uint8_t* buffer);
+uint8_t* JOTAFS_allocate_and_readwholefile(uint32_t inode);
 
 #endif
