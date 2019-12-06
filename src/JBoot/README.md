@@ -14,5 +14,5 @@ At 0xA000, there's the list returned by INT 0x15, EAX = 0xE820.
 The kernel will need this last one in order to figure out how much RAM is available.
 
 There are actually two differnet stage 1 bootloaders:
-(*) CD stage1, which boots from a CD (ISO9660).
-(*) HDD stage1, which boots from the JOTAFS formatted drive.
+- CD stage1, which boots from a CD (ISO9660).
+- HDD stage1, which boots from the JOTAFS formatted drive.
