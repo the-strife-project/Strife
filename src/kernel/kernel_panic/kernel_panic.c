@@ -13,24 +13,14 @@ static const char* kp_messages[] = {
 };
 
 void kernel_panic(uint32_t id) {
-	// Fill screen with red.
-	if(!term_getCurrentMode()) {
-		// Text.
-		uint8_t bgcolor = 12 << 4;
-		bgcolor |= 1;
-		term_setBGC(bgcolor);
-	} else {
-		// Graphics.
-		term_setBGC(0x00FF0000);
-		term_setFGC(0x00FFFFFF);
-	}
-
+	// Change colors.
+	term_setBGC(0x4);
+	term_setFGC(0xF);
 
 	// Show the error.
-	term_clear();
 	printf("\nKERNEL PANIC!\n%s\n\nPlease, reboot.", kp_messages[id]);
 
-	// Don't to anything.
+	// Halt.
 	cli();
 	while(1) {}
 }

@@ -12,8 +12,6 @@ int ticks = 0;
 void clock_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);
 	ticks++;
-
-	if(ticks % 10 == 0) blinkCursor();
 }
 
 void clock_init(void) {

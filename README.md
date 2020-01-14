@@ -7,6 +7,10 @@ It currently has its own bootloader (![JBoot](https://github.com/jlxip/jotadOS/b
 
 In the future it probably will have its own C library, extremely simple user-space applications, and maybe even a C compiler.
 
+## Main points
+- Do not trust that I know what I'm doing. Do not copy/paste my code as most of it is improvable.
+- As of today, backwards compatibility is guaranteed not to exist. If at some point I want to improve a big part of the project which requires changing its interface, I won't hesitate.
+
 ## Compilation
 Before you can compile jotadOS, you need the following things:
 - `i686-elf-gcc`
@@ -50,7 +54,6 @@ You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `
 ## TODO list
 Here's a list of the big things I've managed to do so far as well as the next steps.
 
-- [X] Simple kernel that writes to the screen (terminal driver), and boots with GRUB.
 - [X] GDT.
 - [X] IDT.
 - [X] Keyboard driver (Spanish layout).
@@ -59,18 +62,18 @@ Here's a list of the big things I've managed to do so far as well as the next st
 - [X] Simple kernel C library with ![liballoc](https://github.com/blanham/liballoc).
 - [X] PCI driver.
 - [X] Virtual 8086 mode and VESA video modes.
-- [X] Text cursor in video mode.
-- [X] ATA PIO driver.
-- [X] JBoot, my bootloader, instead of GRUB.
-- [X] ATAPI and ISO9660 drivers.
-- [X] JOTAFS as the main filesystem.
-- [X] Software interrupts and user space.
-- [ ] User space C library that can be dinamically linked with the user space binaries.
-- [ ] Network driver.
-- [ ] TCP.
-- [ ] Cryptographic library.
-- [ ] Multitasking.
+- [X] PIO drivers: ATA and ATAPI.
+- [X] JBoot.
+- [X] ISO9660 driver.
+- [X] JOTAFS.
+- [X] Syscalls and user space.
+- [ ] User space C library that can be dinamically linked with the binaries.
+- [ ] Network driver, IP, ARP, TCP...
+- [ ] Cryptography library.
+- [ ] Multitasking (scheduler).
 - [ ] FIFOs for inter-process communication.
+- [ ] Users and groups.
+- [ ] SSH-like remote system administration tool.
 
 ## Sources
 I have used several resources in order to do this project.

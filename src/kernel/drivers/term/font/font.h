@@ -2,7 +2,8 @@
 #define FONT_H
 
 #include <common/types.h>
+#define FONT_LENGTH 4096
 
-uint8_t isBitSet(uint8_t lat1, char c, int y, int x);
+unsigned char* getFont();
 
 #endif

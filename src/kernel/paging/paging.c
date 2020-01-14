@@ -24,7 +24,7 @@ void paging_init() {
 	// Get available pages and mark them as present.
 	paging_setPresent(0, getAllMemory() >> 2);	// Divided by 4 because it's in KiB.
 
-	// Mark pages in use for the kernel.
+	// Mark pages in use for the kernel (and everything below, such as VGA mappings).
 	paging_setUsed(0, ((uint32_t)ASM_KERNEL_END >> 12)+1);
 }
 

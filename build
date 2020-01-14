@@ -50,11 +50,11 @@ find src/ -iname boot.asm | xargs -n1 bash -c '_compileASM $1 || exit 255' || ex
 echo -e "\e[1;33mKernel asm files done.\e[0m"
 
 # Klibc
-find src/klibc -type f -iname *.c | xargs -n1 bash -c '_compileGCC $1 || exit 255'
+find src/klibc -type f -iname *.c | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
 echo -e "\e[1;33mKernel's libc done.\e[0m"
 
 # The whole kernel
-i686-elf-gcc -T linker.ld -I./src -std=gnu99 -ffreestanding -O2 -nostdlib obj/*.o -o iso/boot/kernel.bin
+i686-elf-gcc -T linker.ld -I./src -std=gnu99 -ffreestanding -O2 -nostdlib obj/*.o -o iso/boot/kernel.bin || exit
 echo -e "\e[1;33mKernel linking done.\e[0m"
 
 # JBoot

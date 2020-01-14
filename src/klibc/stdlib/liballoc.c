@@ -2,7 +2,6 @@
 #include <common/types.h>
 #include <kernel/asm.h>
 #include <kernel/paging/paging.h>
-#include <kernel/drivers/TTY/TTY.h>
 
 // This right here is mine. The rest belongs to liballoc. See 'liballoc.h'.
 

@@ -11,8 +11,6 @@
 #include <kernel/asm.h>
 #include <kernel/PCI/PCI.h>
 #include <kernel/memutils/memutils.h>
-#include <kernel/drivers/VESA/VESA.h>
-#include <kernel/splash.h>
 #include <kernel/install/install.h>
 #include <kernel/syscalls/syscalls.h>
 #include <kernel/TSS/TSS.h>
@@ -23,6 +21,7 @@
 
 void kernel_main(void) {
 	memutils_init();
+	term_setFGC(0xA);
 	term_init();
 
 	printf("Setting GDT...\n");
@@ -40,20 +39,26 @@ void kernel_main(void) {
 
 	printf("Loading drivers...\n");
 	keyboard_init();
-	clock_init();
-	clock_start();
+	//clock_init();
+	//clock_start();
 
-	printf("Going graphics. See you in a bit...\n");
-	VESA_init(800, 600, 32);
-	term_goGraphics(800, 600);
-	term_setFGC(0x0000FF00);
-
-	showSplash("jotadOS", 4, (800-(4*8*7))/2, 32);
+	printf("\n");
+	term_setFGC(0x8);
+	term_setBGC(0xB);
+	printf("\n                                    jotadOS                                     \n");
+	term_setFGC(0xA);
+	term_setBGC(0x0);
+	printf("\n");
 
 	// Check where we're booting from.
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
 	if(bootDriveID == 0xE0) {
 		// It's the CD. Run the installation program.
+		/*
+			This should NOT happen.
+			TODO: improve the ATAPI driver and use something like ramfs
+			so that jotadOS can run from a CD in a clean way.
+		*/
 		/*
 			This REALLY should not be part of the kernel.
 			Might change it at some point, I don't care tbh.
