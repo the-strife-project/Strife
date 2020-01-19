@@ -7,7 +7,7 @@
 
 static const char __HTOA_TABLE[] = "0123456789ABCDEF";
 char* htoa(uint32_t n) {
-	char* ret = jmalloc(10);
+	char* ret = (char*)jmalloc(10);
 
 	int i = 0;
 	while(n) {

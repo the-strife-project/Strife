@@ -42,7 +42,7 @@ uint32_t paging_findPages(uint32_t count);
 uint32_t paging_allocPages(uint32_t count);
 uint32_t paging_getUsedPages();
 
-extern void go_paging(uint32_t*);
-extern void goback_paging();
+extern "C" void go_paging(uint32_t*);
+extern "C" void goback_paging();
 
 #endif

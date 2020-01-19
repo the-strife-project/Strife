@@ -36,9 +36,9 @@ enum JOTAFS_RESERVED_INODES {
 	JOTAFS_INODE_ROOT
 };
 
-struct ATA_INTERFACE* iface;
-struct JOTAFS_SUPERBLOCK sb_cache;
-uint32_t maxLBA;
+extern struct ATA_INTERFACE* iface;
+extern struct JOTAFS_SUPERBLOCK sb_cache;
+extern uint32_t maxLBA;
 
 // JOTAFS_sectorlevel.c
 uint8_t JOTAFS_init(struct ATA_INTERFACE* iface);

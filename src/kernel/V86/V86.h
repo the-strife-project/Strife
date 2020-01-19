@@ -9,6 +9,6 @@ struct regs16_t {
 } __attribute__((packed));
 
 void V86(uint8_t intnum, struct regs16_t *regs);
-extern void int32(uint8_t intnum, struct regs16_t *regs);
+extern "C" void int32(uint8_t intnum, struct regs16_t *regs);
 
 #endif

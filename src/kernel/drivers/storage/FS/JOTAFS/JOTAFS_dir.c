@@ -14,7 +14,7 @@ void JOTAFS_add2dir(uint32_t LBAinode, char* filename, uint32_t lba) {
 	uint8_t* old = JOTAFS_allocate_and_readwholefile(LBAinode);
 
 	// Allocate some memory.
-	uint8_t* contents = jmalloc(inode->size + strlen(filename) + 1 + 4);
+	uint8_t* contents = (uint8_t*)jmalloc(inode->size + strlen(filename) + 1 + 4);
 
 	// Copy the contents, such that there are no consecutive two null bytes.
 	uint8_t lastWasNull = 0;

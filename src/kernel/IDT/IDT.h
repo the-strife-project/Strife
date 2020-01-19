@@ -31,11 +31,11 @@ struct IDT_ptr {
 	uint32_t base;
 } __attribute__((packed));
 
-struct IDT_entry IDT[256];
+extern struct IDT_entry IDT[256];
 
 extern uint32_t* default_ISR_array;
 extern uint32_t empty_ISR;
-extern void load_idt(struct IDT_ptr* idtptr);
+extern "C" void load_idt(struct IDT_ptr* idtptr);
 
 void ISR_ignoreUP(uint8_t intno);
 void ISR_ignoreDOWN(uint8_t intno);

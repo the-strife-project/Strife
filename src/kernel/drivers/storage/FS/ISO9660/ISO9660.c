@@ -6,7 +6,7 @@
 	Example for ISO9660_getdir
 	dirs = {"boot"}
 */
-struct ISO9660_entity* ISO9660_get(char** dirs, uint8_t dirs_sz) {
+struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz) {
 	// Get the root directory record extent as 'last'.
 	ATAPI_read(1, 0x10);
 	uint32_t last_len = *(uint32_t*)(

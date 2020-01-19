@@ -68,7 +68,7 @@ uint8_t* JOTAFS_allocate_and_readwholefile(uint32_t LBAinode) {
 	uint64_t size = inode->size;
 	jfree(inode);
 
-	uint8_t* buffer = jmalloc(size);
+	uint8_t* buffer = (uint8_t*)jmalloc(size);
 	JOTAFS_readwholefile(LBAinode, buffer);
 	return buffer;
 }

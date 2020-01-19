@@ -40,7 +40,7 @@ uint16_t* VESA_getModes() {
 		numberOfModes++;
 
 	// Save 'em.
-	uint16_t* ret = jmalloc(sizeof(uint16_t) * numberOfModes);
+	uint16_t* ret = (uint16_t*)jmalloc(sizeof(uint16_t) * numberOfModes);
 	for(int i=0; i<numberOfModes; i++)
 		ret[i] = ((uint16_t*)info->video_modes)[i];
 

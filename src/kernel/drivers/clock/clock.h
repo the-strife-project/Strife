@@ -5,8 +5,8 @@
 
 #define CLOCK_IDT_ENTRY 0x20
 
-extern void IDT_clock(void);
-void clock_handler(void);
+extern "C" void IDT_clock(void);
+extern "C" void clock_handler(void);
 
 void clock_init(void);
 void clock_start(void);

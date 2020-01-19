@@ -36,12 +36,12 @@ char* buffer = (char*)0x7E00;
 int buffered;
 int __kbcursor;
 uint8_t show;
-void bk(char* a) {	// Buffer key
+void bk(const char* a) {	// Buffer key
 	if(strcmp(a, "\b") == 0) {
 		// If the buffer is empty, don't do anything.
 		if(buffered && __kbcursor) {
 			// Move characters at the right one position to the left.
-			char* baux = jmalloc(buffered);	// backspace auxiliar
+			char* baux = (char*)jmalloc(buffered);	// backspace auxiliar
 			strcpy(baux, buffer+__kbcursor);
 			term_left();
 			printf("%s ", baux);
@@ -73,7 +73,7 @@ void bk(char* a) {	// Buffer key
 		*/
 		if(__kbcursor < buffered) {
 			// Move characters at the right (from current character) one position to the left.
-			char* saux = jmalloc(buffered);	// supr auxiliar
+			char* saux = (char*)jmalloc(buffered);	// supr auxiliar
 			uint8_t diff = 1;
 			if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') {
 				diff++;
@@ -120,7 +120,7 @@ void bk(char* a) {	// Buffer key
 		return;
 	}
 	// Print the new characters.
-	char* aux = jmalloc(buffered+strlen(a));	// Quick and dirty.
+	char* aux = (char*)jmalloc(buffered+strlen(a));	// Quick and dirty.
 	strcpy(aux, a);
 	strcat(aux, buffer+__kbcursor);
 	if(show) printf("%s", aux);
@@ -141,7 +141,7 @@ void bk(char* a) {	// Buffer key
 char* keyboard_getBuffer() { return buffer; }
 int keyboard_getBuffered() { return buffered; }
 
-void keyboard_handler(void) {
+extern "C" void keyboard_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);
 
 	uint8_t status = inb(KEYBOARD_STATUS_PORT);
@@ -156,7 +156,7 @@ void keyboard_handler(void) {
 	if(keycode == 0xE0) differentiate = 1;
 	//printf("%x ", keycode); return;
 
-	char* handle = 0;
+	const char* handle = 0;
 	// Check first some special cases.
 	switch(keycode) {
 		case 0x38:

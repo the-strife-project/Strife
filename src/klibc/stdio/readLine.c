@@ -17,7 +17,7 @@ char* readLine() {
 	}
 	buff[keyboard_getBuffered()] = 0;
 
-	char* ret = jmalloc(strlen(buff));
+	char* ret = (char*)jmalloc(strlen(buff));
 	size_t i=0;
 	for(size_t j=0; j<strlen(buff); j++) {
 		if(buff[j] != '\n') ret[i++] = buff[j];

@@ -10,7 +10,7 @@ static const char __ITOA_TABLE[] = "0123456789";
 char* itoa(int n) {
 	// Special cases
 	if(!n) {
-		char* ret = jmalloc(2);
+		char* ret = (char*)jmalloc(2);
 		ret[0] = '0';
 		ret[1] = 0;
 		return ret;
@@ -23,7 +23,7 @@ char* itoa(int n) {
 	for(sz=0; n % pow(10, sz) != n; sz++) {}
 
 	// Now, allocate the string.
-	char* ret = jmalloc(sz+1);
+	char* ret = (char*)jmalloc(sz+1);
 
 	// Iterate all digits again.
 	for(int i=0; i<sz; i++) {
@@ -33,7 +33,7 @@ char* itoa(int n) {
 	ret[sz] = 0;
 
 	if(negative) {
-		char* aux = jmalloc(sz+2);
+		char* aux = (char*)jmalloc(sz+2);
 		strcpy(aux, ret);
 		aux[sz] = '-';
 		aux[sz+1] = 0;

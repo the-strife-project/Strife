@@ -49,7 +49,7 @@ void install() {
 
 	// Copy MBR.
 	printf("Copying MBR... ");
-	char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
+	const char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
 	struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
 	if(!stage1_e) {
 		printf("[FAILED]\n"
@@ -70,7 +70,7 @@ void install() {
 
 	// Copy JBoot's second stage.
 	printf("Copying JBoot's second stage... ");
-	char* stage2_p[] = {"BOOT", "HDDS2.BIN"};
+	const char* stage2_p[] = {"BOOT", "HDDS2.BIN"};
 	struct ISO9660_entity* stage2_e = ISO9660_get(stage2_p, 2);
 	if(!stage2_e) {
 		printf("[FAILED]\n"
@@ -86,7 +86,7 @@ void install() {
 
 	// Copy the kernel.
 	printf("Copying the kernel... ");
-	char* kernel_p[] = {"BOOT", "KERNEL.BIN"};
+	const char* kernel_p[] = {"BOOT", "KERNEL.BIN"};
 	struct ISO9660_entity* kernel_e = ISO9660_get(kernel_p, 2);
 	if(!kernel_e) {
 		printf("[FAILED]\n"
@@ -98,7 +98,7 @@ void install() {
 		The kernel is actually too big to be read by ISO9660_read.
 		We have to read it granularly.
 	*/
-	uint8_t* kernel = jmalloc(kernel_e->length + 2048);
+	uint8_t* kernel = (uint8_t*)jmalloc(kernel_e->length + 2048);
 	ATAPI_granularread(1+(kernel_e->length / 2048), kernel_e->LBA, kernel);
 	JOTAFS_newfile(kernel_e->length, kernel, 0, 0, 0);
 	jfree(kernel);
@@ -109,7 +109,7 @@ void install() {
 
 	// Copy the MSS.
 	printf("Copying MSS... ");
-	char* mss_p[] = {"MSS.BIN"};
+	const char* mss_p[] = {"MSS.BIN"};
 	struct ISO9660_entity* mss_e = ISO9660_get(mss_p, 1);
 	if(!mss_e) {
 		printf("[FAILED]\n"

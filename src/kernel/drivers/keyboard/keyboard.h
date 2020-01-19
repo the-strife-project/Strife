@@ -10,8 +10,8 @@
 char* keyboard_getBuffer();
 int keyboard_getBuffered();
 
-extern void IDT_keyboard(void);
-void keyboard_handler(void);
+extern "C" void IDT_keyboard(void);
+extern "C" void keyboard_handler(void);
 
 void keyboard_init(void);
 

@@ -3,6 +3,6 @@
 
 #include <common/types.h>
 
-extern void ASM_KERNEL_END(void);
+extern "C" void ASM_KERNEL_END(void);
 
 #endif

@@ -6,7 +6,7 @@
 #include <kernel/IDT/IDT.h>
 
 struct ATA_INTERFACE* newATA(uint8_t master, uint16_t portBase) {
-	struct ATA_INTERFACE* ret = jmalloc(sizeof(struct ATA_INTERFACE));
+	struct ATA_INTERFACE* ret = (struct ATA_INTERFACE*)jmalloc(sizeof(struct ATA_INTERFACE));
 
 	ret->master = master;
 	ret->dataPort = portBase;
@@ -73,7 +73,7 @@ uint8_t* ATA_read28(struct ATA_INTERFACE* iface, uint32_t sector) {
 	status = inb(iface->commandPort);
 	while((status & 0x80) && !(status & 0x01)) status = inb(iface->commandPort);
 
-	uint8_t* ret = jmalloc(BYTES_PER_SECTOR);
+	uint8_t* ret = (uint8_t*)jmalloc(BYTES_PER_SECTOR);
 	for(int i=0; i<BYTES_PER_SECTOR; i+=2) {
 		uint16_t data = inw(iface->dataPort);
 		ret[i] = data & 0xFF;

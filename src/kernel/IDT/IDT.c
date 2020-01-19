@@ -4,6 +4,8 @@
 #include <kernel/drivers/PIC/PIC.h>
 #include <kernel/asm.h>
 
+struct IDT_entry IDT[256];
+
 // This is a bitmap to mark those interrupts that should be ignored.
 // That is, if they have the default ISR, do NOT print a debug output.
 uint32_t ISR_ignore[8] = {0};
@@ -19,7 +21,7 @@ void idt_init(void) {
 	load_idt(&idtptr);
 }
 
-void default_interrupt_handler(uint32_t intno) {
+extern "C" void default_interrupt_handler(uint32_t intno) {
 	// I don't care about these.
 	if(!(ISR_ignore[intno / 32] & (1 << (intno % 32)))) {
 		switch(intno) {

@@ -19,7 +19,7 @@
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
-void kernel_main(void) {
+extern "C" void kernel_main(void) {
 	memutils_init();
 	term_setFGC(0xA);
 	term_init();

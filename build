@@ -11,8 +11,8 @@ fi
 export EXTRA="$1"
 
 _compileGCC () {
-	toRun="i686-elf-gcc -c -I./src
-		-std=gnu99 -ffreestanding -O3 -Wall -Wextra -Werror $EXTRA
+	toRun="i686-elf-g++ -c -I./src
+		-std=c++11 -ffreestanding -O3 -Wall -Wextra -Werror -fno-exceptions -fno-rtti $EXTRA
 		$0 -o obj/$(basename $0 .c).o"
 
 	$($toRun)

@@ -2,7 +2,7 @@
 	No need to say that this is for the Spanish keyboard layout.
 */
 
-static char* KB_LAYOUT[] = {
+static const char* KB_LAYOUT[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, "1", "2", "3", "4", "5", "6",
 	/*8 */ "7", "8", "9", "0", "'", "¡", 0, "\t",
@@ -17,7 +17,7 @@ static char* KB_LAYOUT[] = {
 	/*50 */ "2", "3", "0", ".", 0, 0, "<", 0,
 };
 
-static char* KB_LAYOUT_ALTGR[] = {
+static const char* KB_LAYOUT_ALTGR[] = {
 	// Altgr, no num.
 	/*0 */ 0, 0, "|", "@", "#", "~", "~", "¬",
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -32,7 +32,7 @@ static char* KB_LAYOUT_ALTGR[] = {
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static char* KB_LAYOUT_SHIFT[] = {
+static const char* KB_LAYOUT_SHIFT[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, "!", "\"", "·", "$", "%", "&",
 	/*8 */ "/", "(", ")", "=", "?", "¿", 0, "\t",
@@ -48,7 +48,7 @@ static char* KB_LAYOUT_SHIFT[] = {
 };
 
 // UPPERCASE ACCENTS
-static char* KB_LAYOUT_SHIFT_AC0[] = {
+static const char* KB_LAYOUT_SHIFT_AC0[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,7 +62,7 @@ static char* KB_LAYOUT_SHIFT_AC0[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_SHIFT_AC1[] = {
+static const char* KB_LAYOUT_SHIFT_AC1[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -76,7 +76,7 @@ static char* KB_LAYOUT_SHIFT_AC1[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_SHIFT_AC2[] = {
+static const char* KB_LAYOUT_SHIFT_AC2[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -90,7 +90,7 @@ static char* KB_LAYOUT_SHIFT_AC2[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_SHIFT_AC3[] = {
+static const char* KB_LAYOUT_SHIFT_AC3[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -106,7 +106,7 @@ static char* KB_LAYOUT_SHIFT_AC3[] = {
 };
 
 // LOWECASE ACCENTS
-static char* KB_LAYOUT_AC0[] = {
+static const char* KB_LAYOUT_AC0[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -120,7 +120,7 @@ static char* KB_LAYOUT_AC0[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_AC1[] = {
+static const char* KB_LAYOUT_AC1[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -134,7 +134,7 @@ static char* KB_LAYOUT_AC1[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_AC2[] = {
+static const char* KB_LAYOUT_AC2[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,
@@ -148,7 +148,7 @@ static char* KB_LAYOUT_AC2[] = {
 	/*48 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
-static char* KB_LAYOUT_AC3[] = {
+static const char* KB_LAYOUT_AC3[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, 0, 0, 0, 0, 0, 0,
 	/*8 */ 0, 0, 0, 0, 0, 0, 0, 0,

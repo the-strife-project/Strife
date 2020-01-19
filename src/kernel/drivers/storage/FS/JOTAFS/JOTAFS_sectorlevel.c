@@ -1,6 +1,10 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
 
+struct ATA_INTERFACE* iface;
+struct JOTAFS_SUPERBLOCK sb_cache;
+uint32_t maxLBA;
+
 uint8_t JOTAFS_init(struct ATA_INTERFACE* _iface) {
 	iface = _iface;
 	uint16_t identifydata[256*2];

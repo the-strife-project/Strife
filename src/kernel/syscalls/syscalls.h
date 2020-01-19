@@ -3,7 +3,7 @@
 
 #include <common/types.h>
 
-extern void IDT_syscall(void);
+extern "C" void IDT_syscall(void);
 void syscalls_init(void);
 #define SYSCALL_INT 0x69
 
