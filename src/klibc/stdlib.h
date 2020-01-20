@@ -5,6 +5,11 @@
 #include <klibc/stdlib/liballoc.h>
 #endif
 
+void* operator new(size_t sz);
+void* operator new[](size_t sz);
+void operator delete(void* p);
+void operator delete[](void* p);
+
 #ifndef _STRING_H
 #include <klibc/string.h>
 #endif

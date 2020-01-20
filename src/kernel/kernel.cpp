@@ -17,8 +17,13 @@
 #include <kernel/usermode/usermode.h>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 
+#ifdef STL_TEST
+#include <klibc/STL/test.h>
+#endif
+
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 
+#include <klibc/STL/vector>
 extern "C" void kernel_main(void) {
 	memutils_init();
 	term_setFGC(0xA);
@@ -49,6 +54,12 @@ extern "C" void kernel_main(void) {
 	term_setFGC(0xA);
 	term_setBGC(0x0);
 	printf("\n");
+
+	// Test STL.
+	#ifdef STL_TEST
+	STL_test();
+	while(true) {}
+	#endif
 
 	// Check where we're booting from.
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
