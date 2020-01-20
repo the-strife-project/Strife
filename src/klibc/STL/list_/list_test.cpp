@@ -32,6 +32,11 @@ int list_test() {
 		counter++;
 	}
 
+	for(int i=0; i<10; i++) {
+		if(l.front() != i) return 8;
+		l.pop_front();
+	}
+
 	return 0;
 }
 

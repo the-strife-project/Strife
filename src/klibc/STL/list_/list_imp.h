@@ -1,5 +1,5 @@
-#ifndef VECTOR_IMP
-#define VECTOR_IMP
+#ifndef LIST_IMP
+#define LIST_IMP
 
 template<typename T> list<T>::list() {
 	first = last = 0;
@@ -25,6 +25,7 @@ template<typename T> void list<T>::push_back(T e) {
 	newnode->data = e;
 	newnode->next = 0;
 
+	if(last) last->next = newnode;
 	last = newnode;
 	if(!sz) first = last;
 	sz++;
@@ -48,6 +49,7 @@ template<typename T> void list<T>::pop_front() {
 	first = first->next;
 	delete aux;
 	sz--;
+	if(!sz) last = first;
 }
 template<typename T> T& list<T>::front() { return first->data; }
 template<typename T> const T& list<T>::front() const { return first->data; }
