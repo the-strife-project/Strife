@@ -15,15 +15,16 @@ void install() {
 		"as it's incompatible with any other operating system.\n\n");
 
 	// Check the drive is there.
-	struct ATA_INTERFACE* primarymaster = newATA(1, 0x1F0);
-	if(JOTAFS_init(primarymaster) != 0) {
+	ATA primarymaster(1, 0x1F0);
+	JOTAFS jotafs(primarymaster);
+	if(!jotafs.getStatus()) {
 		printf("You must insert an HDD into the primary master ATA drive.\n"
 		"Then, please reboot.\n");
 		while(1) {}
 	}
 
 	// Check if the disk is already formatted with JOTAFS.
-	struct JOTAFS_SUPERBLOCK* currentSB = JOTAFS_readSB();
+	struct JOTAFS_SUPERBLOCK* currentSB = jotafs.readSB();
 	if(currentSB->signature == 0x000CACADEBACA000) {
 		printf("jotadOS seems to be already installed on the hard disk.\n"
 			"Proceed with caution.\n\n"
@@ -60,12 +61,12 @@ void install() {
 	}
 	uint8_t* stage1 = ISO9660_read(stage1_e);
 	jfree(stage1_e);
-	JOTAFS_writeMBR(stage1);
+	jotafs.writeMBR(stage1);
 	printf("[OK]\n");
 
 	// Format disk.
 	printf("Formatting disk... ");
-	JOTAFS_format();
+	jotafs.format();
 	printf("[OK]\n");
 
 	// Copy JBoot's second stage.
@@ -80,7 +81,7 @@ void install() {
 		while(1) {}
 	}
 	uint8_t* stage2 = ISO9660_read(stage2_e);
-	JOTAFS_newfile(stage2_e->length, stage2, 0, 0, 0);
+	jotafs.newfile(stage2_e->length, stage2, 0, 0, 0);
 	jfree(stage2_e);
 	printf("[OK]\n");
 
@@ -100,7 +101,7 @@ void install() {
 	*/
 	uint8_t* kernel = (uint8_t*)jmalloc(kernel_e->length + 2048);
 	ATAPI_granularread(1+(kernel_e->length / 2048), kernel_e->LBA, kernel);
-	JOTAFS_newfile(kernel_e->length, kernel, 0, 0, 0);
+	jotafs.newfile(kernel_e->length, kernel, 0, 0, 0);
 	jfree(kernel);
 	jfree(kernel_e);
 	printf("[OK]\n");
@@ -118,7 +119,7 @@ void install() {
 		while(1) {}
 	}
 	uint8_t* mss = ISO9660_read(mss_e);
-	JOTAFS_newfile(mss_e->length, mss, 0, 0, 0);
+	jotafs.newfile(mss_e->length, mss, 0, 0, 0);
 	jfree(mss_e);
 	printf("[OK]\n");
 

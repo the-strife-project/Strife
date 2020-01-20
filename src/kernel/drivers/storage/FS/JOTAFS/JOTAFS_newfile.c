@@ -15,9 +15,9 @@
 	realLBA: the previously filled block that contains the actual data.
 */
 static uint8_t last_maxlevel = 0;
-void JOTAFS_updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t realLBA) {
+void JOTAFS::updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t realLBA) {
 	if(level > last_maxlevel) last_maxlevel = level;
-	uint32_t* contents = (uint32_t*)ATA_read28(iface, recLBA);
+	uint32_t* contents = (uint32_t*)(iface.read28(recLBA));
 	// Time to do some annoying substractions.
 	uint32_t idx = i-10;
 	if(last_maxlevel > 1) idx -= 1 << 7;		// 128
@@ -30,27 +30,27 @@ void JOTAFS_updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t
 		// Is it already set?
 		if(!contents[idx]) {
 			// Nope, create the level below.
-			contents[idx] = JOTAFS_getFreeLBABlock();
-			JOTAFS_markBlockAsUsed(contents[idx]);
+			contents[idx] = getFreeLBABlock();
+			markBlockAsUsed(contents[idx]);
 		}
 	} else {
 		// Singly IBP. Just put the realLBA.
 		contents[idx] = realLBA;
 	}
 
-	ATA_write28(iface, recLBA, (uint8_t*)contents);
+	iface.write28(recLBA, (uint8_t*)contents);
 
 	// Are we done?
 	uint32_t contents_idx = contents[idx];
 	jfree(contents);
 	if(level != 1) {
 		// Nope. Go to the next level.
-		JOTAFS_updaterecursive(level-1, i, contents_idx, realLBA);
+		updaterecursive(level-1, i, contents_idx, realLBA);
 	}
 	last_maxlevel = 0;
 }
 
-uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir) {
+uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir) {
 	// 'calloc' is used to fill the area with zeros and not leak data.
 	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)jcalloc(1, 512);
 	inode->size = size;
@@ -69,9 +69,9 @@ uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec
 	uint32_t LBA_singly, LBA_doubly, LBA_triply, LBA_quadruply;
 	LBA_singly = LBA_doubly = LBA_triply = LBA_quadruply = 0;
 	for(uint32_t i=0; i<size_in_blocks; i++) {
-		uint32_t thisblock = JOTAFS_getFreeLBABlock();
+		uint32_t thisblock = getFreeLBABlock();
 		if(i != size_in_blocks-1) {
-			ATA_write28(iface, thisblock, data);
+			iface.write28(thisblock, data);
 		} else if(size % 512) {
 			/*
 				We're on the last block and the file is not padded.
@@ -81,45 +81,45 @@ uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec
 			*/
 			uint8_t contents[512] = {0};
 			for(uint16_t i=0; i<size%512; i++) contents[i] = data[i];
-			ATA_write28(iface, thisblock, contents);
+			iface.write28(thisblock, contents);
 		}
 		data += 512;
-		JOTAFS_markBlockAsUsed(thisblock);
+		markBlockAsUsed(thisblock);
 
 		// 'thisblock' is now set.
 		// Put the block in the inode.
 		if(i > 9+(128*128*128)) {
 			// Quadruply indirect block pointer.
 			if(!LBA_quadruply) {
-				LBA_quadruply = JOTAFS_getFreeLBABlock();
-				JOTAFS_markBlockAsUsed(LBA_quadruply);
+				LBA_quadruply = getFreeLBABlock();
+				markBlockAsUsed(LBA_quadruply);
 				inode->ext_4 = LBA_quadruply;
 			}
-			JOTAFS_updaterecursive(4, i, LBA_quadruply, thisblock);
+			updaterecursive(4, i, LBA_quadruply, thisblock);
 		} else if(i > 9+(128*128)) {
 			// Triply indirect block pointer.
 			if(!LBA_triply) {
-				LBA_triply = JOTAFS_getFreeLBABlock();
-				JOTAFS_markBlockAsUsed(LBA_triply);
+				LBA_triply = getFreeLBABlock();
+				markBlockAsUsed(LBA_triply);
 				inode->ext_3 = LBA_triply;
 			}
-			JOTAFS_updaterecursive(3, i, LBA_triply, thisblock);
+			updaterecursive(3, i, LBA_triply, thisblock);
 		} else if(i > 9+128) {
 			// Doubly indirect block pointer.
 			if(!LBA_doubly) {
-				LBA_doubly = JOTAFS_getFreeLBABlock();
-				JOTAFS_markBlockAsUsed(LBA_doubly);
+				LBA_doubly = getFreeLBABlock();
+				markBlockAsUsed(LBA_doubly);
 				inode->ext_2 = LBA_doubly;
 			}
-			JOTAFS_updaterecursive(2, i, LBA_doubly, thisblock);
+			updaterecursive(2, i, LBA_doubly, thisblock);
 		} else if(i > 9) {
 			// Singly indirect block pointer.
 			if(!LBA_singly) {
-				LBA_singly = JOTAFS_getFreeLBABlock();
-				JOTAFS_markBlockAsUsed(LBA_singly);
+				LBA_singly = getFreeLBABlock();
+				markBlockAsUsed(LBA_singly);
 				inode->ext_1 = LBA_singly;
 			}
-			JOTAFS_updaterecursive(1, i, LBA_singly, thisblock);
+			updaterecursive(1, i, LBA_singly, thisblock);
 		} else {
 			// Direct.
 			inode->DBPs[i] = thisblock;
@@ -127,8 +127,8 @@ uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec
 	}
 
 	// Write the inode.
-	uint32_t inode_LBA = JOTAFS_getFreeLBAInode();
-	ATA_write28(iface, inode_LBA, (uint8_t*)inode);
+	uint32_t inode_LBA = getFreeLBAInode();
+	iface.write28(inode_LBA, (uint8_t*)inode);
 
 	return inode_LBA;
 }

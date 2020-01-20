@@ -74,13 +74,13 @@ extern "C" void kernel_main(void) {
 	TSS_flush();
 
 	// Initialize the file system.
-	struct ATA_INTERFACE* primarymaster = newATA(1, 0x1F0);
-	JOTAFS_init(primarymaster);
+	ATA primarymaster(1, 0x1F0);
+	JOTAFS jotafs(primarymaster);
 
 	// Run the MSS (Main Shell System).
 	uint32_t mss = paging_allocPages(2);
 	paging_setUser(mss, 2);
-	JOTAFS_readwholefile(4, (uint8_t*)(mss+4096));
+	jotafs.readwholefile(4, (uint8_t*)(mss+4096));
 	jump_usermode(mss+4096);
 
 	printf("\n[[[ MSS RETURNED?!?!?! ]]]");

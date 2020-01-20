@@ -1,17 +1,17 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
 
-uint32_t JOTAFS_newdir(uint32_t uid) { return JOTAFS_newfile(0, 0, uid, 0, 1); }
+uint32_t JOTAFS::newdir(uint32_t uid) { return newfile(0, 0, uid, 0, 1); }
 
 /*
 	This method adds a file as a child to a directory.
 	It also removes fragmentation in case a child has been deleted.
 */
-void JOTAFS_add2dir(uint32_t LBAinode, char* filename, uint32_t lba) {
-	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, LBAinode);
+void JOTAFS::add2dir(uint32_t LBAinode, char* filename, uint32_t lba) {
+	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)(iface.read28(LBAinode));
 
 	// Read the contents.
-	uint8_t* old = JOTAFS_allocate_and_readwholefile(LBAinode);
+	uint8_t* old = allocate_and_readwholefile(LBAinode);
 
 	// Allocate some memory.
 	uint8_t* contents = (uint8_t*)jmalloc(inode->size + strlen(filename) + 1 + 4);
@@ -35,21 +35,21 @@ void JOTAFS_add2dir(uint32_t LBAinode, char* filename, uint32_t lba) {
 	uint32_t newsize_in_blocks = newsize / 512;
 	if(newsize % 512) newsize_in_blocks++;
 	for(uint32_t i=0; i<newsize_in_blocks; i++)
-		JOTAFS_markBlockAsFree(JOTAFS_gimmetheblocc(inode, i));
+		markBlockAsFree(gimmetheblocc(inode, i));
 
 	// "Overwrite" ( ͡° ͜ʖ ͡°)
-	uint32_t aux_inode = JOTAFS_newfile(newsize, contents, 0xDEADBEEF, 0, 0);
-	struct JOTAFS_INODE* real_aux_inode = (struct JOTAFS_INODE*)ATA_read28(iface, aux_inode);
+	uint32_t aux_inode = newfile(newsize, contents, 0xDEADBEEF, 0, 0);
+	struct JOTAFS_INODE* real_aux_inode = (struct JOTAFS_INODE*)(iface.read28(aux_inode));
 	for(uint8_t i=0; i<10; i++) inode->DBPs[i] = real_aux_inode->DBPs[i];
 	inode->ext_1 = real_aux_inode->ext_1;
 	inode->ext_2 = real_aux_inode->ext_2;
 	inode->ext_3 = real_aux_inode->ext_3;
 	inode->ext_4 = real_aux_inode->ext_4;
 	real_aux_inode->isUsed = 0;
-	ATA_write28(iface, aux_inode, (uint8_t*)real_aux_inode);
+	iface.write28(aux_inode, (uint8_t*)real_aux_inode);
 	jfree(real_aux_inode);
 
 	inode->size = newsize;
-	ATA_write28(iface, LBAinode, (uint8_t*)inode);
+	iface.write28(LBAinode, (uint8_t*)inode);
 	jfree(inode);
 }

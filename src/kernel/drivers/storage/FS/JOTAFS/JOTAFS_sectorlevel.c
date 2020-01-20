@@ -1,41 +1,40 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
 
-struct ATA_INTERFACE* iface;
+ATA iface;
 struct JOTAFS_SUPERBLOCK sb_cache;
 uint32_t maxLBA;
 
-uint8_t JOTAFS_init(struct ATA_INTERFACE* _iface) {
-	iface = _iface;
+JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];
-	uint8_t ret = ATA_identify(iface, identifydata);
+	int aux = iface.identify(identifydata);
+	status = (aux == 0);
 	maxLBA = (identifydata[61] << 16) + identifydata[60];
-	return ret;
 }
 
-uint32_t JOTAFS_getMaxLBA(void) { return maxLBA; }
+bool JOTAFS::getStatus() { return status; }
 
-uint8_t JOTAFS_writeMBR(uint8_t* mbr) {
-	return ATA_write28(iface, 0, mbr);
-}
+uint32_t JOTAFS::getMaxLBA() { return maxLBA; }
 
-struct JOTAFS_SUPERBLOCK* JOTAFS_readSB() {
-	struct JOTAFS_SUPERBLOCK* p = (struct JOTAFS_SUPERBLOCK*)ATA_read28(iface, 1);
+uint8_t JOTAFS::writeMBR(uint8_t* mbr) { return iface.write28(0, mbr); }
+
+struct JOTAFS_SUPERBLOCK* JOTAFS::readSB() {
+	struct JOTAFS_SUPERBLOCK* p = (struct JOTAFS_SUPERBLOCK*)(iface.read28(1));
 	sb_cache = *p;
 	return p;
 }
 
-uint8_t JOTAFS_writeSB(struct JOTAFS_SUPERBLOCK* sb) {
+uint8_t JOTAFS::writeSB(struct JOTAFS_SUPERBLOCK* sb) {
 	sb_cache = *sb;
-	return ATA_write28(iface, 1, (uint8_t*)sb);
+	return iface.write28(1, (uint8_t*)sb);
 }
 
-uint32_t JOTAFS_getFreeLBABlock(void) {
+uint32_t JOTAFS::getFreeLBABlock(void) {
 	// Find the first non-full chunk.
 	uint32_t offset = 2+sb_cache.s_first_chunk;
 	uint8_t* p = 0;
 	for(uint32_t i=0; i<sb_cache.n_chunks; i++) {
-		p = ATA_read28(iface, offset);
+		p = iface.read28(offset);
 		if(!(*p & 0x80)) break;
 		jfree(p);
 		offset += 512;
@@ -50,7 +49,7 @@ uint32_t JOTAFS_getFreeLBABlock(void) {
 	jfree(p);
 
 	// Clear it.
-	ATA_clear28(iface, offset);
+	iface.clear28(offset);
 
 	return offset;
 }
@@ -59,7 +58,7 @@ uint32_t JOTAFS_getFreeLBABlock(void) {
 	Mode 0: free
 	Mode 1: used
 */
-static uint8_t JOTAFS_markBlock(uint32_t LBAsector, uint8_t mode) {
+uint8_t JOTAFS::markBlock(uint32_t LBAsector, uint8_t mode) {
 	// Get the block and the chunk it's in.
 	LBAsector -= 2;
 	LBAsector -= sb_cache.s_first_chunk;
@@ -68,7 +67,7 @@ static uint8_t JOTAFS_markBlock(uint32_t LBAsector, uint8_t mode) {
 	LBAsector = 2+sb_cache.s_first_chunk+(512*LBAsector);
 
 	// Mark it.
-	uint8_t* p = ATA_read28(iface, LBAsector);
+	uint8_t* p = iface.read28(LBAsector);
 	p[block_in_chunk] = mode;
 
 	// If we're freeing, then the chunk is now not-full.
@@ -86,19 +85,19 @@ static uint8_t JOTAFS_markBlock(uint32_t LBAsector, uint8_t mode) {
 		p[0] = full_chunk;	// Faster than comparisons.
 	}
 
-	uint8_t ret = ATA_write28(iface, LBAsector, p);
+	uint8_t ret = iface.write28(LBAsector, p);
 	jfree(p);
 	return ret;
 }
 
-uint8_t JOTAFS_markBlockAsFree(uint32_t LBAsector) { return JOTAFS_markBlock(LBAsector, 0); }
-uint8_t JOTAFS_markBlockAsUsed(uint32_t LBAsector) { return JOTAFS_markBlock(LBAsector, 1); }
+uint8_t JOTAFS::markBlockAsFree(uint32_t LBAsector) { return markBlock(LBAsector, 0); }
+uint8_t JOTAFS::markBlockAsUsed(uint32_t LBAsector) { return markBlock(LBAsector, 1); }
 
-uint32_t JOTAFS_getFreeLBAInode(void) {
+uint32_t JOTAFS::getFreeLBAInode(void) {
 	// Find the first inode such that its "isUsed" field is zero.
 	uint32_t offset;
 	for(offset=2; offset<2+sb_cache.n_inodes; offset++) {
-		struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, offset);
+		struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)(iface.read28(offset));
 		uint8_t used = inode->isUsed;
 		jfree(inode);
 		if(!used) break;
@@ -106,9 +105,9 @@ uint32_t JOTAFS_getFreeLBAInode(void) {
 	return offset;
 }
 
-void JOTAFS_markInodeAsFree(uint32_t LBAsector) {
-	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)ATA_read28(iface, LBAsector);
+void JOTAFS::markInodeAsFree(uint32_t LBAsector) {
+	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)(iface.read28(LBAsector));
 	inode->isUsed = 0;
-	ATA_write28(iface, LBAsector, (uint8_t*)inode);
+	iface.write28(LBAsector, (uint8_t*)inode);
 	jfree(inode);
 }

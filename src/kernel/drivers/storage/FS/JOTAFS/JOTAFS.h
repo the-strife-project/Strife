@@ -36,35 +36,50 @@ enum JOTAFS_RESERVED_INODES {
 	JOTAFS_INODE_ROOT
 };
 
-extern struct ATA_INTERFACE* iface;
-extern struct JOTAFS_SUPERBLOCK sb_cache;
-extern uint32_t maxLBA;
+class JOTAFS {
+private:
+	ATA iface;
+	struct JOTAFS_SUPERBLOCK sb_cache;
+	uint32_t maxLBA;
+	bool status;
 
-// JOTAFS_sectorlevel.c
-uint8_t JOTAFS_init(struct ATA_INTERFACE* iface);
-uint32_t JOTAFS_getMaxLBA(void);
-uint8_t JOTAFS_writeMBR(uint8_t* mbr);
-struct JOTAFS_SUPERBLOCK* JOTAFS_readSB();
-uint8_t JOTAFS_writeSB(struct JOTAFS_SUPERBLOCK* sb);
-uint32_t JOTAFS_getFreeLBABlock(void);
-uint8_t JOTAFS_markBlockAsUsed(uint32_t LBAsector);
-uint8_t JOTAFS_markBlockAsFree(uint32_t LBAsector);
-uint32_t JOTAFS_getFreeLBAInode(void);
-void JOTAFS_markInodeAsFree(uint32_t LBAsector);
+	// JOTAFS_sectorleve.cpp
+	uint8_t markBlock(uint32_t LBAsector, uint8_t mode);
 
-// JOTAFS_disklevel.c
-void JOTAFS_format(void);
+	// JOTAFS_newfile.cpp
+	void updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t realLBA);
 
-// JOTAFS_newfile.c
-uint32_t JOTAFS_newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir);
+	// JOTAFS_readwholefile.cpp
+	uint32_t getrecursive(uint8_t level, uint32_t i, uint32_t recLBA);
 
-// JOTAFS_dir.c
-uint32_t JOTAFS_newdir(uint32_t uid);
-void JOTAFS_add2dir(uint32_t LBAinode, char* filename, uint32_t lba);
+public:
+	// JOTAFS_sectorlevel.cpp
+	JOTAFS(ATA iface);
+	bool getStatus();
+	uint32_t getMaxLBA();
+	uint8_t writeMBR(uint8_t* mbr);
+	struct JOTAFS_SUPERBLOCK* readSB();
+	uint8_t writeSB(struct JOTAFS_SUPERBLOCK* sb);
+	uint32_t getFreeLBABlock();
+	uint8_t markBlockAsUsed(uint32_t LBAsector);
+	uint8_t markBlockAsFree(uint32_t LBAsector);
+	uint32_t getFreeLBAInode();
+	void markInodeAsFree(uint32_t LBAsector);
 
-// JOTAFS_readwholefile.c
-uint32_t JOTAFS_gimmetheblocc(struct JOTAFS_INODE* inode, uint32_t i);
-void JOTAFS_readwholefile(uint32_t inode, uint8_t* buffer);
-uint8_t* JOTAFS_allocate_and_readwholefile(uint32_t inode);
+	// JOTAFS_disklevel.cpp
+	void format(void);
+
+	// JOTAFS_newfile.cpp
+	uint32_t newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir);
+
+	// JOTAFS_dir.cpp
+	uint32_t newdir(uint32_t uid);
+	void add2dir(uint32_t LBAinode, char* filename, uint32_t lba);
+
+	// JOTAFS_readwholefile.cpp
+	uint32_t gimmetheblocc(struct JOTAFS_INODE* inode, uint32_t i);
+	void readwholefile(uint32_t inode, uint8_t* buffer);
+	uint8_t* allocate_and_readwholefile(uint32_t inode);
+};
 
 #endif
