@@ -13,7 +13,7 @@ export EXTRA="$1"
 _compileGCC () {
 	toRun="i686-elf-g++ -c -I./src
 		-std=c++11 -ffreestanding -O3 -Wall -Wextra -Werror -fno-exceptions -fno-rtti $EXTRA
-		$0 -o obj/$(basename $0 .c).o"
+		$0 -o obj/$(basename $0 .cpp).o"
 
 	$($toRun)
 	if [ $? != 0 ]; then
@@ -41,7 +41,7 @@ export -f _compileASM
 echo -e "\e[1;36mCompiling jotadOS...\e[0m"
 
 # Kernel (C)
-find src/kernel -type f -iname *.c | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
+find src/kernel -type f -iname *.cpp | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
 echo -e "\e[1;33mKernel C files done.\e[0m"
 
 # Kernel (asm)
@@ -50,7 +50,7 @@ find src/ -iname boot.asm | xargs -n1 bash -c '_compileASM $1 || exit 255' || ex
 echo -e "\e[1;33mKernel asm files done.\e[0m"
 
 # Klibc
-find src/klibc -type f -iname *.c | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
+find src/klibc -type f -iname *.cpp | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
 echo -e "\e[1;33mKernel's libc done.\e[0m"
 
 # The whole kernel
