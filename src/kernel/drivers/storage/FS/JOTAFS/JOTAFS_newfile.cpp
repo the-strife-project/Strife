@@ -1,78 +1,29 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
 
-/*
-	I recommend listening to "The Strokes - Hard to Explain" right now.
+inline uint32_t div_power128(uint32_t n, uint32_t exp) { return n >> (7*exp); }
 
-	JOTAFS_updaterecursive handles the insertion of blocks in the inode.
-	You should read README.md in this directory first.
-
-	level: 1 (singly indirect block pointer), 2 (doubly), ... ; NON-ZERO
-	i: the block number of the file. If it's the first 512 bytes, it's zero, and so on.
-	recLBA: recursive LBA. Contains the LBA sector of the current countainer.
-			Let's say we're dealing with a singly IBP, when we call it, it will contain
-			the LBA sector that contains 128 LBA addresses.
-	realLBA: the previously filled block that contains the actual data.
-*/
-static uint8_t last_maxlevel = 0;
-void JOTAFS::updaterecursive(uint8_t level, uint32_t i, uint32_t recLBA, uint32_t realLBA) {
-	if(level > last_maxlevel) last_maxlevel = level;
-	uint32_t* contents = (uint32_t*)(iface.read28(recLBA));
-	// Time to do some annoying substractions.
-	uint32_t idx = i-10;
-	if(last_maxlevel > 1) idx -= 1 << 7;		// 128
-	if(last_maxlevel > 2) idx -= 1 << (7*2);	// 128**2
-	if(last_maxlevel > 3) idx -= 1 << (7*3);	// 128**3
-	idx >>= 7*(level-1);	// Divide by 128**(level-1)
-
-	if(level > 1) {
-		// Doubly or more IBP.
-		// Is it already set?
-		if(!contents[idx]) {
-			// Nope, create the level below.
-			contents[idx] = getFreeLBABlock();
-			markBlockAsUsed(contents[idx]);
-		}
-	} else {
-		// Singly IBP. Just put the realLBA.
-		contents[idx] = realLBA;
-	}
-
-	iface.write28(recLBA, (uint8_t*)contents);
-
-	// Are we done?
-	uint32_t contents_idx = contents[idx];
-	jfree(contents);
-	if(level != 1) {
-		// Nope. Go to the next level.
-		updaterecursive(level-1, i, contents_idx, realLBA);
-	}
-	last_maxlevel = 0;
-}
-
-uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exec, uint8_t dir) {
-	// 'calloc' is used to fill the area with zeros and not leak data.
-	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)jcalloc(1, 512);
-	inode->size = size;
+uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t flags, uint16_t permissions) {
+	JOTAFS_INODE inode;
+	inode.used = 1;
+	inode.size = size;
 	// The line below is to be kept until I implement POSIX time.
-	inode->creation_time = inode->last_mod_time = inode->last_access_time = 0;
-	inode->n_blocks = size / 512;
-	if(size % 512) inode->n_blocks++;
-	inode->uid = uid;
-	inode->isApp = exec;
-	inode->isDir = dir;
-	inode->isUsed = 1;
+	inode.creation_time = inode.last_mod_time = inode.last_access_time = 0;
+	inode.n_blocks = size / BYTES_PER_SECTOR;
+	if(size % BYTES_PER_SECTOR) inode.n_blocks++;
+	inode.uid = uid;
+	inode.flags = flags;
+	inode.permissions = permissions;
 
 	// Let's start filling up the blocks.
-	uint32_t size_in_blocks = inode->n_blocks;
+	uint32_t size_in_blocks = inode.n_blocks;
 
-	uint32_t LBA_singly, LBA_doubly, LBA_triply, LBA_quadruply;
-	LBA_singly = LBA_doubly = LBA_triply = LBA_quadruply = 0;
 	for(uint32_t i=0; i<size_in_blocks; i++) {
-		uint32_t thisblock = getFreeLBABlock();
+		uint32_t thisblock = allocBlock();
+
 		if(i != size_in_blocks-1) {
-			iface.write28(thisblock, data);
-		} else if(size % 512) {
+			writeBlock(thisblock, data);
+		} else if(size % BYTES_PER_SECTOR) {
 			/*
 				We're on the last block and the file is not padded.
 				We now copy the contents to a new memory location,
@@ -80,55 +31,49 @@ uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t exe
 				memory is written.
 			*/
 			uint8_t contents[512] = {0};
-			for(uint16_t i=0; i<size%512; i++) contents[i] = data[i];
-			iface.write28(thisblock, contents);
+			for(uint16_t i=0; i<size % BYTES_PER_SECTOR; i++) contents[i] = data[i];
+			writeBlock(thisblock, contents);
+		} else {
+			writeBlock(thisblock, data);
 		}
-		data += 512;
-		markBlockAsUsed(thisblock);
+		data += BYTES_PER_SECTOR;
 
 		// 'thisblock' is now set.
-		// Put the block in the inode.
-		if(i > 9+(128*128*128)) {
-			// Quadruply indirect block pointer.
-			if(!LBA_quadruply) {
-				LBA_quadruply = getFreeLBABlock();
-				markBlockAsUsed(LBA_quadruply);
-				inode->ext_4 = LBA_quadruply;
+		// It's time to put the block in the inode.
+		uint8_t level = getLevel(i);
+		if(level == 0) {
+			inode.DBPs[i] = thisblock;
+			continue;
+		}
+
+		// Go down the IBPs tree, creating nodes if necessary.
+		uint32_t idx = discardLowerLevels(i, level);
+		// Is the IBP already there? If not, create it.
+		if(!inode.IBPs[level-1]) inode.IBPs[level-1] = allocBlock();
+		uint32_t nextBlock = inode.IBPs[level-1];
+		while(level) {
+			// Get ready to read the contents.
+			uint32_t* contents = (uint32_t*)getBlock(nextBlock);
+
+			// Get the index.
+			uint32_t index = div_power128(idx, level-1);
+
+			// Are there any indirect levels left?
+			if(level > 1) {
+				// Is it already there?
+				if(!contents[index]) contents[index] = allocBlock();
+			} else {
+				// Just put the block we just wrote.
+				contents[index] = thisblock;
 			}
-			updaterecursive(4, i, LBA_quadruply, thisblock);
-		} else if(i > 9+(128*128)) {
-			// Triply indirect block pointer.
-			if(!LBA_triply) {
-				LBA_triply = getFreeLBABlock();
-				markBlockAsUsed(LBA_triply);
-				inode->ext_3 = LBA_triply;
-			}
-			updaterecursive(3, i, LBA_triply, thisblock);
-		} else if(i > 9+128) {
-			// Doubly indirect block pointer.
-			if(!LBA_doubly) {
-				LBA_doubly = getFreeLBABlock();
-				markBlockAsUsed(LBA_doubly);
-				inode->ext_2 = LBA_doubly;
-			}
-			updaterecursive(2, i, LBA_doubly, thisblock);
-		} else if(i > 9) {
-			// Singly indirect block pointer.
-			if(!LBA_singly) {
-				LBA_singly = getFreeLBABlock();
-				markBlockAsUsed(LBA_singly);
-				inode->ext_1 = LBA_singly;
-			}
-			updaterecursive(1, i, LBA_singly, thisblock);
-		} else {
-			// Direct.
-			inode->DBPs[i] = thisblock;
+
+			writeBlock(nextBlock, (uint8_t*)contents);
+			nextBlock = contents[index];
+			jfree(contents);
+
+			level--;
 		}
 	}
 
-	// Write the inode.
-	uint32_t inode_LBA = getFreeLBAInode();
-	iface.write28(inode_LBA, (uint8_t*)inode);
-
-	return inode_LBA;
+	return allocInodeAndWrite(inode);
 }

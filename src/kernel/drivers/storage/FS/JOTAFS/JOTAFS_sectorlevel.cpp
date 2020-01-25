@@ -1,113 +1,155 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
+#include <klibc/STL/bitmap>
+#include <klibc/stdio.h>
 
-ATA iface;
-struct JOTAFS_SUPERBLOCK sb_cache;
-uint32_t maxLBA;
+// TODO: Rename to JOTAFS_atomic.cpp
 
 JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];
 	int aux = iface.identify(identifydata);
 	status = (aux == 0);
-	maxLBA = (identifydata[61] << 16) + identifydata[60];
+	maxSector = (identifydata[61] << 16) + identifydata[60];
+
+	JOTAFS_SUPERBLOCK* p = (JOTAFS_SUPERBLOCK*)iface.read28(JOTAFS_SECTOR_SUPERBLOCK);
+	sb_cache = *p;
+	jfree(p);
 }
 
 bool JOTAFS::getStatus() { return status; }
+uint32_t JOTAFS::getMaxSector() { return maxSector; }
 
-uint32_t JOTAFS::getMaxLBA() { return maxLBA; }
+uint8_t JOTAFS::writeBoot(uint8_t* boot) { return iface.write28(JOTAFS_SECTOR_BOOT, boot); }
 
-uint8_t JOTAFS::writeMBR(uint8_t* mbr) { return iface.write28(0, mbr); }
-
-struct JOTAFS_SUPERBLOCK* JOTAFS::readSB() {
-	struct JOTAFS_SUPERBLOCK* p = (struct JOTAFS_SUPERBLOCK*)(iface.read28(1));
-	sb_cache = *p;
-	return p;
+uint8_t JOTAFS::writeSB(const JOTAFS_SUPERBLOCK& sb) {
+	sb_cache = sb;
+	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
 
-uint8_t JOTAFS::writeSB(struct JOTAFS_SUPERBLOCK* sb) {
-	sb_cache = *sb;
-	return iface.write28(1, (uint8_t*)sb);
+uint8_t JOTAFS::updateSB() {
+	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
 
-uint32_t JOTAFS::getFreeLBABlock(void) {
-	// Find the first non-full chunk.
-	uint32_t offset = 2+sb_cache.s_first_chunk;
-	uint8_t* p = 0;
-	for(uint32_t i=0; i<sb_cache.n_chunks; i++) {
-		p = iface.read28(offset);
-		if(!(*p & 0x80)) break;
-		jfree(p);
-		offset += 512;
-	}
-
-	// Find the first unused block in the chunk.
-	offset++;
-	for(uint16_t i=1; i<512; i++) {
-		if(!p[i]) break;
-		offset++;
-	}
-	jfree(p);
-
-	// Clear it.
-	iface.clear28(offset);
-
-	return offset;
-}
-
-/*
-	Mode 0: free
-	Mode 1: used
-*/
-uint8_t JOTAFS::markBlock(uint32_t LBAsector, uint8_t mode) {
-	// Get the block and the chunk it's in.
-	LBAsector -= 2;
-	LBAsector -= sb_cache.s_first_chunk;
-	uint16_t block_in_chunk = LBAsector % 512;
-	LBAsector /= 512;
-	LBAsector = 2+sb_cache.s_first_chunk+(512*LBAsector);
-
-	// Mark it.
-	uint8_t* p = iface.read28(LBAsector);
-	p[block_in_chunk] = mode;
-
-	// If we're freeing, then the chunk is now not-full.
-	if(mode == 0) {
-		p[0] = 0;
-	} else {
-		// Let's check now if all bytes but the first one are ones.
-		uint8_t full_chunk = 1;
-		for(uint16_t i=1; i<512; i++) {
-			if(!p[i]) {
-				full_chunk = 0;
-				break;
-			}
-		}
-		p[0] = full_chunk;	// Faster than comparisons.
-	}
-
-	uint8_t ret = iface.write28(LBAsector, p);
-	jfree(p);
+JOTAFS_INODE JOTAFS::getInode(uint32_t idx) {
+	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(idx));
+	JOTAFS_INODE ret = inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR];
+	jfree(inodes);
 	return ret;
 }
 
-uint8_t JOTAFS::markBlockAsFree(uint32_t LBAsector) { return markBlock(LBAsector, 0); }
-uint8_t JOTAFS::markBlockAsUsed(uint32_t LBAsector) { return markBlock(LBAsector, 1); }
-
-uint32_t JOTAFS::getFreeLBAInode(void) {
-	// Find the first inode such that its "isUsed" field is zero.
-	uint32_t offset;
-	for(offset=2; offset<2+sb_cache.n_inodes; offset++) {
-		struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)(iface.read28(offset));
-		uint8_t used = inode->isUsed;
-		jfree(inode);
-		if(!used) break;
-	}
-	return offset;
+void JOTAFS::writeInode(uint32_t idx, const JOTAFS_INODE& contents) {
+	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(idx));
+	inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR] = contents;
+	iface.write28(inode2sector(idx), (uint8_t*)inodes);
+	jfree(inodes);
 }
 
-void JOTAFS::markInodeAsFree(uint32_t LBAsector) {
-	struct JOTAFS_INODE* inode = (struct JOTAFS_INODE*)(iface.read28(LBAsector));
-	inode->isUsed = 0;
-	iface.write28(LBAsector, (uint8_t*)inode);
-	jfree(inode);
+
+
+/*
+	TODO: Make this allocate a number of blocks instead of one.
+	Something like:
+		list<uint32_t> allocBlocks(uint32_t count);
+	Why? It's way more efficient searching for a given number of free blocks
+	than calling this function a bunch of times.
+*/
+uint32_t JOTAFS::allocBlock() {
+	// Read the first non-full bitmap.
+	uint8_t* raw_bitmap = iface.read28(bitmap2sector(sb_cache.first_non_full_bitmap));
+	bitmap bm(BYTES_PER_SECTOR, raw_bitmap);
+	uint32_t ret = (uint32_t)bm.getFirstZeroAndFlip();
+	if(ret == BYTES_PER_SECTOR) {
+		// This should NEVER happen.
+		printf("\n[[[ BLOCK BITMAP ASSUMPTIONS INVALIDATED ]]]\n");
+		while(true) {}
+	}
+
+	// Write the new bitmap.
+	iface.write28(bitmap2sector(sb_cache.first_non_full_bitmap), raw_bitmap);
+
+	// Time to check if this is still the first non-full bitmap.
+	if(bm.getAllOne()) {
+		sb_cache.first_non_full_bitmap++;
+		updateSB();
+	}
+
+	jfree(raw_bitmap);
+	return ret;
+}
+
+// TODO: SAME AS ABOVE
+void JOTAFS::freeBlock(uint32_t idx) {
+	// Which bitmap does this belong to?
+	uint32_t bitmap_idx = idx / BYTES_PER_SECTOR;
+
+	// Read
+	uint8_t* raw_bitmap = iface.read28(bitmap2sector(bitmap_idx));
+	bitmap bm(BYTES_PER_SECTOR, raw_bitmap);
+	// Flip
+	bm.set(idx % BYTES_PER_SECTOR, false);
+	// Write
+	iface.write28(bitmap2sector(bitmap_idx), raw_bitmap);
+
+	// Is this below the first non-full bitmap?
+	if(bitmap_idx < sb_cache.first_non_full_bitmap) {
+		// Is it non-full?
+		if(!bm.getAllOne()) {
+			// Change it to this one.
+			sb_cache.first_non_full_bitmap = bitmap_idx;
+			updateSB();
+		}
+	}
+
+	jfree(raw_bitmap);
+}
+
+
+
+uint32_t JOTAFS::allocInode() {
+	// Read the front of the queue.
+	uint32_t ret = sb_cache.first_free_inode;
+
+	// If first_free_inode is 0, there are no free inodes :(
+	if(!ret) return 0;
+
+	JOTAFS_BOTH_INODES b;
+	b.inode = getInode(ret);
+	sb_cache.first_free_inode = b.free_inode.next;
+	updateSB();
+
+	return ret;
+}
+
+uint32_t JOTAFS::allocInodeAndWrite(const JOTAFS_INODE& inode) {
+	/*
+		Similar to above. This one is done for optimizing 'newfile'.
+		'allocInode' and 'writeInode' called consecutively require 4
+		accesses, and this only 3.
+	*/
+	uint32_t ret = sb_cache.first_free_inode;
+	if(!ret) return 0;
+
+	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(ret));
+
+	JOTAFS_BOTH_INODES b;
+	b.inode = inodes[(ret-1) % JOTAFS_INODES_PER_SECTOR];
+	sb_cache.first_free_inode = b.free_inode.next;
+
+	inodes[(ret-1) % JOTAFS_INODES_PER_SECTOR] = inode;
+	iface.write28(inode2sector(ret), (uint8_t*)inodes);
+
+	updateSB();
+	jfree(inodes);
+	return ret;
+}
+
+void JOTAFS::freeInode(uint32_t idx) {
+	// Put it at the end of the queue.
+	JOTAFS_BOTH_INODES old;
+	old.inode = getInode(sb_cache.last_free_inode);
+	old.free_inode.next = idx;
+
+	writeInode(idx, old.inode);
+	sb_cache.last_free_inode = idx;
+	updateSB();
 }

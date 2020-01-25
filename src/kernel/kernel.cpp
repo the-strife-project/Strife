@@ -21,7 +21,7 @@
 #include <klibc/STL/test.h>
 #endif
 
-#define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
+#define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x8AE0);
 
 #include <klibc/STL/vector>
 extern "C" void kernel_main(void) {
@@ -66,12 +66,11 @@ extern "C" void kernel_main(void) {
 	if(bootDriveID == 0xE0) {
 		// It's the CD. Run the installation program.
 		/*
-			This should NOT happen.
-			TODO: improve the ATAPI driver and use something like ramfs
-			so that jotadOS can run from a CD in a clean way.
+			TODO: don't run the installation if we boot from CD.
+			Instead, improve the ATAPI driver and make this usable.
 		*/
 		/*
-			This REALLY should not be part of the kernel.
+			TODO: install() should REALLY not be part of the kernel.
 			Might change it at some point, I don't care tbh.
 		*/
 		install();
@@ -88,11 +87,11 @@ extern "C" void kernel_main(void) {
 	ATA primarymaster(1, 0x1F0);
 	JOTAFS jotafs(primarymaster);
 
-	// Run the MSS (Main Shell System).
-	uint32_t mss = paging_allocPages(2);
-	paging_setUser(mss, 2);
-	jotafs.readwholefile(4, (uint8_t*)(mss+4096));
-	jump_usermode(mss+4096);
+	// Run the MSS.
+	uint32_t mss = paging_allocPages(1);
+	paging_setUser(mss, 1);
+	jotafs.readWholeFile(3, (uint8_t*)mss);
+	jump_usermode(mss);
 
 	printf("\n[[[ MSS RETURNED?!?!?! ]]]");
 	while(1) {}

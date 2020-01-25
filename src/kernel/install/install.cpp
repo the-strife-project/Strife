@@ -24,13 +24,11 @@ void install() {
 	}
 
 	// Check if the disk is already formatted with JOTAFS.
-	struct JOTAFS_SUPERBLOCK* currentSB = jotafs.readSB();
-	if(currentSB->signature == 0x000CACADEBACA000) {
+	if(jotafs.checkSignature()) {
 		printf("jotadOS seems to be already installed on the hard disk.\n"
 			"Proceed with caution.\n\n"
 		);
 	}
-	jfree(currentSB);
 
 	printf("%s", "Now, write \"yes\" without quotes to install jotadOS into the\n"
 		"primary master ATA drive. Any other input will stop the installation.\n\n");
@@ -48,8 +46,13 @@ void install() {
 
 	printf("\nHere we go!\n");
 
+	// Format disk.
+	printf("Formatting disk... ");
+	jotafs.format();
+	printf("[OK]\n");
+
 	// Copy MBR.
-	printf("Copying MBR... ");
+	printf("Copying boot sector... ");
 	const char* stage1_p[] = {"BOOT", "HDDS1.BIN"};
 	struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p, 2);
 	if(!stage1_e) {
@@ -61,12 +64,7 @@ void install() {
 	}
 	uint8_t* stage1 = ISO9660_read(stage1_e);
 	jfree(stage1_e);
-	jotafs.writeMBR(stage1);
-	printf("[OK]\n");
-
-	// Format disk.
-	printf("Formatting disk... ");
-	jotafs.format();
+	jotafs.writeBoot(stage1);
 	printf("[OK]\n");
 
 	// Copy JBoot's second stage.
@@ -98,6 +96,10 @@ void install() {
 	/*
 		The kernel is actually too big to be read by ISO9660_read.
 		We have to read it granularly.
+
+		Btw, this sometimes fires a 0x20 interrupt. Probably has to do
+		with weird V86 stuff. Don't know. Don't care. I'll get rid of
+		this disgusting ATAPI driver soon.
 	*/
 	uint8_t* kernel = (uint8_t*)jmalloc(kernel_e->length + 2048);
 	ATAPI_granularread(1+(kernel_e->length / 2048), kernel_e->LBA, kernel);
@@ -121,6 +123,7 @@ void install() {
 	uint8_t* mss = ISO9660_read(mss_e);
 	jotafs.newfile(mss_e->length, mss, 0, 0, 0);
 	jfree(mss_e);
+
 	printf("[OK]\n");
 
 	printf("\nInstallation successful!\nYou can reboot now.");

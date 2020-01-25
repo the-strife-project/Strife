@@ -11,5 +11,5 @@ mov eax, 0xCACABACA
 int 0x69
 jmp $
 
-welcome db "Main Shell System loading...", 0x0A, 0x0A
+welcome db "Main System Shell loading...", 0x0A, 0x0A
 welcome_sz equ $ - welcome

@@ -1,25 +1,56 @@
 # jotadOS
 
 ## Introduction
-jotadOS is an x86 operating system made in C from scratch that I'm doing to learn. That's it.
+jotadOS is an x86 operating system made in C/C++ from scratch that I'm doing to learn. That's it. I'm not trying to make everything myself for any reason whatsoever but learning. There are so many topics in CS that I want to know in depth, and making an OS is a great way to touch all of them.
 
-It currently has its own bootloader (![JBoot](https://github.com/jlxip/jotadOS/blob/master/src/JBoot/README.md)), kernel, drivers and file system (![JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md)).
+Please,
 
-In the future it probably will have its own C library, extremely simple user-space applications, and maybe even a C compiler.
+- Do not trust that I know what I'm doing.
+- Do not copy/paste my code as probably all of it is improvable.
+- Do not run jotadOS outside of a virtual machine. It will almost definitely make your computer explode.
 
-## Main points
-- Do not trust that I know what I'm doing. Do not copy/paste my code as most of it is improvable.
-- As of today, backwards compatibility is guaranteed not to exist. If at some point I want to improve a big part of the project which requires changing its interface, I won't hesitate.
+The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be read in the TODO list at the bottom.
 
-## Compilation
-Before you can compile jotadOS, you need the following things:
+## What is done
+So, here's what I've managed to do so far. None of these things are finished. Some are more polished than others: some I consider to be dealt with, and I will rarely have to touch them again; some are terribly incomplete, and have the bare minimum functionality to be here, but will get better with time as other parts get more relied upon them.
+
+### Medium-high level
+- Kernel C(++) library, using ![liballoc](https://github.com/blanham/liballoc) as memory manager.
+
+### Medium level
+These are parts that do not have to deal directly with the hardware, or do so in a very limited way.
+
+- Keyboard driver (Spanish layout).
+- Kernel panics.
+- Filesystems: ISO9660 and ![JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
+
+### Low level
+These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.
+
+- PCI driver.
+- Management of VESA video modes.
+- Programmed I/O drivers: ATA and ATAPI.
+- Syscalls (well, some are more low level than others).
+
+### Really low level
+These can only be programmed in assembly, or require executing instructions that do not exist in C(++).
+
+- My own bootloader, ![JBoot](https://github.com/jlxip/jotadOS/blob/master/src/JBoot/README.md).
+- GDT and IDT.
+- Paging.
+- Virtual 8086.
+- User space.
+
+
+## Compiling jotadOS
+Before you can compile it, you need the following things:
 - `i686-elf-gcc`
 - `nasm`
 - `qemu` and/or `bochs` and/or `VirtualBox`
 - `python`, `genisoimage`
 - `bison`, `flex`, `gmp3`, `mpc`, `mpfr`, `texinfo`, `xorriso`, `mtools`
 
-In order to compile `i686-elf-gcc`, open a terminal and do the following (do NOT copy paste):
+In order to compile `i686-elf-gcc`, do the following (do NOT copy paste):
 ```
 export PREFIX="$HOME/opt/cross"
 export TARGET=i686-elf
@@ -49,31 +80,18 @@ Now write `PATH="$HOME/opt/cross/bin:$PATH"` at the end of your shell profile (.
 
 To compile jotadOS, open a new terminal in the directory, and run `./build`.
 
-You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `bochs`.
+You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `bochs`. There are equivalents for installing it in a virtual hard drive.
 
 ## TODO list
-Here's a list of the big things I've managed to do so far as well as the next steps.
+Here's a list of the things that are coming.
 
-- [X] GDT.
-- [X] IDT.
-- [X] Keyboard driver (Spanish layout).
-- [X] Paging.
-- [X] Kernel panics.
-- [X] Simple kernel C library with ![liballoc](https://github.com/blanham/liballoc).
-- [X] PCI driver.
-- [X] Virtual 8086 mode and VESA video modes.
-- [X] PIO drivers: ATA and ATAPI.
-- [X] JBoot.
-- [X] ISO9660 driver.
-- [X] JOTAFS.
-- [X] Syscalls and user space.
-- [ ] User space C library that can be dinamically linked with the binaries.
-- [ ] Network driver, IP, ARP, TCP...
-- [ ] Cryptography library.
-- [ ] Multitasking (scheduler).
-- [ ] FIFOs for inter-process communication.
-- [ ] Users and groups.
-- [ ] SSH-like remote system administration tool.
+- User space C library that can be dinamically linked with the binaries.
+- Network driver, IP, ARP, TCP...
+- Cryptography library.
+- Multitasking (scheduler).
+- FIFOs for inter-process communication.
+- Users and groups.
+- SSH-like remote system administration tool.
 
 ## Sources
 I have used several resources in order to do this project.

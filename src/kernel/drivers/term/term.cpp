@@ -57,8 +57,8 @@ void term_writec(unsigned char c) {
 				This is useful in case the background color has changed
 				since the last call to "term_clear()".
 
-				TODO: avoid doing this all the time, keep a value of the
-				background color and see if it has changed.
+				TODO: avoid doing this all the time.
+				Instead, keep a value of the background color and see if it has changed.
 			*/
 			for(int i=term_column; i<TERM_WIDTH; i++)
 				__term_putliteralchar(' ');

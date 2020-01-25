@@ -58,6 +58,7 @@ uint8_t ATA::identify(uint16_t* retdata) {
 	return 0;
 }
 
+// TODO: make this return a C++ object so there's no need to free every time
 uint8_t* ATA::read28(uint32_t sector) {
 	if(sector > 0x0FFFFFFF) return 0;
 

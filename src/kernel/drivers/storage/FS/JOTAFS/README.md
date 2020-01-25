@@ -1,12 +1,12 @@
-JOTAFS is a simplified version of ext2 that adapts to this OS in particular.
+JOTAFS is a simplified (and arguably worse) version of ext2.
 
 Some aclarations:
 - Everything is in Little-Endian.
 - The filesystem consists in the superblock, inodes, chunks, and blocks.
 - The superblock contains information about the later three.
-- An inode is a sector (512 bytes) containing all metadata about a file but the filename.
-- A block is also a sector containing raw data (file contents).
-- A chunk is a set of 512 sectors (256KiB), 511 of which are blocks.
+- An inode is an array of 128 bytes containing all metadata about a file but its name.
+- A block is a sector containing raw data (the contents of a file).
+- Bitmaps will be used in order to find free blocks. They are contiguous in disk.
 
 The first sector contains the first stage of the bootloader.
 The second sector is the superblock, which contains the following fields:
@@ -15,47 +15,99 @@ The second sector is the superblock, which contains the following fields:
 | --- | --- | --- |
 | 0   | 8   | Signature (0x000CACADEBACA000) |
 | 8   | 4   | Number of inodes |
-| 12   | 4   | Number of chunks |
-| 16  | 4   | First unallocated inode |
-| 20  | 4   | LBA sector of the first inode (reserved: 2) |
-| 24  | 4   | LBA sector of the first chunk |
+| 12  | 4   | Number of blocks |
+| 16  | 4   | ID of the first free inode |
+| 20  | 4   | ID of the last free inode |
+| 24  | 4   | LBA sector of the first block bitmap |
+| 28  | 4   | ID of the first non-full bitmap |
+| 32  | 4   | LBA sector of the first block |
+| 36  | 476 | Unused |
 
-From the third to the (3 + Number of inodes) sector, inodes are present. Each one is structured as follows:
+Then, inodes. There are four of them in each sector, and the first inode is the number 1, as 0 is reserved for the null inode (necessary for the linked list). Their structure depends on the first byte. If it's 0x00, the inode is free. If it's 0x01, it's in use. This way, fields are overlapped.
+
+If the inode is free, this is its structure:
+
+| Start byte | Size (bytes) | Description |
+| 0   | 1   | Fixed to 0. |
+| 1   | 3   | Padding. |
+| 4   | 4   | Sector number of the next free inode. 0 if it's there isn't. |
+| 8  | 120 | Padding to 128 bytes. |
+
+This way, the free inodes form a singly linked list in disk, which behaves like a queue.
+
+If it's in use, it's as follows:
 
 | Start byte | Size (bytes) | Description |
 | --- | --- | --- |
-| 0   | 8   | File size (bytes) |
-| 8   | 4   | Creation time (POSIX) |
-| 12  | 4   | Last modification time (POSIX) |
-| 16  | 4   | Last access time (POSIX) |
-| 20  | 4   | Number of blocks the file uses |
-| 24  | 4   | Direct Block Pointer (DBP) 0 |
-| 28  | 4   | DBP 1 |
-| 32  | 4   | DBP 2 |
-| 36  | 4   | DBP 3 |
-| 40  | 4   | DBP 4 |
-| 44  | 4   | DBP 5 |
-| 48  | 4   | DBP 6 |
-| 52  | 4   | DBP 7 |
-| 56  | 4   | DBP 8 |
-| 60  | 4   | DBP 9 |
-| 64  | 4   | Singly Indirect Block Pointer |
-| 68  | 4   | Doubly Indirect Block Pointer |
-| 72  | 4   | Triply Indirect Block Pointer |
-| 76  | 4   | Quadruply Indirect Block Pointer |
-| 80  | 4   | User ID |
-| 84  | 1   | File is an app (executable), either 0 or 1 |
-| 85  | 1   | File is a directory, 0 or 1 |
-| 86  | 1   | Whether this inode is in use, 0 or 1 |
+| 0   | 1   | Fixed to 1. |
+| 1   | 7   | Padding. Unused. |
+| 8   | 8   | File size (bytes) |
+| 16  | 4   | Creation time (POSIX) |
+| 20  | 4   | Last modification time (POSIX) |
+| 24  | 4   | Last access time (POSIX) |
+| 28  | 4   | Number of blocks the file uses |
+| 32  | 4   | Direct Block Pointer (DBP) 0 |
+| 36  | 4   | DBP 1 |
+| 40  | 4   | DBP 2 |
+| 44  | 4   | DBP 3 |
+| 48  | 4   | DBP 4 |
+| 52  | 4   | DBP 5 |
+| 56  | 4   | DBP 6 |
+| 60  | 4   | DBP 7 |
+| 64  | 4   | DBP 8 |
+| 68  | 4   | DBP 9 |
+| 72  | 4   | Singly Indirect Block Pointer |
+| 76  | 4   | Doubly Indirect Block Pointer |
+| 80  | 4   | Triply Indirect Block Pointer |
+| 84  | 4   | Quadruply Indirect Block Pointer |
+| 88  | 4   | Owner's user ID |
+| 92 | 2   | Permissions. See below. |
+| 94 | 1   | Flags. See below. |
+| 95 | 33  | Padding to 128 bytes. |
 
-Some inodes are reserved.
+The permissions bitmap is formed as folows:
+
+| Bit (0 is MSB) | Contents |
+| --- | --- |
+| 0    | Owner read (ur) |
+| 1    | Owner write (uw) |
+| 2    | Owner execute (ux) |
+| 3    | Group read (gr) |
+| 4    | Group write (gw) |
+| 5    | Group execute (gx) |
+| 6    | Other read (or) |
+| 7    | Other write (ow) |
+| 8    | Other execute (ox) |
+| 9-15 | Padding. Unused. |
+
+The flags:
+
+| Bit (0 is MSB) | Contents |
+| 0-3 | Filetype. |
+| 4-8 | Unused. |
+
+The filetype:
+
+| ID | Value |
+| --- | --- |
+| 0   | Regular file. |
+| 1   | Directory. |
+| 2   | FIFO (pipe). |
+| 3   | Suction pipe. |
+| 4   | Socket. |
+| 5   | Volatile (in RAM). |
+| 6-16| To be determined. |
+
+Some inodes are reserved:
 
 | Inode number | Contents |
 | --- | --- |
-| 0   | JBoot's second stage |
-| 1   | The kernel |
-| 2   | The root directory |
+| 1   | JBoot's second stage |
+| 2   | The kernel |
+| 3   | The root directory |
 
-A directory is a file with its inode's 85th byte set to 1. Its blocks contain file entries (which have no separators between). Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but ':' (58) and terminated with a null byte, and 4 bytes specifying the inode number of that entry.
+A directory is a file with its filetype set to 1. Its blocks contain contiguous file entries. Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but '\', terminated by a null byte, and 4 bytes specifying the inode number of that entry.
 
-The remaining sectors are chunks. Each one is 512 sectors long. The first sector of a chunk is a "bytemap". The first byte indicates whether the remaining bytes are all 1. As for the rest, the nth byte marks whether the nth block of the chunk is free (0) or in use (1). The other 511 sectors are blocks, that is, raw data.
+After the inodes, there's a multi-sector bitmap marking whether a block is in used (0) or free (1).
+
+Finally, blocks. After the last sector of the bitmap, blocks start, containing raw data.

@@ -4,12 +4,15 @@ BITS 16
 ORG 0x8000
 
 %define SECTOR_BUFFER 0x9000
-%define INODE_NBLOCKS 20
-%define INODE_DBP0 24
-%define INODE_SIBP 64
-%define INODE_DIBP 68
-%define INODE_TIBP 72
-%define INODE_QIBP 76
+%define INODE_NBLOCKS 28
+%define INODE_DBP0 32
+%define INODE_SIBP 72
+%define INODE_DIBP 76
+%define INODE_TIBP 80
+%define INODE_QIBP 84
+
+; The kernel is the second inode in its sector.
+%define KERNEL_INODE_OFFSET 128
 
 ; Reference some methods: print and readsector.
 ; This is some serious preprocessor magic. Basically "includes" the methods
@@ -68,7 +71,7 @@ checkA20:
 
 ; This is a port of JOTAFS_getrecursive from JOTAFS_readwholefile.c
 ; edi <- level
-; esi <- recLBA
+; esi <- recBlock
 ; ecx <- i
 last_maxlevel db 0
 getrecursive:
@@ -81,8 +84,9 @@ getrecursive:
 	jna .last_maxlevel_updated
 	mov byte [last_maxlevel], al
 	.last_maxlevel_updated:
-	; uint32_t* contents = (uint32_t*)ATA_read28(iface, recLBA);
+	; uint32_t* contents = (uint32_t*)ATA_read28(iface, recBlock);
 	mov eax, esi
+	call block2sector	; Remember we're reading blocks...
 	call readsector
 
 	; uint32_t idx = i-10;
@@ -110,9 +114,7 @@ getrecursive:
 	sub eax, ebx
 	.check3:
 	; idx >>= 7*(level-1);	// Divide by 128**(level-1)
-	;xor ecx, ecx
-	;mov cl, byte [esp+8]
-	mov ecx, dword [esp+8]
+	mov ecx, dword [esp+8]	; ecx <- level
 	dec ecx
 	; ( Note: 7*a = (8*a)-a = (a << 3)-a )
 	push ecx
@@ -121,10 +123,10 @@ getrecursive:
 	add esp, 4
 	shr eax, cl
 
-	; uint32_t next_recLBA = contents[idx];
-	mov eax, dword [SECTOR_BUFFER+(4*eax)]
+	; uint32_t next_recBlock = contents[idx];
+	mov eax, dword [SECTOR_BUFFER + (4*eax)]
 
-	; if(level > 1) toRet = JOTAFS_getrecursive(level-1, i, next_recLBA);
+	; if(level > 1) toRet = JOTAFS_getrecursive(level-1, i, next_recBlock);
 	cmp dword [esp+8], 1
 	jna .finish_recursion
 	mov edi, [esp+8]
@@ -149,10 +151,13 @@ getrecursive:
 
 
 
-; Equivalent to JOTAFS_gimmetheblocc
+; Returns what's the i-th block of an inode.
 ; This assumes that the inode is loaded at SECTOR_BUFFER.
 ; ecx <- i
-gimmetheblocc:
+; Note: this is made for loading JUST the kernel.
+; There are some hardcoded constants (mainly offset in the inode sector) that
+; belong solely to the kernel.
+getSequentialBlock:
 	push ecx
 	push ebx
 
@@ -164,9 +169,9 @@ gimmetheblocc:
 	jna .gtb1
 
 	mov edi, 4
-	mov esi, dword [SECTOR_BUFFER+INODE_QIBP]
+	mov esi, dword [SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_QIBP]
 	call getrecursive
-	jmp .gimmetheblocc_end
+	jmp .getSequentialBlock_end
 
 	.gtb1:
 	xor ebx, ebx
@@ -177,9 +182,9 @@ gimmetheblocc:
 	jna .gtb2
 
 	mov edi, 3
-	mov esi, dword [SECTOR_BUFFER+INODE_TIBP]
+	mov esi, dword [SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_TIBP]
 	call getrecursive
-	jmp .gimmetheblocc_end
+	jmp .getSequentialBlock_end
 
 	.gtb2:
 	xor ebx, ebx
@@ -190,24 +195,24 @@ gimmetheblocc:
 	jna .gtb3
 
 	mov edi, 2
-	mov esi, dword [SECTOR_BUFFER+INODE_DIBP]
+	mov esi, dword [SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_DIBP]
 	call getrecursive
-	jmp .gimmetheblocc_end
+	jmp .getSequentialBlock_end
 
 	.gtb3:
 	cmp ecx, 9
 	jna .gtb4
 
 	mov edi, 1
-	mov esi, dword [SECTOR_BUFFER+INODE_SIBP]
+	mov esi, dword [SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_SIBP]
 	call getrecursive
-	jmp .gimmetheblocc_end
+	jmp .getSequentialBlock_end
 
 	.gtb4:
-	mov eax, SECTOR_BUFFER+INODE_DBP0
+	mov eax, SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_DBP0
 	mov eax, dword [eax+(4*ecx)]
 
-	.gimmetheblocc_end:
+	.getSequentialBlock_end:
 	pop ebx
 	pop ecx
 	ret
@@ -246,6 +251,8 @@ jmp $
 A20_ENABLED:
 ; A20 is enabled at this point.
 
+
+
 ; Enter Big Unreal Mode (to write past the 1M barrier).
 ; Thanks to: https://wiki.osdev.org/Unreal_Mode
 cli	; Disable interrupts
@@ -256,7 +263,7 @@ mov eax, cr0	; Switch to protected mode
 or al, 1
 mov cr0, eax
 
-jmp $+2	; Tell 386/486 to not crash (y tho?)
+jmp $+2	; Do not crash!
 
 mov bx, 0x08	; Select descriptor 1
 mov ds, bx
@@ -265,6 +272,8 @@ and al, 0xFE	; Back to real mode
 mov cr0, eax
 pop ds
 ; We are now in Big Unreal Mode.
+
+
 
 ; About to begin the real shit.
 mov si, loading
@@ -279,20 +288,24 @@ mov word [dapack_boffset], SECTOR_BUFFER
 ; Load the ELF at 2M, and then parse it and load the kernel at 1M.
 
 ; Get the size of the ELF in blocks.
-mov eax, 3	; 2 (reserved) + 1 (kernel's inode)
+; The kernel is inode 2. Which is in sector 2 with the bootloader.
+; Read the JOTAFS specs if you don't know what I'm talking about.
+mov eax, 2
 call readsector
-mov edx, dword [SECTOR_BUFFER + INODE_NBLOCKS]
+mov edx, dword [SECTOR_BUFFER + KERNEL_INODE_OFFSET + INODE_NBLOCKS]
 
 ; Offsetless count.
 xor ecx, ecx
 LOAD_KERNEL:
 	push edx
-	; Load the inode. POTENTIAL IMPROVEMENT.
-	mov eax, 3
+	; Load the inode.
+	; TODO: this could be improved so we don't have to make twice the accesses.
+	mov eax, 2
 	call readsector
 	; Get the LBA sector of the block.
-	call gimmetheblocc
+	call getSequentialBlock
 	; Read it.
+	call block2sector
 	call readsector
 
 	; Calculate the current block's starting position.
@@ -325,6 +338,9 @@ LOAD_KERNEL:
 	pop edx
 	cmp ecx, edx
 	jl LOAD_KERNEL
+
+
+
 
 ; The whole ELF is now in memory!
 mov si, booting
@@ -381,6 +397,8 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 mov ss, ax
+
+
 
 ; Everything set. Now it's time to parse the ELF.
 ; jotadOS is x86, so I'll follow those specs.
