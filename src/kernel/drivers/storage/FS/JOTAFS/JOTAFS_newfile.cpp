@@ -3,7 +3,7 @@
 
 inline uint32_t div_power128(uint32_t n, uint32_t exp) { return n >> (7*exp); }
 
-uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t flags, uint16_t permissions) {
+uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	JOTAFS_INODE inode;
 	inode.used = 1;
 	inode.size = size;
@@ -12,7 +12,7 @@ uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t fla
 	inode.n_blocks = size / BYTES_PER_SECTOR;
 	if(size % BYTES_PER_SECTOR) inode.n_blocks++;
 	inode.uid = uid;
-	inode.flags = flags;
+	inode.filetype = filetype;
 	inode.permissions = permissions;
 
 	// Let's start filling up the blocks.

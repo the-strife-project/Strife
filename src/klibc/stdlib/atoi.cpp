@@ -1,19 +1,17 @@
 #include <klibc/stdlib.h>
 #include <klibc/math.h>
 
-int atoi(char* str) {
-	size_t s_str = strlen(str);
-	if(!s_str) return 0;
+int atoi(string str) {
+	if(str.length() == 0) return 0;
 
-	uint8_t negative = 0;
-	if(str[0] == '-') negative = 1;
+	bool negative = (str[0] == '-');
 
 	size_t i=0;
 	if(negative) i++;
 
 	int ret = 0;
-	for(; i<s_str; i++) {
-		ret += (str[i]-'0')*pow(10, (s_str-i)-1);
+	for(; i<str.length(); i++) {
+		ret += (str[i]-'0')*pow(10, (str.length()-i)-1);
 	}
 
 	if(negative) ret *= -1;

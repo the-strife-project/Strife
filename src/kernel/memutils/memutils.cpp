@@ -32,7 +32,7 @@ void memutils_init() {
 }
 
 uint32_t getFreeMemory() {
-	return (memutils_memory) - paging_getUsedPages()*4;
+	return memutils_memory - (paging_getUsedPages()*4);
 }
 
 uint32_t getAllMemory() { return memutils_memory; }

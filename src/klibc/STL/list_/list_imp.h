@@ -1,6 +1,8 @@
 #ifndef LIST_IMP
 #define LIST_IMP
 
+#include <stdarg.h>
+
 template<typename T> list<T>::list() {
 	first = last = 0;
 	sz = 0;

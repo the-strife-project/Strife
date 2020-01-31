@@ -66,6 +66,10 @@ template<typename T> void vector<T>::push_back(T e) {
 	data[sz++] = e;
 	if(sz == allocated) more();
 }
+template<typename T> void vector<T>::push_back(const vector<T>& other) {
+	for(auto const& x : other)
+		push_back(x);
+}
 template<typename T> void vector<T>::pop_back() { sz--; }
 template<typename T> T& vector<T>::back() { return data[sz-1]; }
 template<typename T> const T& vector<T>::back() const { return data[sz-1]; }
@@ -76,9 +80,25 @@ template<typename T> void vector<T>::push_front(T e) {
 	disp_right(0, 1);
 	data[0] = e;
 }
+template<typename T> void vector<T>::push_front(const vector<T>& other) {
+	disp_right(0, other.size());
+	for(size_t i=0; i<other.size(); i++)
+		data[i] = other.data[i];
+}
 template<typename T> void vector<T>::pop_front() { disp_left(1, 1); }
 template<typename T> T& vector<T>::front() { return data[0]; }
 template<typename T> const T& vector<T>::front() const { return data[0]; }
+
+
+// General operations.
+template<typename T> void vector<T>::invert() {
+	size_t count = size() / 2;
+	for(size_t i=0; i<count; i++) {
+		T aux = data[i];
+		data[i] = data[(size()-1)-i];
+		data[(size()-1)-i] = aux;
+	}
+}
 
 
 // Operators.
@@ -88,6 +108,7 @@ template<typename T> vector<T>& vector<T>::operator=(const vector<T>& other) {
 
 	data = new T[allocated];
 	for(size_t i=0; i<sz; i++) data[i] = other.data[i];
+	return *this;
 }
 template<typename T> T& vector<T>::operator[](size_t idx) { return data[idx]; }
 template<typename T> const T& vector<T>::operator[](size_t idx) const { return data[idx]; }
@@ -99,10 +120,16 @@ template<typename T> bool vector<T>::operator==(const vector<T>& other) const {
 	return true;
 }
 template<typename T> bool vector<T>::operator!=(const vector<T>& other) const  { return !(*this == other); }
+template<typename T> vector<T>& vector<T>::operator+=(const vector<T>& other) {
+	push_back(other);
+	return *this;
+}
 
 
 template<typename T> typename vector<T>::iterator vector<T>::begin() { return data; }
 template<typename T> typename vector<T>::iterator vector<T>::end() { return data+sz; }
+template<typename T> typename vector<T>::const_iterator vector<T>::begin() const { return data; }
+template<typename T> typename vector<T>::const_iterator vector<T>::end() const{ return data+sz; }
 template<typename T> typename vector<T>::const_iterator vector<T>::cbegin() const { return data; }
 template<typename T> typename vector<T>::const_iterator vector<T>::cend() const { return data+sz; }
 

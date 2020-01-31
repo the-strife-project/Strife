@@ -9,6 +9,8 @@
 #define ISO9660_DIR_FILENAME 33
 
 #include <common/types.h>
+#include <klibc/STL/list>
+#include <klibc/string>
 
 // It can be either a directory record or a file itself.
 struct ISO9660_entity {
@@ -16,7 +18,7 @@ struct ISO9660_entity {
 	uint32_t length;
 };
 
-struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz);
+struct ISO9660_entity* ISO9660_get(const list<string>& dirs);
 uint8_t* ISO9660_read(struct ISO9660_entity* entity);
 
 #endif

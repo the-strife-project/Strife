@@ -66,6 +66,4 @@ void JOTAFS::format() {
 
 	// Initialize the bitmaps.
 	for(uint32_t i=0; i<getNumberOfBitmaps(); i++) iface.clear28(bitmap2sector(i));
-
-	// TODO: CREATE THE ROOT.
 }

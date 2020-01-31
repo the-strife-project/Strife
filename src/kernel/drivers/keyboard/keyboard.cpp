@@ -8,138 +8,140 @@
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/drivers/keyboard/kb_layout.h>
 #include <kernel/drivers/term/term.h>
+#include <klibc/string>
+
+#define IS_LATIN1(x) ((x == '\xC2') || (x == '\xC3'))
 
 /*
 	'differentiate' marks whether the first byte of the interrupt
 	is 0xE0. This is used to distinguish some keys with the same keycode.
 	The rest should require no further explanation.
 */
-uint8_t differentiate = 0;
-uint8_t altgr = 0;
-uint8_t Lshift = 0;
-uint8_t Rshift = 0;
-uint8_t mayb = 0;
+bool differentiate = false;
+bool altgr = false;
+bool Lshift = false;
+bool Rshift = false;
+bool mayb = false;	// Mayus block
 
-uint8_t accent0 = 0;	// ^
-uint8_t accent1 = 0;	// `
-uint8_t accent2 = 0;	// ´
-uint8_t accent3 = 0;	// ¨
+bool accent0 = false;	// ^
+bool accent1 = false;	// `
+bool accent2 = false;	// ´
+bool accent3 = false;	// ¨
 
-uint8_t ctrl =  0;
-uint8_t alt = 0;
+// These are not implemented at the moment.
+bool ctrl = false;
+bool alt = false;
 
 /*
-	The keyboard buffer will be stored at 0x7E00.
-	There are more than 400KiB free there.
+	The idea: use a window to save the characters.
+	Insertion, deletion, moving back, and forward, are all O(1),
+	so it fits perfectly for this case.
 */
-char* buffer = (char*)0x7E00;
-int buffered;
-int __kbcursor;
-uint8_t show;
-void bk(const char* a) {	// Buffer key
-	if(strcmp(a, "\b") == 0) {
-		// If the buffer is empty, don't do anything.
-		if(buffered && __kbcursor) {
-			// Move characters at the right one position to the left.
-			char* baux = (char*)jmalloc(buffered);	// backspace auxiliar
-			strcpy(baux, buffer+__kbcursor);
+window<char> buffer;
+bool returnPressed = false;
+bool show = true;
+
+/*
+	Silent Mode is for getch().
+	Just registers the last key pressed, and does not
+	execute the corresponding routine.
+*/
+bool silentMode = false;
+string lastPressed;
+
+// Function to print the characters at the right of the cursor.
+// extraSpace is in case we're deleting a character.
+void printRight(bool extraSpace) {
+	if(show) {
+		size_t count = 0;
+		for(auto const& x : buffer) {
+			printf("%c", x);
+			++count;
+		}
+
+		if(extraSpace) {
+			printf(" ");
 			term_left();
-			printf("%s ", baux);
-
-			// Move the cursor back.
-			for(size_t i=0; i<strlen(baux)+1; i++) {
-				if(baux[i] == '\xc2' || baux[i] == '\xc3') continue;
-				term_left();
-			}
-
-			// Overwrite the buffer.
-			int diff = 1;
-			if(buffer[__kbcursor-2] == '\xc2' || buffer[__kbcursor-2] == '\xc3') diff++;
-			strcpy(buffer + __kbcursor - diff, baux);
-			jfree(baux);
-
-			// Pull the counters back.
-			if(diff == 2) {
-				buffered--; __kbcursor--;
-			}
-			buffer[--buffered] = 0;
-			__kbcursor--;
 		}
-		return;
-	} else if(strcmp(a, "[SUPR]") == 0) {
-		/*
-			This is really similar to above.
-			However, there are too many differences to make this only one method.
-		*/
-		if(__kbcursor < buffered) {
-			// Move characters at the right (from current character) one position to the left.
-			char* saux = (char*)jmalloc(buffered);	// supr auxiliar
-			uint8_t diff = 1;
-			if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') {
-				diff++;
-			}
-			strcpy(saux, buffer+__kbcursor+diff);
-			printf("%s ", saux);
 
-			// Move the cursor back.
-			for(size_t i=0; i<strlen(saux)+1; i++) {
-				if(saux[i] == '\xc2' || saux[i] == '\xc3') continue;
-				term_left();
-			}
-
-			// Overwrite the buffer.
-			strcpy(buffer + __kbcursor, saux);
-			jfree(saux);
-
-			// Pull the counters back.
-			if(diff == 2) buffered--;
-			buffer[--buffered] = 0;
-		}
-		return;
-	} else if(strcmp(a, "[LEFT]") == 0) {
-		if(!__kbcursor) return;
-		term_left();
-		__kbcursor--;
-		if(buffer[__kbcursor-1] == '\xc2' || buffer[__kbcursor-1] == '\xc3') {
-			__kbcursor--;
-		}
-		return;
-	} else if(strcmp(a, "[RIGHT]") == 0) {
-		if(__kbcursor >= buffered) return;
-		term_right();
-		__kbcursor++;
-		if(buffer[__kbcursor] == '\xc2' || buffer[__kbcursor] == '\xc3') {
-			__kbcursor++;
-		}
-		return;
-	} else if(strcmp(a, "[HOME]") == 0) {
-		while(__kbcursor) bk("[LEFT]");
-		return;
-	} else if(strcmp(a, "[END]") == 0) {
-		while(__kbcursor < buffered) bk("[RIGHT]");
-		return;
+		for(size_t i=0; i<count; ++i)
+			term_left();
 	}
-	// Print the new characters.
-	char* aux = (char*)jmalloc(buffered+strlen(a));	// Quick and dirty.
-	strcpy(aux, a);
-	strcat(aux, buffer+__kbcursor);
-	if(show) printf("%s", aux);
-
-	// Move the cursor back as many positions as printable character 'aux' has.
-	for(size_t i=0; i<strlen(aux)-strlen(a); i++) {
-		if(aux[i+strlen(a)] == '\xc2' || aux[i+strlen(a)] == '\xc3') continue;
-		term_left();
-	}
-
-	// Update the buffer.
-	strcpy(buffer+__kbcursor, aux);
-	jfree(aux);
-
-	buffered += strlen(a);
-	__kbcursor += strlen(a);
 }
-char* keyboard_getBuffer() { return buffer; }
-int keyboard_getBuffered() { return buffered; }
+
+void bk(const string& a) {	// Buffer key
+	// If we're on Silent Mode, we're done.
+	if(silentMode) {
+		lastPressed = a;
+		return;
+	}
+
+	if(a == "\b") {
+		// If the buffer is empty, don't do anything.
+		if(buffer.isBeginning()) return;
+
+		// Move the cursor back.
+		--buffer;
+		// Is the current character '\xC2' or '\xC3'?
+		if(IS_LATIN1(buffer.get())) {	// BUGGED
+			// Yep. Remove one extra byte.
+			buffer.remove();
+		}
+		// Go back to the other byte, and remove it.
+		++buffer;
+		buffer.remove();
+		// And move the term back.
+		term_left();
+		// Print removing the last character.
+		printRight(true);
+		return;
+	} else if(a == "[SUPR]") {
+		if(buffer.isLast()) return;
+
+		// Supr is just moving forward and backspace.
+		++buffer; term_right();
+		if(IS_LATIN1(buffer.get())) ++buffer;
+		bk("\b");
+		return;
+	} else if(a == "[LEFT]") {
+		if(buffer.isBeginning()) return;
+		term_left();
+		--buffer;
+		if(!(buffer.isBeginning()) && IS_LATIN1(buffer.get()))
+			--buffer;
+		return;
+	} else if(a == "[RIGHT]") {
+		if(buffer.isLast()) return;
+		term_right();
+		if(IS_LATIN1(buffer.get()))
+			++buffer;
+		++buffer;
+		return;
+	} else if(a == "[HOME]") {
+		while(!(buffer.isBeginning())) bk("[LEFT]");
+		return;
+	} else if(a == "[END]") {
+		while(!(buffer.isLast())) bk("[RIGHT]");
+		return;
+	} else if(a == "\n") {
+		returnPressed = true;
+		while(!(buffer.isLast())) {
+			term_right();
+			++buffer;
+		}
+	}
+
+	// Insert the new characters.
+	for(auto const& x : a) {
+		buffer.put(x);
+		if(show) printf("%c", x);
+	}
+
+	printRight(false);
+}
+
+window<char>& keyboard_getBuffer() { return buffer; }
+bool keyboard_returnPressed() { return returnPressed; }
 
 extern "C" void keyboard_handler(void) {
 	outb(PIC_IO_PIC1, PIC_EOI);
@@ -153,7 +155,7 @@ extern "C" void keyboard_handler(void) {
 
 	uint8_t keycode = inb(KEYBOARD_DATA_PORT);
 
-	if(keycode == 0xE0) differentiate = 1;
+	if(keycode == 0xE0) differentiate = true;
 	//printf("%x ", keycode); return;
 
 	const char* handle = 0;
@@ -162,34 +164,34 @@ extern "C" void keyboard_handler(void) {
 		case 0x38:
 			// Altgr down
 			if(differentiate) {
-				altgr = 1;
+				altgr = true;
 				handle = (char*)1;
 			}
 			break;
 		case 0xB8:
 			// Altgr up
 			if(differentiate) {
-				altgr = 0;
+				altgr = false;
 				handle = (char*)1;
 			}
 			break;
 		case 0x2A:
 			// Left shift down
-			Lshift = 1;
+			Lshift = true;
 			handle = (char*)1;
 			break;
 		case 0xAA:
 			// Left shift up
-			Lshift = 0;
+			Lshift = false;
 			break;
 		case 0x36:
 			// Right shift down
-			Rshift = 1;
+			Rshift = true;
 			handle = (char*)1;
 			break;
 		case 0xB6:
 			// Right shift up
-			Rshift = 0;
+			Rshift = false;
 			break;
 		case 0x35:
 			/*
@@ -207,7 +209,7 @@ extern "C" void keyboard_handler(void) {
 		case 0x0E:
 			// Backspace.
 			handle = (char*)1;
-			accent0 = accent1 = accent2 = accent3 = 0;
+			accent0 = accent1 = accent2 = accent3 = false;
 			bk("\b");
 			break;
 		case 0x3A:
@@ -227,17 +229,17 @@ extern "C" void keyboard_handler(void) {
 				// ^
 				if(accent0 || accent1 || accent2 || accent3) {
 					bk("^");
-					accent0 = accent1 = accent2 = accent3 = 0;
+					accent0 = accent1 = accent2 = accent3 = false;
 				} else {
-					accent0 = 1;
+					accent0 = true;
 				}
 			} else {
 				// `
 				if(accent0 || accent1 || accent2 || accent3) {
 					bk("`");
-					accent0 = accent1 = accent2 = accent3 = 0;
+					accent0 = accent1 = accent2 = accent3 = false;
 				} else {
-					accent1 = 1;
+					accent1 = true;
 				}
 			}
 			break;
@@ -249,17 +251,17 @@ extern "C" void keyboard_handler(void) {
 				// ¨
 				if(accent0 || accent1 || accent2 || accent3) {
 					bk("¨");
-					accent0 = accent1 = accent2 = accent3 = 0;
+					accent0 = accent1 = accent2 = accent3 = false;
 				} else {
-					accent3 = 1;
+					accent3 = true;
 				}
 			} else {
 				// ´
 				if(accent0 || accent1 || accent2 || accent3) {
 					bk("´");
-					accent0 = accent1 = accent2 = accent3 = 0;
+					accent0 = accent1 = accent2 = accent3 = false;
 				} else {
-					accent2 = 1;
+					accent2 = true;
 				}
 			}
 			break;
@@ -273,7 +275,7 @@ extern "C" void keyboard_handler(void) {
 			// Supr
 			if(!differentiate) break;
 			handle = (char*)1;
-			accent0 = accent1 = accent2 = accent3 = 0;
+			accent0 = accent1 = accent2 = accent3 = false;
 			bk("[SUPR]");
 			break;
 		case 0x4D:
@@ -306,7 +308,7 @@ extern "C" void keyboard_handler(void) {
 			break;
 	}
 	if(handle) {
-		differentiate = 0;
+		differentiate = false;
 		return;
 	}
 
@@ -339,7 +341,7 @@ extern "C" void keyboard_handler(void) {
 			} else if(accent3) {
 				bk("¨");
 			}
-			accent0 = accent1 = accent2 = accent3 = 0;
+			accent0 = accent1 = accent2 = accent3 = false;
 			handle = KB_LAYOUT[keycode];
 			if(handle) bk(handle);
 		}
@@ -347,8 +349,8 @@ extern "C" void keyboard_handler(void) {
 	}
 
 	bk(handle);
-	differentiate = 0;
-	accent0 = accent1 = accent2 = accent3 = 0;
+	differentiate = false;
+	accent0 = accent1 = accent2 = accent3 = false;
 }
 
 void keyboard_init(void) {
@@ -368,11 +370,10 @@ void keyboard_init(void) {
 void keyboard_pause(void) {
 	pic_disable_irq(1);
 }
-void keyboard_resume(uint8_t show_) {
+void keyboard_resume(bool show_) {
 	// Reset the buffer.
-	*buffer = 0;
-	buffered = 0;
-	__kbcursor = 0;
+	buffer.clear();
+	returnPressed = false;
 	show = show_;
 	pic_enable_irq(1);
 }

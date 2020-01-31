@@ -5,19 +5,17 @@
 #include <klibc/stdlib/liballoc.h>
 #endif
 
+#include <klibc/string>
+
 void* operator new(size_t sz);
 void* operator new[](size_t sz);
 void operator delete(void* p);
 void operator delete[](void* p);
 
-#ifndef _STRING_H
-#include <klibc/string.h>
-#endif
+string itoa(int n);
+int atoi(string str);
 
-char* itoa(int n);
-int atoi(char* str);
-
-char* htoa(uint32_t n);
-int htoi(char* str);
+string htoa(uint32_t n);
+int htoi(string str);
 
 #endif

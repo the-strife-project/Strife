@@ -6,29 +6,18 @@
 */
 
 static const char __HTOA_TABLE[] = "0123456789ABCDEF";
-char* htoa(uint32_t n) {
-	char* ret = (char*)jmalloc(10);
+string htoa(uint32_t n) {
+	string ret;
 
-	int i = 0;
 	while(n) {
-		ret[i++] = __HTOA_TABLE[n & 0xF];
+		ret += __HTOA_TABLE[n & 0xF];
 		n >>= 4;
 	}
 
-	if(!i) {
-		ret[0] = '0';
-		i++;
-	}
-
-	// Fill the rest with zeros.
-	for(; i<=9; i++) ret[i] = 0;
-
-	// Shorten it.
-	char* aux = strdup(ret);
-	jfree(ret);
-	ret = aux;
+	if(ret.length() == 0)
+		ret += '0';
 
 	// Turn it around.
-	strinv(ret);
+	ret.invert();
 	return ret;
 }

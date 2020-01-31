@@ -1,9 +1,11 @@
 #ifndef STDIO_H
 #define STDIO_H
 
+#include <klibc/string>
+
 // Input
 char getch();
-char* readLine();
+string readLine();
 
 // Output
 void writec(char c);

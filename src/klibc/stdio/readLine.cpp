@@ -2,27 +2,22 @@
 #include <klibc/stdlib.h>
 #include <kernel/drivers/keyboard/keyboard.h>
 
-char* readLine() {
+string readLine() {
 	keyboard_resume(1);
-	char* buff = keyboard_getBuffer();
-	while(1) {
-		uint8_t br = 0;
-		for(int i=0; i<keyboard_getBuffered(); i++) {
-			if(buff[i] == '\n') {
-				br = 1;
-				break;
-			}
-		}
-		if(br) break;
-	}
-	buff[keyboard_getBuffered()] = 0;
 
-	char* ret = (char*)jmalloc(strlen(buff));
-	size_t i=0;
-	for(size_t j=0; j<strlen(buff); j++) {
-		if(buff[j] != '\n') ret[i++] = buff[j];
+	string ret;
+	while(!keyboard_returnPressed()) {}
+
+	// Go to the beginning and copy the characters.
+	window<char>& buffer = keyboard_getBuffer();
+	if(buffer.size() > 1) {
+		while(!(buffer.isFirst())) buffer.left();
+
+		do {
+			ret += buffer.get();
+			buffer.right();
+		} while(!(buffer.isLast()));
 	}
-	ret[i] = 0;
 
 	keyboard_pause();
 	return ret;

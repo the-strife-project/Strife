@@ -90,7 +90,11 @@ extern "C" void kernel_main(void) {
 	// Run the MSS.
 	uint32_t mss = paging_allocPages(1);
 	paging_setUser(mss, 1);
-	jotafs.readWholeFile(3, (uint8_t*)mss);
+	/*
+		This number 4 is temporally hardcoded, created during install.
+		This will be, in the future, read from the directory tree.
+	*/
+	jotafs.readWholeFile(5, (uint8_t*)mss);
 	jump_usermode(mss);
 
 	printf("\n[[[ MSS RETURNED?!?!?! ]]]");

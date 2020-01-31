@@ -4,7 +4,10 @@
 #include <stdarg.h>
 
 void __writes(const char* data) {
-	for(size_t i=0; i<strlen(data); i++) writec(data[i]);
+	while(*data) {
+		writec(*data);
+		++data;
+	}
 }
 
 /*
@@ -16,6 +19,7 @@ void __writes(const char* data) {
 	%c -> character
 */
 
+// TODO: REMOVE THIS AND CREATE 'cout'!
 void printf(const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
@@ -37,15 +41,21 @@ void printf(const char* fmt, ...) {
 				const char* str = va_arg(args, const char*);
 				__writes(str);
 				readyToFormat = 0;
-			} else if(buff == 'x') {
+			} else if(buff == 'S') {
+				// Incredibly inefficient!
+				string str = va_arg(args, string);
+				for(auto const& x : str)
+					writec(x);
+				readyToFormat = 0;
+			/*} else if(buff == 'x') {
 				char* p = htoa((uint32_t)va_arg(args, int));
 				__writes(p);
 				jfree(p);
-				readyToFormat = 0;
+				readyToFormat = 0;*/
 			} else if(buff == 'd') {
-				char* p = itoa(va_arg(args, int));
-				__writes(p);
-				jfree(p);
+				string str = itoa(va_arg(args, int));
+				for(auto const& x : str)
+					writec(x);
 				readyToFormat = 0;
 			} else if(buff == 'c') {
 				writec((char)va_arg(args, int));

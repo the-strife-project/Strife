@@ -3,8 +3,9 @@
 
 char getch() {
 	keyboard_resume(0);
-	while(!keyboard_getBuffered()) {}
+	// TODO: Make this use keyboard's Silent Mode.
+	while(!(keyboard_getBuffer().size())) {}
 
 	keyboard_pause();
-	return *keyboard_getBuffer();
+	return keyboard_getBuffer().get();
 }

@@ -5,7 +5,7 @@
 #include <klibc/STL/list>
 
 template<typename T> class stack {
-private:
+protected:	// Protected for "iterable_stack".
 	list<T> data;
 
 public:

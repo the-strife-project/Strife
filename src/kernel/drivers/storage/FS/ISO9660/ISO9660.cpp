@@ -2,11 +2,7 @@
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
 #include <klibc/stdlib.h>
 
-/*
-	Example for ISO9660_getdir
-	dirs = {"boot"}
-*/
-struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz) {
+struct ISO9660_entity* ISO9660_get(const list<string>& dirs) {
 	// Get the root directory record extent as 'last'.
 	ATAPI_read(1, 0x10);
 	uint32_t last_len = *(uint32_t*)(
@@ -21,15 +17,15 @@ struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz) {
 	);
 
 	// Run through 'dirs'.
-	for(uint8_t dirs_i=0; dirs_i < dirs_sz; dirs_i++) {
+	for(auto const& x : dirs) {
 		// Read the directory.
 		ATAPI_read(
 			(last_len % 2048 != 0) + (last_len / 2048),
 			last_LBA
 		);
 
-		// Run through the directory records of 'last' until one matches dirs[dirs_i].
-		uint8_t found = 0;
+		// Run through the directory records of 'last' until one matches x.
+		bool found = false;
 		for(uint32_t i=0; i < last_len && !found; ) {
 			// Check if the record length is ok. If it's zero, it couldn't be found.
 			if(!
@@ -42,8 +38,6 @@ struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz) {
 
 			// Get the filename.
 			char* filename = (char*)(ATAPI_PIO_BUFFER + i + ISO9660_DIR_FILENAME);
-
-			// Replace the semicolon with a null byte.
 			for(uint32_t j=0; j < ISO9660_DIR_FILENAME_LENGTH; j++) {
 				if(filename[j] == ';') {
 					filename[j] = 0;
@@ -52,9 +46,9 @@ struct ISO9660_entity* ISO9660_get(const char** dirs, uint8_t dirs_sz) {
 			}
 
 			// Do they match?
-			if(strcmp(dirs[dirs_i], filename) == 0) {
+			if(x == string(filename)) {
 				// Yep!
-				found = 1;
+				found = true;
 				last_LBA = *(uint32_t*)(ATAPI_PIO_BUFFER + i + ISO9660_DIR_EAR_LBA);
 				last_len = *(uint32_t*)(ATAPI_PIO_BUFFER + i + ISO9660_DIR_EAR_LENGTH);
 			} else {

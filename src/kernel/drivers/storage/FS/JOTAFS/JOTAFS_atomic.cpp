@@ -3,8 +3,6 @@
 #include <klibc/STL/bitmap>
 #include <klibc/stdio.h>
 
-// TODO: Rename to JOTAFS_atomic.cpp
-
 JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];
 	int aux = iface.identify(identifydata);

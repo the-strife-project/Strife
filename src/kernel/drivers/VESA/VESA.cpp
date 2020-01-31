@@ -4,6 +4,7 @@
 #include <klibc/stdlib.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/paging/paging.h>
+#include <klibc/string>
 
 uint16_t VESA_currentMode = 0xFFFF;
 uint16_t VESA_currentMode_width = 0;
@@ -19,8 +20,9 @@ uint16_t* VESA_getModes() {
 	*/
 
 	char* info_addr = (char*)0x7E00;
-	strcpy(info_addr, "VBE2");
-	for(int i=4; i<512; i++) *(info_addr+i) = 0;
+	info_addr[0] = 'V'; info_addr[1] = 'B';
+	info_addr[2] = 'E'; info_addr[3] = '2';
+	for(int i=4; i<512; i++) info_addr[i] = 0;
 
 	struct regs16_t regs;
 	regs.ax = VESA_GET_INFO;
@@ -32,7 +34,7 @@ uint16_t* VESA_getModes() {
 	struct VBE_info_structure* info = (struct VBE_info_structure*)info_addr;
 
 	// Check VBE2 is supported.
-	if(strcmp(info->signature, "VESA") != 0) kernel_panic(3);	// VBE2 not supported.
+	if(string(info->signature) != "VESA") kernel_panic(3);	// VBE2 not supported.
 
 	// Get the number of modes.
 	int numberOfModes = 1;	// Count 0xFFFF.

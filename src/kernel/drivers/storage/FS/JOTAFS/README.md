@@ -62,7 +62,7 @@ If it's in use, it's as follows:
 | 84  | 4   | Quadruply Indirect Block Pointer |
 | 88  | 4   | Owner's user ID |
 | 92 | 2   | Permissions. See below. |
-| 94 | 1   | Flags. See below. |
+| 94 | 1   | Filetype. |
 | 95 | 33  | Padding to 128 bytes. |
 
 The permissions bitmap is formed as folows:
@@ -80,23 +80,19 @@ The permissions bitmap is formed as folows:
 | 8    | Other execute (ox) |
 | 9-15 | Padding. Unused. |
 
-The flags:
-
-| Bit (0 is MSB) | Contents |
-| 0-3 | Filetype. |
-| 4-8 | Unused. |
-
 The filetype:
 
 | ID | Value |
 | --- | --- |
-| 0   | Regular file. |
-| 1   | Directory. |
-| 2   | FIFO (pipe). |
-| 3   | Suction pipe. |
-| 4   | Socket. |
-| 5   | Volatile (in RAM). |
-| 6-16| To be determined. |
+| 0     | Regular file. |
+| 1     | Directory. |
+| 2     | FIFO (pipe). |
+| 3     | Suction pipe. |
+| 4     | Socket. |
+| 5     | Volatile (in RAM). |
+| 6     | Hard link. |
+| 7     | Soft link. |
+| 8-255 | Unused. In case there's need for more. |
 
 Some inodes are reserved:
 
@@ -106,7 +102,7 @@ Some inodes are reserved:
 | 2   | The kernel |
 | 3   | The root directory |
 
-A directory is a file with its filetype set to 1. Its blocks contain contiguous file entries. Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but '\', terminated by a null byte, and 4 bytes specifying the inode number of that entry.
+A directory is a file with its filetype set to 1. Its blocks contain contiguous file entries. Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but '/', terminated by a null byte, and 4 bytes specifying the inode number of that entry.
 
 After the inodes, there's a multi-sector bitmap marking whether a block is in used (0) or free (1).
 
