@@ -1,5 +1,5 @@
 #include <kernel/drivers/term/term.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 #include <klibc/stdlib.h>
 #include <kernel/GDT/GDT.h>
 #include <kernel/paging/paging.h>
@@ -87,6 +87,9 @@ extern "C" void kernel_main(void) {
 	ATA primarymaster(1, 0x1F0);
 	JOTAFS jotafs(primarymaster);
 
+	// Where's MSS?
+	uint32_t mss_inode_n = jotafs.find("/bin/core/mss");
+
 	// Run the MSS.
 	uint32_t mss = paging_allocPages(1);
 	paging_setUser(mss, 1);
@@ -94,7 +97,7 @@ extern "C" void kernel_main(void) {
 		This number 4 is temporally hardcoded, created during install.
 		This will be, in the future, read from the directory tree.
 	*/
-	jotafs.readWholeFile(5, (uint8_t*)mss);
+	jotafs.readWholeFile(mss_inode_n, (uint8_t*)mss);
 	jump_usermode(mss);
 
 	printf("\n[[[ MSS RETURNED?!?!?! ]]]");

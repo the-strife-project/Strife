@@ -1,6 +1,6 @@
 #include <kernel/PCI/PCI.h>
 #include <kernel/asm.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 
 /*
 	31			30-24		23-16		15-11		10-8		7-0

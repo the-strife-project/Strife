@@ -99,10 +99,18 @@ template<typename T> void vector<T>::invert() {
 		data[(size()-1)-i] = aux;
 	}
 }
+template<typename T> void vector<T>::clear() {
+	delete [] data;
+	data = new T[VECTOR_INITIAL_SIZE];
+	sz = 0;
+	allocated = VECTOR_INITIAL_SIZE;
+}
 
 
 // Operators.
 template<typename T> vector<T>& vector<T>::operator=(const vector<T>& other) {
+	clear();
+
 	sz = other.sz;
 	allocated = other.allocated;
 

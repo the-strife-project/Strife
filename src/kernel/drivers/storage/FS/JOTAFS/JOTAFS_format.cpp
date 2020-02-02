@@ -2,7 +2,7 @@
 
 // TODO: THIS SHOULD NOT BE PART OF THE FILESYSTEM IMPLEMENTATION, BUT AN INDEPENDENT PROGRAM.
 void JOTAFS::format() {
-	JOTAFS_SUPERBLOCK sb;
+	SUPERBLOCK sb;
 	sb.signature = 0x000CACADEBACA000;
 
 	/*
@@ -53,15 +53,20 @@ void JOTAFS::format() {
 
 	// It's time to initialize the inodes.
 	for(uint32_t i=1; i<=sb.n_inodes; i++) {
-		JOTAFS_FREE_INODE inodes[JOTAFS_INODES_PER_SECTOR];
+		FREE_INODE inodes[JOTAFS_INODES_PER_SECTOR];
 		for(uint8_t j=0; j<JOTAFS_INODES_PER_SECTOR; j++) {
 			inodes[j].used = 0;
-			inodes[j].next = (i == sb.n_inodes) ? 0 : i+j+1;
+			if(i != sb.n_inodes) {
+				inodes[j].next = i+j+1;
+			} else {
+				inodes[j].next = 0;
+				break;
+			}
 		}
 
 		// Do not use writeInode. If we want to copy 4, this is more efficient.
 		iface.write28(inode2sector(i), (uint8_t*)inodes);
-		i += 4;
+		i += JOTAFS_INODES_PER_SECTOR-1;
 	}
 
 	// Initialize the bitmaps.

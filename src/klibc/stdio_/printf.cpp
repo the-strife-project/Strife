@@ -1,5 +1,5 @@
 #include <common/types.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 #include <klibc/stdlib.h>
 #include <stdarg.h>
 
@@ -13,13 +13,13 @@ void __writes(const char* data) {
 /*
 	Some specs
 	%% -> '%'
-	%s -> string
+	%s -> char*
+	%S -> string
 	%x -> hex
 	%d -> decimal
 	%c -> character
 */
 
-// TODO: REMOVE THIS AND CREATE 'cout'!
 void printf(const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
@@ -47,11 +47,11 @@ void printf(const char* fmt, ...) {
 				for(auto const& x : str)
 					writec(x);
 				readyToFormat = 0;
-			/*} else if(buff == 'x') {
-				char* p = htoa((uint32_t)va_arg(args, int));
-				__writes(p);
-				jfree(p);
-				readyToFormat = 0;*/
+			} else if(buff == 'x') {
+				string str = htoa((uint32_t)va_arg(args, int));
+				for(auto const& x : str)
+					writec(x);
+				readyToFormat = 0;
 			} else if(buff == 'd') {
 				string str = itoa(va_arg(args, int));
 				for(auto const& x : str)

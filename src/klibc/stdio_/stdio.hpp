@@ -4,7 +4,7 @@
 #include <klibc/string>
 
 // Input
-char getch();
+string getch();
 string readLine();
 
 // Output

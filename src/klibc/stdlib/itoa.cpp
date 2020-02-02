@@ -1,4 +1,3 @@
-#include <klibc/stdio.h>
 #include <klibc/stdlib.h>
 #include <klibc/math.h>
 

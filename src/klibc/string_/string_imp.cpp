@@ -20,6 +20,7 @@ void string::disp_left(size_t idx, size_t count) { data.disp_left(idx, count); }
 void string::invert() { data.invert(); }
 void string::pop_front() { data.pop_front(); }
 void string::pop_back() { data.pop_back(); }
+void string::clear() { data.clear(); }
 
 
 // Operators.
@@ -28,6 +29,7 @@ string& string::operator=(const string& other) {
 	return *this;
 }
 string& string::operator=(const char* other) {
+	clear();
 	for(size_t i=0; other[i]; i++) data.push_back(other[i]);
 	return *this;
 }

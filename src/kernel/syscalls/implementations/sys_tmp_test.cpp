@@ -1,5 +1,5 @@
 #include <kernel/syscalls/syscalls.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 #include <klibc/stdlib.h>
 #include <kernel/memutils/memutils.h>
 #include <kernel/drivers/term/term.h>

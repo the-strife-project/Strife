@@ -1,7 +1,7 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
 #include <klibc/STL/bitmap>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 
 JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];
@@ -9,7 +9,7 @@ JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	status = (aux == 0);
 	maxSector = (identifydata[61] << 16) + identifydata[60];
 
-	JOTAFS_SUPERBLOCK* p = (JOTAFS_SUPERBLOCK*)iface.read28(JOTAFS_SECTOR_SUPERBLOCK);
+	SUPERBLOCK* p = (SUPERBLOCK*)iface.read28(JOTAFS_SECTOR_SUPERBLOCK);
 	sb_cache = *p;
 	jfree(p);
 }
@@ -19,7 +19,7 @@ uint32_t JOTAFS::getMaxSector() { return maxSector; }
 
 uint8_t JOTAFS::writeBoot(uint8_t* boot) { return iface.write28(JOTAFS_SECTOR_BOOT, boot); }
 
-uint8_t JOTAFS::writeSB(const JOTAFS_SUPERBLOCK& sb) {
+uint8_t JOTAFS::writeSB(const SUPERBLOCK& sb) {
 	sb_cache = sb;
 	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
@@ -28,15 +28,15 @@ uint8_t JOTAFS::updateSB() {
 	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
 
-JOTAFS_INODE JOTAFS::getInode(uint32_t idx) {
-	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(idx));
-	JOTAFS_INODE ret = inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR];
+JOTAFS::INODE JOTAFS::getInode(uint32_t idx) {
+	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
+	INODE ret = inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR];
 	jfree(inodes);
 	return ret;
 }
 
-void JOTAFS::writeInode(uint32_t idx, const JOTAFS_INODE& contents) {
-	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(idx));
+void JOTAFS::writeInode(uint32_t idx, const INODE& contents) {
+	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
 	inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR] = contents;
 	iface.write28(inode2sector(idx), (uint8_t*)inodes);
 	jfree(inodes);
@@ -102,7 +102,6 @@ void JOTAFS::freeBlock(uint32_t idx) {
 }
 
 
-
 uint32_t JOTAFS::allocInode() {
 	// Read the front of the queue.
 	uint32_t ret = sb_cache.first_free_inode;
@@ -110,7 +109,7 @@ uint32_t JOTAFS::allocInode() {
 	// If first_free_inode is 0, there are no free inodes :(
 	if(!ret) return 0;
 
-	JOTAFS_BOTH_INODES b;
+	BOTH_INODES b;
 	b.inode = getInode(ret);
 	sb_cache.first_free_inode = b.free_inode.next;
 	updateSB();
@@ -118,7 +117,7 @@ uint32_t JOTAFS::allocInode() {
 	return ret;
 }
 
-uint32_t JOTAFS::allocInodeAndWrite(const JOTAFS_INODE& inode) {
+uint32_t JOTAFS::allocInodeAndWrite(const INODE& inode) {
 	/*
 		Similar to above. This one is done for optimizing 'newfile'.
 		'allocInode' and 'writeInode' called consecutively require 4
@@ -127,9 +126,9 @@ uint32_t JOTAFS::allocInodeAndWrite(const JOTAFS_INODE& inode) {
 	uint32_t ret = sb_cache.first_free_inode;
 	if(!ret) return 0;
 
-	JOTAFS_INODE* inodes = (JOTAFS_INODE*)iface.read28(inode2sector(ret));
+	INODE* inodes = (INODE*)iface.read28(inode2sector(ret));
 
-	JOTAFS_BOTH_INODES b;
+	BOTH_INODES b;
 	b.inode = inodes[(ret-1) % JOTAFS_INODES_PER_SECTOR];
 	sb_cache.first_free_inode = b.free_inode.next;
 
@@ -138,12 +137,13 @@ uint32_t JOTAFS::allocInodeAndWrite(const JOTAFS_INODE& inode) {
 
 	updateSB();
 	jfree(inodes);
+
 	return ret;
 }
 
 void JOTAFS::freeInode(uint32_t idx) {
 	// Put it at the end of the queue.
-	JOTAFS_BOTH_INODES old;
+	BOTH_INODES old;
 	old.inode = getInode(sb_cache.last_free_inode);
 	old.free_inode.next = idx;
 

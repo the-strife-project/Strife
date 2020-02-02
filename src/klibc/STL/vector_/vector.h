@@ -36,6 +36,7 @@ public:
 
 	// General operations.
 	void invert();
+	void clear();
 
 	// Operators.
 	vector<T>& operator=(const vector<T>& other);

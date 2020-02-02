@@ -1,10 +1,9 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
 #include <klibc/stdlib.h>
-
-inline uint32_t div_power128(uint32_t n, uint32_t exp) { return n >> (7*exp); }
+#include <klibc/STL/list>
 
 uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
-	JOTAFS_INODE inode;
+	INODE inode;
 	inode.used = 1;
 	inode.size = size;
 	// The line below is to be kept until I implement POSIX time.
@@ -40,40 +39,76 @@ uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t fil
 
 		// 'thisblock' is now set.
 		// It's time to put the block in the inode.
-		uint8_t level = getLevel(i);
-		if(level == 0) {
-			inode.DBPs[i] = thisblock;
-			continue;
-		}
-
-		// Go down the IBPs tree, creating nodes if necessary.
-		uint32_t idx = discardLowerLevels(i, level);
-		// Is the IBP already there? If not, create it.
-		if(!inode.IBPs[level-1]) inode.IBPs[level-1] = allocBlock();
-		uint32_t nextBlock = inode.IBPs[level-1];
-		while(level) {
-			// Get ready to read the contents.
-			uint32_t* contents = (uint32_t*)getBlock(nextBlock);
-
-			// Get the index.
-			uint32_t index = div_power128(idx, level-1);
-
-			// Are there any indirect levels left?
-			if(level > 1) {
-				// Is it already there?
-				if(!contents[index]) contents[index] = allocBlock();
-			} else {
-				// Just put the block we just wrote.
-				contents[index] = thisblock;
-			}
-
-			writeBlock(nextBlock, (uint8_t*)contents);
-			nextBlock = contents[index];
-			jfree(contents);
-
-			level--;
-		}
+		putBlockInInode(inode, i, thisblock);
 	}
 
 	return allocInodeAndWrite(inode);
+}
+
+
+
+
+void JOTAFS::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
+	uint64_t appendsize = size;
+
+	// Read the inode.
+	INODE inode = getInode(inode_n);
+
+	// First: is there space in the last block?
+	uint32_t spacestart = inode.size % BYTES_PER_SECTOR;
+	if(spacestart) {
+		// Yep. Append the bytes we need there.
+		// Read the block.
+		uint32_t blockid = getSequentialBlock(inode, inode.n_blocks - 1);
+		uint8_t* contents = getBlock(blockid);
+
+		// Start putting the data.
+		uint16_t written;
+		for(written=0; written < size && written+spacestart < BYTES_PER_SECTOR; ++written) {
+			contents[written+spacestart] = *data;
+			++data;
+		}
+		size -= written;
+
+		// That's done. Write the block.
+		writeBlock(blockid, contents);
+		jfree(contents);
+	}
+
+	// How many extra blocks do we need?
+	uint32_t extrablocks = size / BYTES_PER_SECTOR;
+	if(size % BYTES_PER_SECTOR) extrablocks++;
+
+	// Allocate them.
+	// TODO: Change this one allocBlock is improved.
+	list<uint32_t> blocks;
+	for(uint32_t i=0; i<extrablocks; ++i)
+		blocks.push_back(allocBlock());
+
+	// Write the data!
+	for(auto const& blockid : blocks) {
+		uint8_t contents[BYTES_PER_SECTOR] = {0};
+		uint16_t written;
+		for(written=0; written < size && written < BYTES_PER_SECTOR; ++written) {
+			contents[written] = *data;
+			++data;
+		}
+		size -= written;
+
+		writeBlock(blockid, contents);
+	}
+
+	// Put the new blocks.
+	uint32_t i = inode.n_blocks;
+	for(auto const& blockid : blocks) {
+		putBlockInInode(inode, i, blockid);
+		++i;
+	}
+
+	// Update the size.
+	inode.size += appendsize;
+	inode.n_blocks += extrablocks;
+
+	// Write the inode.
+	writeInode(inode_n, inode);
 }

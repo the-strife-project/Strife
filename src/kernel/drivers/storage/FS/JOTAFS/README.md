@@ -2,7 +2,7 @@ JOTAFS is a simplified (and arguably worse) version of ext2.
 
 Some aclarations:
 - Everything is in Little-Endian.
-- The filesystem consists in the superblock, inodes, chunks, and blocks.
+- The filesystem consists in the superblock, inodes, and blocks.
 - The superblock contains information about the later three.
 - An inode is an array of 128 bytes containing all metadata about a file but its name.
 - A block is a sector containing raw data (the contents of a file).
@@ -28,6 +28,7 @@ Then, inodes. There are four of them in each sector, and the first inode is the 
 If the inode is free, this is its structure:
 
 | Start byte | Size (bytes) | Description |
+| --- | --- | --- |
 | 0   | 1   | Fixed to 0. |
 | 1   | 3   | Padding. |
 | 4   | 4   | Sector number of the next free inode. 0 if it's there isn't. |
@@ -104,6 +105,6 @@ Some inodes are reserved:
 
 A directory is a file with its filetype set to 1. Its blocks contain contiguous file entries. Each entry is formed by the filename (max length being 507 bytes), made up of any characters greater than 31 but '/', terminated by a null byte, and 4 bytes specifying the inode number of that entry.
 
-After the inodes, there's a multi-sector bitmap marking whether a block is in used (0) or free (1).
+After the inodes, there's a multi-sector bitmap marking whether a block is in use (1) or free (0).
 
 Finally, blocks. After the last sector of the bitmap, blocks start, containing raw data.

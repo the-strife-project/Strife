@@ -1,6 +1,5 @@
 #include <kernel/drivers/VESA/VESA.h>
 #include <kernel/drivers/PIC/PIC.h>
-#include <klibc/stdio.h>
 #include <klibc/stdlib.h>
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/paging/paging.h>

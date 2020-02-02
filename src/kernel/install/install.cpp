@@ -1,5 +1,5 @@
 #include <kernel/install/install.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 #include <klibc/stdlib.h>
 #include <kernel/drivers/term/term.h>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
@@ -56,7 +56,7 @@ void install() {
 	// Copy MBR.
 	printf("Copying boot sector... ");
 	list<string> stage1_p; stage1_p.push_back("BOOT"); stage1_p.push_back("HDDS1.BIN");
-	struct ISO9660_entity* stage1_e = ISO9660_get(stage1_p);
+	ISO9660_entity* stage1_e = ISO9660_get(stage1_p);
 	if(!stage1_e) {
 		printf("[FAILED]\n"
 		"Couldn't find HDDS1.BIN in the BOOT directory of the CD.\n"
@@ -72,7 +72,7 @@ void install() {
 	// Copy JBoot's second stage.
 	printf("Copying JBoot's second stage... ");
 	list<string> stage2_p; stage2_p.push_back("BOOT"); stage2_p.push_back("HDDS2.BIN");
-	struct ISO9660_entity* stage2_e = ISO9660_get(stage2_p);
+	ISO9660_entity* stage2_e = ISO9660_get(stage2_p);
 	if(!stage2_e) {
 		printf("[FAILED]\n"
 		"Couldn't find HDDS2.BIN in the BOOT directory of the CD.\n"
@@ -81,14 +81,14 @@ void install() {
 		while(1) {}
 	}
 	uint8_t* stage2 = ISO9660_read(stage2_e);
-	jotafs.newfile(stage2_e->length, stage2, 0, JOTAFS_FILETYPE_REGULAR_FILE, 0);
+	jotafs.newfile(stage2_e->length, stage2, 0, JOTAFS::FILETYPE::REGULAR_FILE, 0);
 	jfree(stage2_e);
 	printf("[OK]\n");
 
 	// Copy the kernel.
 	printf("Copying the kernel... ");
 	list<string> kernel_p; kernel_p.push_back("BOOT"); kernel_p.push_back("KERNEL.BIN");
-	struct ISO9660_entity* kernel_e = ISO9660_get(kernel_p);
+	ISO9660_entity* kernel_e = ISO9660_get(kernel_p);
 	if(!kernel_e) {
 		printf("[FAILED]\n"
 		"This error is impossible.\n"
@@ -105,7 +105,7 @@ void install() {
 	*/
 	uint8_t* kernel = (uint8_t*)jmalloc(kernel_e->length + 2048);
 	ATAPI_granularread(1+(kernel_e->length / 2048), kernel_e->LBA, kernel);
-	jotafs.newfile(kernel_e->length, kernel, 0, JOTAFS_FILETYPE_REGULAR_FILE, 0);
+	jotafs.newfile(kernel_e->length, kernel, 0, JOTAFS::FILETYPE::REGULAR_FILE, 0);
 	jfree(kernel);
 	jfree(kernel_e);
 	printf("[OK]\n");
@@ -114,14 +114,13 @@ void install() {
 	printf("Creating directory tree... ");
 
 	// Root (inode will be JOTAFS_INODE_ROOT=3).
-	// TODO: Probably there's an issue with newdir or inode allocation.
-	/*JOTAFS::DIR root = */jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
+	JOTAFS::DIR root = jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
 	// "/bin/"
-	/*JOTAFS::DIR dir_bin = */jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
-	//root.addChild("bin", dir_bin.getInodeNumber());
+	JOTAFS::DIR dir_bin = jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
+	root.addChild("bin", dir_bin.getInodeNumber());
 	// "/bin/core"
-	/*JOTAFS::DIR dir_bin_core = *///jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
-	//dir_bin.addChild("core", dir_bin_core.getInodeNumber());
+	JOTAFS::DIR dir_bin_core = jotafs.newdir(0, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX);
+	dir_bin.addChild("core", dir_bin_core.getInodeNumber());
 
 	printf("[OK]\n");
 
@@ -129,7 +128,7 @@ void install() {
 	// Copy the MSS.
 	printf("Copying MSS... ");
 	list<string> mss_p; mss_p.push_back("MSS.BIN");
-	struct ISO9660_entity* mss_e = ISO9660_get(mss_p);
+	ISO9660_entity* mss_e = ISO9660_get(mss_p);
 	if(!mss_e) {
 		printf("[FAILED]\n"
 		"MSS.bin could not be found."
@@ -137,8 +136,8 @@ void install() {
 		while(1) {}
 	}
 	uint8_t* mss = ISO9660_read(mss_e);
-	/*uint32_t mss_inoden = */jotafs.newfile(mss_e->length, mss, 0, JOTAFS_FILETYPE_REGULAR_FILE, 0);
-	//dir_bin_core.addChild("mss", mss_inoden);
+	uint32_t mss_inoden = jotafs.newfile(mss_e->length, mss, 0, JOTAFS::FILETYPE::REGULAR_FILE, 0);
+	dir_bin_core.addChild("mss", mss_inoden);
 	jfree(mss_e);
 
 	printf("[OK]\n");

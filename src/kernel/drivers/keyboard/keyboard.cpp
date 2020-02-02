@@ -1,5 +1,5 @@
 #include <kernel/drivers/keyboard/keyboard.h>
-#include <klibc/stdio.h>
+#include <klibc/stdio>
 #include <klibc/stdlib.h>
 #include <kernel/asm.h>
 #include <kernel/GDT/GDT.h>
@@ -8,7 +8,6 @@
 #include <kernel/kernel_panic/kernel_panic.h>
 #include <kernel/drivers/keyboard/kb_layout.h>
 #include <kernel/drivers/term/term.h>
-#include <klibc/string>
 
 #define IS_LATIN1(x) ((x == '\xC2') || (x == '\xC3'))
 
@@ -47,7 +46,7 @@ bool show = true;
 	execute the corresponding routine.
 */
 bool silentMode = false;
-string lastPressed;
+string silentPressed;	// TODO: This should be an ID for immediate comparisons.
 
 // Function to print the characters at the right of the cursor.
 // extraSpace is in case we're deleting a character.
@@ -72,7 +71,8 @@ void printRight(bool extraSpace) {
 void bk(const string& a) {	// Buffer key
 	// If we're on Silent Mode, we're done.
 	if(silentMode) {
-		lastPressed = a;
+		silentMode = false;
+		silentPressed = a;
 		return;
 	}
 
@@ -353,7 +353,7 @@ extern "C" void keyboard_handler(void) {
 	accent0 = accent1 = accent2 = accent3 = false;
 }
 
-void keyboard_init(void) {
+void keyboard_init() {
 	IDT_SET_ENT(IDT[KEYBOARD_IDT_ENTRY], 0, _KERNEL_CODESEGMENT, (uint32_t)IDT_keyboard, 0);
 
 	// Discard already pressed keys.
@@ -367,7 +367,7 @@ void keyboard_init(void) {
 	while(inb(KEYBOARD_DATA_PORT) != 0xFA) {}
 }
 
-void keyboard_pause(void) {
+void keyboard_pause() {
 	pic_disable_irq(1);
 }
 void keyboard_resume(bool show_) {
@@ -377,3 +377,7 @@ void keyboard_resume(bool show_) {
 	show = show_;
 	pic_enable_irq(1);
 }
+
+void keyboard_setSilentMode() { silentMode = true; }
+bool keyboard_getSilentMode() { return silentMode; }
+const string& keyboard_getSilentPressed() { return silentPressed; }

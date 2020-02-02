@@ -2,6 +2,7 @@
 #define JOTAFS_UTIL
 
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
+#include <klibc/stdlib.h>
 
 uint32_t JOTAFS::sector2inode(uint32_t sector) {
 	// Let's count: 0 is for the boot sector, 1 the superblock, 2 is the four (JOTAFS_INODES_PER_SECTOR) first inodes.
@@ -66,7 +67,7 @@ uint32_t JOTAFS::discardLowerLevels(uint32_t i, uint8_t level) {
 }
 
 
-uint32_t JOTAFS::getSequentialBlock(const JOTAFS_INODE& inode, uint32_t i) {	// O(1)
+uint32_t JOTAFS::getSequentialBlock(const INODE& inode, uint32_t i) {	// O(1)
 	// Fast comparison.
 	if(i <= 9) return inode.DBPs[i];
 
@@ -88,6 +89,43 @@ uint32_t JOTAFS::getSequentialBlock(const JOTAFS_INODE& inode, uint32_t i) {	// 
 	}
 
 	return nextBlock;
+}
+
+
+void JOTAFS::putBlockInInode(INODE& inode, uint32_t i, uint32_t block) {	// O(1)
+	uint8_t level = getLevel(i);
+	if(level == 0) {
+		inode.DBPs[i] = block;
+		return;
+	}
+
+	// Go down the IBPs tree, creating nodes if necessary.
+	uint32_t idx = discardLowerLevels(i, level);
+	// Is the IBP already there? If not, create it.
+	if(!inode.IBPs[level-1]) inode.IBPs[level-1] = allocBlock();
+	uint32_t nextBlock = inode.IBPs[level-1];
+	while(level) {
+		// Get ready to read the contents.
+		uint32_t* contents = (uint32_t*)getBlock(nextBlock);
+
+		// Get the index.
+		uint32_t index = div_power128(idx, level-1);
+
+		// Are there any indirect levels left?
+		if(level > 1) {
+			// Is it already there?
+			if(!contents[index]) contents[index] = allocBlock();
+		} else {
+			// Just put the block we just wrote.
+			contents[index] = block;
+		}
+
+		writeBlock(nextBlock, (uint8_t*)contents);
+		nextBlock = contents[index];
+		jfree(contents);
+
+		level--;
+	}
 }
 
 #endif

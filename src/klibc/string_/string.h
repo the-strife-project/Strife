@@ -24,6 +24,7 @@ public:
 	void invert();
 	void pop_front();
 	void pop_back();
+	void clear();
 
 
 	// Operators.
