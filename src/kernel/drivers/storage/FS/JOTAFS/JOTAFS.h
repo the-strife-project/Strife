@@ -6,6 +6,7 @@
 #include <klibc/string>
 #include <klibc/STL/list>
 #include <klibc/STL/pair>
+#include <klibc/STL/stack>
 
 #define JOTAFS_SECTOR_BOOT 0
 #define JOTAFS_SECTOR_SUPERBLOCK 1

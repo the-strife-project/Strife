@@ -72,7 +72,7 @@ extern "C" void kernel_main(void) {
 
 		// Load font.
 		printf("Loading font...\n");
-		list<string> font_p; font_p.push_back("FONT"); font_p.push_back("LAT1"); font_p.push_back("LAT1.RAW");
+		list<string> font_p(string("FONT/LAT1/LAT1.RAW").split('/'));
 		ISO9660_entity* font_e = ISO9660_get(font_p);
 		if(font_e) {
 			uint8_t* font = ISO9660_read(font_e);

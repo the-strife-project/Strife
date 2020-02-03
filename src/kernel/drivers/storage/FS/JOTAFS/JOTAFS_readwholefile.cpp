@@ -21,9 +21,12 @@ uint8_t* JOTAFS::readWholeFile(uint32_t idx, uint8_t* buffer) {
 		// Read it.
 		uint8_t* thisblock_contents = getBlock(thisblock);
 
-		// Append only the required. TODO: Use memmove.
-		uint16_t upper_bound = (i != inode.n_blocks - 1) ? BYTES_PER_SECTOR : (inode.size % BYTES_PER_SECTOR);
-		for(uint16_t j=0; j<upper_bound; j++) buffer[(i*BYTES_PER_SECTOR) + j] = thisblock_contents[j];
+		// Append only the required.
+		uint16_t upper_bound = BYTES_PER_SECTOR;
+		if(i == inode.n_blocks - 1 && inode.size % BYTES_PER_SECTOR)
+			upper_bound = inode.size % BYTES_PER_SECTOR;
+
+		memcpy(buffer + i*BYTES_PER_SECTOR, thisblock_contents, upper_bound);
 
 		jfree(thisblock_contents);
 	}

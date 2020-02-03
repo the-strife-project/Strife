@@ -12,6 +12,8 @@ void* operator new[](size_t sz);
 void operator delete(void* p);
 void operator delete[](void* p);
 
+void memcpy(void* dst, void* src, size_t sz);
+
 string itoa(int n);
 int atoi(string str);
 

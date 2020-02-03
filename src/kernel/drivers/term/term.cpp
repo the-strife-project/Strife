@@ -2,6 +2,7 @@
 #include <kernel/paging/paging.h>
 #include <kernel/drivers/term/font/font.h>
 #include <kernel/drivers/term/cursor/cursor.h>
+#include <klibc/stdlib.h>
 
 size_t term_row;
 size_t term_column;
@@ -11,6 +12,8 @@ uint16_t* TERM_BUFFER = (uint16_t*)0xB8000;
 
 // This will be used in order to do some offsets in the font.
 uint8_t lat1 = 0;
+// This is for doing checks in '\n'.
+uint8_t term_bg_cache;
 
 void term_init(void) {
 	term_row = 0;
@@ -28,16 +31,14 @@ void term_writec(unsigned char c) {
 	switch(c) {
 		case '\n':
 			/*
-				Fill the rest of the line with spaces.
-				This is useful in case the background color has changed
-				since the last call to "term_clear()".
-
-				TODO: avoid doing this all the time.
-				Instead, keep a value of the background color and see if it has changed.
+				If the background color has changed since the last fill,
+				we need to fill in the rest of the line with spaces.
 			*/
-			for(int i=term_column; i<TERM_WIDTH; i++)
-				__term_putliteralchar(' ');
-			term_row--;
+			if(term_bg_cache != term_bg) {
+				for(int i=term_column; i<TERM_WIDTH; ++i)
+					__term_putliteralchar(' ');
+				term_row--;
+			}
 
 			term_goDown();
 			break;
@@ -58,7 +59,7 @@ void term_writec(unsigned char c) {
 			term_left();
 			break;
 		default:
-			// Map C3 LAT-1 character where they should go.
+			// Map C3 LAT-1 character where they should go. This depends on the font.
 			if(c >= 0xA0 && lat1 == 3) __term_putliteralchar(c + 0x40);
 			else __term_putliteralchar(c);
 	}
@@ -71,11 +72,7 @@ void term_goDown() {
 		term_row--;
 
 		// Starting from row 1, move each character up.
-		// TODO: IMPROVE THIS ALGORITHM!!!
-		for(int i=0; i<TERM_HEIGHT-1; i++) {
-			for(int j=0; j<TERM_WIDTH; j++)
-				TERM_BUFFER[i*TERM_WIDTH + j] = TERM_BUFFER[(i+1) * TERM_WIDTH + j];
-		}
+		memcpy(TERM_BUFFER, TERM_BUFFER + TERM_WIDTH, sizeof(uint16_t)*TERM_WIDTH*(TERM_HEIGHT-1));
 
 		// Finally, clear the last line.
 		for(int i=0; i<TERM_WIDTH; i++)
@@ -90,10 +87,10 @@ void term_goStart() {
 }
 
 void term_fill(uint32_t color) {
+	term_bg_cache = term_bg;
 	term_bg = color;
-	// TODO: This can be done way more efficient.
-	for(unsigned int i=0; i<TERM_WIDTH*TERM_HEIGHT; i++)
-		term_writec(' ');
+	for(uint32_t i=0; i<TERM_WIDTH*TERM_HEIGHT; ++i)
+		TERM_BUFFER[i] = vga_entry(' ', vga_entry_color(term_fg, term_bg));
 }
 
 void term_clear() {

@@ -31,6 +31,7 @@ uint32_t __readAndNew(JOTAFS& jotafs, const list<string>& path, uint8_t filetype
 		while(true) {}
 	}
 	uint8_t* contents = ISO9660_read(entity);
+
 	uint32_t ret = jotafs.newfile(entity->length, contents, JOTAFS_SUPERUSER_UID, filetype, permissions);
 
 	jfree(contents);
