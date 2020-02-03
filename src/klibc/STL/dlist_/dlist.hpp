@@ -23,6 +23,7 @@ private:
 public:
 	dlist();
 	dlist(const dlist& other);
+	dlist(dlist&& other);
 	~dlist();
 
 	size_t size() const;
@@ -42,6 +43,7 @@ public:
 
 	// Operators.
 	dlist<T>& operator=(const dlist<T>& other);
+	dlist<T>& operator=(dlist<T>&& other);
 	bool operator==(const dlist<T>& other) const;
 	bool operator!=(const dlist<T>& other) const;
 

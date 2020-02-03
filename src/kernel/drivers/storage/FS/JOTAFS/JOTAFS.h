@@ -4,6 +4,8 @@
 #include <common/types.h>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
 #include <klibc/string>
+#include <klibc/STL/list>
+#include <klibc/STL/pair>
 
 #define JOTAFS_SECTOR_BOOT 0
 #define JOTAFS_SECTOR_SUPERBLOCK 1
@@ -12,6 +14,7 @@
 #define JOTAFS_FIRST_NON_RESERVED_INODE 4
 #define JOTAFS_NUMBER_OF_DBPS 10
 #define JOTAFS_SEPARATOR '/'
+#define JOTAFS_SUPERUSER_UID 0
 
 // J(otafs) P(ermissions)
 #define JP_UR 0b100000000
@@ -57,7 +60,8 @@ public:
 
 	struct INODE {
 		uint8_t used;
-		uint8_t padding0[7];
+		uint8_t padding0[3];
+		uint32_t n_links;
 		uint64_t size;
 		uint32_t creation_time;
 		uint32_t last_mod_time;
@@ -68,7 +72,8 @@ public:
 		uint32_t uid;
 		uint16_t permissions;
 		uint8_t filetype;
-		uint8_t padding1[33];
+		uint8_t flags;
+		uint8_t padding1[32];
 	} __attribute__((packed));
 
 	union BOTH_INODES {
@@ -92,7 +97,7 @@ public:
 			SUCTION,
 			SOCKET,
 			VOLATILE,
-			HARD,
+			SYSTEM,
 			SOFT
 		};
 	};
@@ -103,6 +108,12 @@ public:
 			JBOOT2,
 			KERNEL,
 			ROOT
+		};
+	};
+
+	struct FLAG {
+		enum {
+			FAST_LINK
 		};
 	};
 
@@ -182,19 +193,22 @@ public:
 		INODE inode_cache;
 
 		// 'cached' is a JOTAFS_INODE address, in case it's in memory, so there's no need to read it again.
-		friend class JOTAFS;
 		DIR(JOTAFS* parent, uint32_t inode_n, void* cached=0);
+		friend class JOTAFS;
 	public:
 		DIR();
 		void addChild(string filename, uint32_t child_inode_number);
 		uint32_t getInodeNumber() const;
+		list<pair<string, uint32_t>> getChildren() const;
 	};
 	friend class DIR;
 
-	DIR newdir(uint32_t uid, uint16_t permissions);
+	DIR newdir(uint32_t uid, uint16_t permissions, uint32_t parent_inode_number);
 
 	// JOTAFS_find.cpp
 	uint32_t find(const string& path);
+
+	inline DIR getdir(const string& path) { return DIR(this, find(path)); };
 };
 
 #endif

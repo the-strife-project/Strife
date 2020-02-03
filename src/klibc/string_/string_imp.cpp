@@ -2,9 +2,8 @@
 #define STRING_IMP
 
 #include <klibc/string>
+#include <klibc/utility>
 
-string::string() {}
-string::string(const string& other) { data = other.data; }
 string::string(const char* other) { for(size_t i=0; other[i]; i++) data.push_back(other[i]); }
 size_t string::size() const { return data.size(); }
 size_t string::length() const { return data.size(); }
@@ -21,13 +20,25 @@ void string::invert() { data.invert(); }
 void string::pop_front() { data.pop_front(); }
 void string::pop_back() { data.pop_back(); }
 void string::clear() { data.clear(); }
+list<string> string::split(char c) const {
+	list<string> ret;
+
+	string aux;
+	auto it = begin();
+	do {
+		if(it == end() || *it == c) {
+			ret.push_back(aux);
+			aux.clear();
+		} else {
+			aux += *it;
+		}
+	} while((it++) != end());
+
+	return ret;
+}
 
 
 // Operators.
-string& string::operator=(const string& other) {
-	data = other.data;
-	return *this;
-}
 string& string::operator=(const char* other) {
 	clear();
 	for(size_t i=0; other[i]; i++) data.push_back(other[i]);

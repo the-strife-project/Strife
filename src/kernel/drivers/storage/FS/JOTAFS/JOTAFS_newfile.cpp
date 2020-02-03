@@ -5,14 +5,16 @@
 uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	INODE inode;
 	inode.used = 1;
+	inode.n_links = 0;	// Links will be created by DIR::addChild.
 	inode.size = size;
 	// The line below is to be kept until I implement POSIX time.
 	inode.creation_time = inode.last_mod_time = inode.last_access_time = 0;
 	inode.n_blocks = size / BYTES_PER_SECTOR;
 	if(size % BYTES_PER_SECTOR) inode.n_blocks++;
 	inode.uid = uid;
-	inode.filetype = filetype;
 	inode.permissions = permissions;
+	inode.filetype = filetype;
+	inode.flags = 0;
 
 	// Let's start filling up the blocks.
 	uint32_t size_in_blocks = inode.n_blocks;

@@ -1,9 +1,6 @@
 #ifndef WINDOW_IMP
 #define WINDOW_IMP
 
-template<typename T> window<T>::window() {}
-template<typename T> window<T>::window(const window& other) { *this = other; }
-
 template<typename T> size_t window<T>::size() const { return left_st.size() + right_st.size(); }
 
 template<typename T> T& window<T>::get() { return left_st.top(); }
@@ -31,11 +28,6 @@ template<typename T> bool window<T>::isBeginning() const { return left_st.size()
 template<typename T> bool window<T>::isFirst() const { return left_st.size() == 1; }
 template<typename T> bool window<T>::isLast() const { return right_st.size() == 0; }
 
-template<typename T> window<T>& window<T>::operator=(const window<T>& other) {
-	left_st = other.left_st;
-	right_st = other.right_st;
-	return *this;
-}
 template<typename T> window<T>& window<T>::operator++() {
 	right();
 	return *this;

@@ -4,6 +4,8 @@
 #include <common/types.h>
 #define FONT_LENGTH 4096
 
-unsigned char* getFont();
+void setFont(uint8_t* f);
+void loadFontToVGA();
+uint8_t* getFont();
 
 #endif

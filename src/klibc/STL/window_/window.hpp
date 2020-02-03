@@ -8,8 +8,9 @@ private:
 	iterable_stack<T> left_st, right_st;
 
 public:
-	window();
-	window(const window& other);
+	window() = default;
+	window(const window& other) = default;
+	window(window&& other) = default;
 
 	size_t size() const;
 
@@ -29,7 +30,8 @@ public:
 	bool isFirst() const;
 	bool isLast() const;
 
-	window<T>& operator=(const window<T>& other);
+	window<T>& operator=(const window<T>& other) = default;
+	window<T>& operator=(window<T>&& other) = default;
 	window<T>& operator++();	// right();
 	window<T> operator++(int);
 	window<T>& operator--();	// left();

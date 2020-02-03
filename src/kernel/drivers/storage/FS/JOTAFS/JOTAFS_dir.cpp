@@ -31,11 +31,49 @@ void JOTAFS::DIR::addChild(string filename, uint32_t child_inode_number) {
 	parent->appendToFile(inode_n, filename.length() + 1 + 4, dirent);
 
 	jfree(dirent);
+
+	// Increment the number of links of child_inode_number.
+	INODE inode = parent->getInode(child_inode_number);
+	++inode.n_links;
+	parent->writeInode(child_inode_number, inode);
 }
 
 uint32_t JOTAFS::DIR::getInodeNumber() const { return inode_n; }
 
-JOTAFS::DIR JOTAFS::newdir(uint32_t uid, uint16_t permissions) {
+inline uint32_t getPtrDiff(uint8_t* ptr1, uint8_t* ptr2) {
+	return ((uint32_t)(ptr1 - ptr2));
+}
+
+list<pair<string, uint32_t>> JOTAFS::DIR::getChildren() const {
+	list<pair<string, uint32_t>> ret;
+
+	INODE inode = parent->getInode(inode_n);
+	uint8_t* children = parent->readWholeFile(inode_n);
+	uint8_t* auxchildren = children;
+
+	while((uint32_t)(auxchildren - children) < inode.size) {
+		string str = (char*)auxchildren;
+		auxchildren += str.length() + 1;
+
+		pair<string, uint32_t> toPush;
+		toPush.f = str;
+		toPush.s = *(uint32_t*)auxchildren;
+
+		ret.push_back(toPush);
+		auxchildren += 4;
+	}
+
+	jfree(children);
+	return ret;
+}
+
+JOTAFS::DIR JOTAFS::newdir(uint32_t uid, uint16_t permissions, uint32_t parent_inode_number) {
 	uint32_t inode_n = newfile(0, 0, uid, FILETYPE::DIRECTORY, permissions);
-	return JOTAFS::DIR(this, inode_n);
+	DIR ret(this, inode_n);
+
+	// Add '.'
+	ret.addChild(".", inode_n);
+	ret.addChild("..", parent_inode_number);
+
+	return ret;
 }

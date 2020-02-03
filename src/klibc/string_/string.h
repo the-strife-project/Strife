@@ -2,13 +2,18 @@
 #define STRING_H
 
 #include <klibc/STL/vector>
+#include <klibc/STL/list>
+
+// TODO: Should this inherit vector<char>?
+// It would simplify the code, no doubt.
 
 class string {
 private:
 	vector<char> data;
 public:
-	string();
-	string(const string& other);
+	string() = default;
+	string(const string& other) = default;
+	string(string&& other) = default;
 	string(const char* other);
 
 	size_t size() const;
@@ -25,10 +30,12 @@ public:
 	void pop_front();
 	void pop_back();
 	void clear();
+	list<string> split(char c) const;
 
 
 	// Operators.
-	string& operator=(const string& other);
+	string& operator=(const string& other) = default;
+	string& operator=(string&& other) = default;
 	string& operator=(const char* other);
 	char& operator[](size_t idx);
 	const char& operator[](size_t idx) const;

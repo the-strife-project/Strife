@@ -8,6 +8,10 @@ template<typename T> list<T>::list() {
 	sz = 0;
 }
 template<typename T> list<T>::list(const list<T>& other) { *this = other; }
+template<typename T> list<T>::list(list<T>&& other) : first(other.first), last(other.last), sz(other.sz) {
+	other.first = other.last = nullptr;
+	other.sz = 0;
+}
 template<typename T> list<T>::~list() {
 	node* current = first;
 	while(current) {
@@ -75,6 +79,13 @@ template<typename T> list<T>& list<T>::operator=(const list<T>& other) {
 	last->next = 0;
 	sz = other.sz;
 	return *this;
+}
+template<typename T> list<T>& list<T>::operator=(list<T>&& other) {
+	first = other.first;
+	last = other.last;
+	sz = other.sz;
+	other.first = other.last = nullptr;
+	other.sz = 0;
 }
 template<typename T> bool list<T>::operator==(const list<T>& other) const {
 	if(sz != other.sz) return false;

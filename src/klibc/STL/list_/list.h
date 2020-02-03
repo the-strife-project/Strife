@@ -17,6 +17,7 @@ private:
 public:
 	list();
 	list(const list& other);
+	list(list&& other);
 	~list();
 
 	size_t size() const;
@@ -35,6 +36,7 @@ public:
 
 	// Operators.
 	list<T>& operator=(const list<T>& other);
+	list<T>& operator=(list<T>&& other);
 	bool operator==(const list<T>& other) const;
 	bool operator!=(const list<T>& other) const;
 

@@ -16,6 +16,8 @@
 #include <kernel/TSS/TSS.h>
 #include <kernel/usermode/usermode.h>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
+#include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
+#include <kernel/drivers/term/font/font.h>
 
 #ifdef STL_TEST
 #include <klibc/STL/test.h>
@@ -23,7 +25,16 @@
 
 #define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x8AE0);
 
-#include <klibc/STL/vector>
+void printSplash() {
+	printf("\n");
+	term_setFGC(0x8);
+	term_setBGC(0xB);
+	printf("\n                                    jotadOS                                     \n");
+	term_setFGC(0xA);
+	term_setBGC(0x0);
+	printf("\n");
+}
+
 extern "C" void kernel_main(void) {
 	memutils_init();
 	term_setFGC(0xA);
@@ -44,16 +55,9 @@ extern "C" void kernel_main(void) {
 
 	printf("Loading drivers...\n");
 	keyboard_init();
+
 	//clock_init();
 	//clock_start();
-
-	printf("\n");
-	term_setFGC(0x8);
-	term_setBGC(0xB);
-	printf("\n                                    jotadOS                                     \n");
-	term_setFGC(0xA);
-	term_setBGC(0x0);
-	printf("\n");
 
 	// Test STL.
 	#ifdef STL_TEST
@@ -65,6 +69,21 @@ extern "C" void kernel_main(void) {
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));
 	if(bootDriveID == 0xE0) {
 		// It's the CD. Run the installation program.
+
+		// Load font.
+		printf("Loading font...\n");
+		list<string> font_p; font_p.push_back("FONT"); font_p.push_back("LAT1"); font_p.push_back("LAT1.RAW");
+		ISO9660_entity* font_e = ISO9660_get(font_p);
+		if(font_e) {
+			uint8_t* font = ISO9660_read(font_e);
+			setFont(font);
+			jfree(font);
+			loadFontToVGA();
+		}
+		jfree(font_e);
+
+		printSplash();
+
 		/*
 			TODO: don't run the installation if we boot from CD.
 			Instead, improve the ATAPI driver and make this usable.
@@ -77,20 +96,29 @@ extern "C" void kernel_main(void) {
 		// That should not return.
 	}
 
+	// Initialize the file system.
+	ATA primarymaster(1, 0x1F0);
+	JOTAFS jotafs(primarymaster);
+
+	// Load font.
+	printf("Loading font...\n");
+	uint8_t* font = jotafs.readWholeFile(jotafs.find("/sys/fonts/lat1-16/lat1-16.font"));
+	setFont(font);
+	jfree(font);
+	loadFontToVGA();
+
+	printSplash();
+
 	// Enable syscalls.
 	syscalls_init();
 
 	// Load the TSS.
 	TSS_flush();
 
-	// Initialize the file system.
-	ATA primarymaster(1, 0x1F0);
-	JOTAFS jotafs(primarymaster);
-
 	// Where's MSS?
 	uint32_t mss_inode_n = jotafs.find("/bin/core/mss");
 
-	// Run the MSS.
+	// Load it and run it.
 	uint32_t mss = paging_allocPages(1);
 	paging_setUser(mss, 1);
 	/*

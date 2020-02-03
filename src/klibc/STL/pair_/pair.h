@@ -6,6 +6,6 @@
 template<typename T, typename Q> struct pair {
 	T f;
 	Q s;
-}
+};
 
 #endif

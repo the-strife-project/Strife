@@ -17,8 +17,15 @@ template<typename T> vector<T>::vector(const vector<T>& other) {
 	for(size_t i=0; i<sz; i++) data[i] = other.data[i];
 }
 
+template<typename T> vector<T>::vector(vector<T>&& other) {
+	sz = other.sz;
+	allocated = other.allocated;
+	data = other.data;
+	other.data = nullptr;
+}
+
 template<typename T> vector<T>::~vector() {
-	delete [] data;
+	if(data) delete [] data;
 	data = 0;
 }
 
@@ -32,7 +39,7 @@ template<typename T> void vector<T>::more() {
 	T* newdata = new T[allocated];
 	for(size_t i=0; i<sz; i++) newdata[i] = data[i];
 
-	delete [] data;
+	if(data) delete [] data;
 	data = newdata;
 }
 
@@ -45,7 +52,7 @@ template<typename T> void vector<T>::disp_right(size_t idx, size_t count) {
 		for(size_t i=0; i<idx; i++) newdata[i] = data[i];
 		for(size_t i=idx+count; i<((sz-idx) + count); i++) newdata[i] = data[i];
 
-		delete [] data;
+		if(data) delete [] data;
 		data = newdata;
 	} else {
 		// No need to reallocate.
@@ -116,6 +123,13 @@ template<typename T> vector<T>& vector<T>::operator=(const vector<T>& other) {
 
 	data = new T[allocated];
 	for(size_t i=0; i<sz; i++) data[i] = other.data[i];
+	return *this;
+}
+template<typename T> vector<T>& vector<T>::operator=(vector<T>&& other) {
+	sz = other.sz;
+	allocated = other.allocated;
+	data = other.data;
+	other.data = nullptr;
 	return *this;
 }
 template<typename T> T& vector<T>::operator[](size_t idx) { return data[idx]; }

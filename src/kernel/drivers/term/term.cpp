@@ -1,7 +1,6 @@
 #include <kernel/drivers/term/term.h>
 #include <kernel/paging/paging.h>
 #include <kernel/drivers/term/font/font.h>
-#include <kernel/asm.h>
 #include <kernel/drivers/term/cursor/cursor.h>
 
 size_t term_row;
@@ -16,30 +15,6 @@ uint8_t lat1 = 0;
 void term_init(void) {
 	term_row = 0;
 	term_column = 0;
-
-	/* --- LOAD VGA FONT --- */
-	outw(0x03CE, 0x0005);	// Clear even/odd mode.
-	outw(0x03CE, 0x0406);	// Map VGA memory to 0x0A0000.
-	outw(0x03C4, 0x0402);	// Set bitplane 2.
-	outw(0x03C4, 0x0604);	// Clear even/odd mode.
-
-	// Copy the font. It's stored as 8x32, so we have to ommit the higher 16 bytes.
-	// TODO: OPTIMIZE THIS
-	unsigned char* LAT1_16 = getFont();
-	unsigned char* vga_font = (unsigned char*)0x0A0000;
-	for(int i=0; i<FONT_LENGTH/16; i++) {
-		// Copy 16 bytes.
-		for(int j=0; j<16; j++) *(vga_font++) = LAT1_16[i*16 + j];
-		// Ignore 16 bytes.
-		vga_font += 16;
-	}
-
-	// Restore VGA to normal operation.
-	outw(0x03C4, 0x0302);
-	outw(0x03C4, 0x0204);
-	outw(0x03CE, 0x1005);
-	outw(0x03CE, 0x0E06);
-
 	term_clear();
 }
 
@@ -76,6 +51,7 @@ void term_writec(unsigned char c) {
 			break;
 
 		case '\t':
+			// TODO: make this an actual tab with 8 spaces between each one.
 			for(int i=0; i<4; i++) __term_putliteralchar(' ');
 			break;
 		case '\b':

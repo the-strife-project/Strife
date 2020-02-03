@@ -7,6 +7,10 @@ template<typename T> dlist<T>::dlist() {
 }
 
 template<typename T> dlist<T>::dlist(const dlist<T>& other) { *this = other; }
+template<typename T> dlist<T>::dlist(dlist<T>&& other) : first(other.first), last(other.last), sz(other.sz) {
+	other.first = other.last = nullptr;
+	other.sz = 0;
+}
 template<typename T> dlist<T>::~dlist() { clear(); }
 template<typename T> size_t dlist<T>::size() const { return sz; }
 template<typename T> void dlist<T>::clear() {
@@ -85,6 +89,13 @@ template<typename T> dlist<T>& dlist<T>::operator=(const dlist<T>& other) {
 	last->next = 0;
 	sz = other.sz;
 	return *this;
+}
+template<typename T> dlist<T>& dlist<T>::operator=(dlist<T>&& other) {
+	first = other.first;
+	last = other.last;
+	sz = other.sz;
+	other.first = other.last = nullptr;
+	other.sz = 0;
 }
 template<typename T> bool dlist<T>::operator==(const dlist<T>& other) const {
 	if(sz != other.sz) return false;

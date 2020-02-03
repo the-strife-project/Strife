@@ -2,6 +2,7 @@ JOTAFS is a simplified (and arguably worse) version of ext2.
 
 Some aclarations:
 - Everything is in Little-Endian.
+- When I say «sector» I mean «physical block» (doesn't actually have to be a physical sector).
 - The filesystem consists in the superblock, inodes, and blocks.
 - The superblock contains information about the later three.
 - An inode is an array of 128 bytes containing all metadata about a file but its name.
@@ -18,9 +19,9 @@ The second sector is the superblock, which contains the following fields:
 | 12  | 4   | Number of blocks |
 | 16  | 4   | ID of the first free inode |
 | 20  | 4   | ID of the last free inode |
-| 24  | 4   | LBA sector of the first block bitmap |
+| 24  | 4   | Sector of the first block bitmap |
 | 28  | 4   | ID of the first non-full bitmap |
-| 32  | 4   | LBA sector of the first block |
+| 32  | 4   | Sector of the first block |
 | 36  | 476 | Unused |
 
 Then, inodes. There are four of them in each sector, and the first inode is the number 1, as 0 is reserved for the null inode (necessary for the linked list). Their structure depends on the first byte. If it's 0x00, the inode is free. If it's 0x01, it's in use. This way, fields are overlapped.
@@ -41,7 +42,8 @@ If it's in use, it's as follows:
 | Start byte | Size (bytes) | Description |
 | --- | --- | --- |
 | 0   | 1   | Fixed to 1. |
-| 1   | 7   | Padding. Unused. |
+| 1   | 3   | Padding. Unused. |
+| 4   | 4   | Number of (hard) links. |
 | 8   | 8   | File size (bytes) |
 | 16  | 4   | Creation time (POSIX) |
 | 20  | 4   | Last modification time (POSIX) |
@@ -64,7 +66,8 @@ If it's in use, it's as follows:
 | 88  | 4   | Owner's user ID |
 | 92 | 2   | Permissions. See below. |
 | 94 | 1   | Filetype. |
-| 95 | 33  | Padding to 128 bytes. |
+| 95 | 1   | Flags. |
+| 96 | 32  | Padding to 128 bytes. |
 
 The permissions bitmap is formed as folows:
 
@@ -91,9 +94,15 @@ The filetype:
 | 3     | Suction pipe. |
 | 4     | Socket. |
 | 5     | Volatile (in RAM). |
-| 6     | Hard link. |
+| 6     | System (regular) file. Cannot be deleted, and has a reserved inode number. |
 | 7     | Soft link. |
 | 8-255 | Unused. In case there's need for more. |
+
+Flags:
+
+| Bit (0 is MSB) | Contents |
+| --- | --- |
+| 0   | Fast link. If the filetype is soft link, the path overlaps the block pointers. |
 
 Some inodes are reserved:
 

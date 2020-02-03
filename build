@@ -72,6 +72,9 @@ echo -e "\e[1;33mJBoot compiled.\e[0m"
 
 echo -e "\e[1;36mCompiling extras...\e[0m"
 
+# Font
+cp -r extra/font iso/font
+
 # MSS
 nasm src/extra/MSS/MSS.asm -f bin -o iso/MSS.bin || exit 255
 echo -e "\e[1;33mMSS compiled.\e[0m"
