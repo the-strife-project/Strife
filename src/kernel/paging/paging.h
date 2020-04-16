@@ -3,6 +3,8 @@
 
 #include <common/types.h>
 
+#define PAGE_SIZE 4096
+
 #define PD_PRESENT  1 << 0
 #define PD_RW       1 << 1
 #define PD_ALL_PRIV 1 << 2

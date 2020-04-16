@@ -23,8 +23,6 @@
 #include <klibc/STL/test.h>
 #endif
 
-#define bochs_breakpoint() outw(0x8A00,0x8A00);outw(0x8A00,0x8AE0);
-
 void printSplash() {
 	printf("\n");
 	term_setFGC(0x8);
@@ -58,12 +56,6 @@ extern "C" void kernel_main(void) {
 
 	//clock_init();
 	//clock_start();
-
-	// Test STL.
-	#ifdef STL_TEST
-	STL_test();
-	while(true) {}
-	#endif
 
 	// Check where we're booting from.
 	uint8_t bootDriveID = (uint8_t)(*((uint8_t*)0x9000));

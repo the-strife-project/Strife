@@ -5,6 +5,8 @@
 #include <kernel/boot.h>
 #include <kernel/asm.h>
 
+// This is very inefficient. Improving it is not a priority.
+
 uint32_t page_directory[1024] __attribute__((aligned(4096)));
 uint32_t page_tables[1024][1024] __attribute__((aligned(4096)));
 

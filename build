@@ -56,6 +56,7 @@ echo -e "\e[1;33mKernel's libc done.\e[0m"
 # The whole kernel
 i686-elf-gcc -T linker.ld -I./src -std=gnu99 -ffreestanding -O2 -nostdlib obj/*.o -o iso/boot/kernel.bin || exit
 echo -e "\e[1;33mKernel linking done.\e[0m"
+strip --strip-unneeded iso/boot/kernel.bin
 
 # JBoot
 nasm src/JBoot/CD/JBoot.asm -f bin -o iso/boot/CD.bin || exit 255

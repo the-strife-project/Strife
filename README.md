@@ -6,23 +6,23 @@ jotadOS is an x86 operating system made in C/C++ from scratch that I'm doing to 
 Please,
 
 - Do not trust that I know what I'm doing.
-- Do not copy/paste my code as probably all of it is improvable.
+- Do not copy/paste my code as it probably is improvable.
 - Do not run jotadOS outside of a virtual machine. It will almost definitely make your computer explode.
 
-The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be read in the TODO list at the bottom.
+The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be seen [here](https://jlxip.net/jotadOS/TODO.html).
 
 ## What is done
 So, here's what I've managed to do so far. None of these things are finished. Some are more polished than others: some I consider to be dealt with, and I will rarely have to touch them again; some are terribly incomplete, and have the bare minimum functionality to be here, but will get better with time as other parts get more relied upon them.
 
 ### Medium-high level
-- Kernel C(++) library, using ![liballoc](https://github.com/blanham/liballoc) as memory manager.
+- Kernel C(++) library, using [liballoc](https://github.com/blanham/liballoc) as memory manager.
 
 ### Medium level
 These are parts that do not have to deal directly with the hardware, or do so in a very limited way.
 
 - Keyboard driver (Spanish layout).
 - Kernel panics.
-- Filesystems: ISO9660 and ![JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
+- Filesystems: ISO9660 and [JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
 
 ### Low level
 These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.
@@ -35,7 +35,7 @@ These can be programed in non-assembly programming languages (ignoring `in` and 
 ### Really low level
 These can only be programmed in assembly, or require executing instructions that do not exist in C(++).
 
-- My own bootloader, ![JBoot](https://github.com/jlxip/jotadOS/blob/master/src/JBoot/README.md).
+- My own bootloader, [JBoot](https://github.com/jlxip/jotadOS/blob/master/src/JBoot/README.md).
 - GDT and IDT.
 - Paging.
 - Virtual 8086.
@@ -81,17 +81,6 @@ Now write `PATH="$HOME/opt/cross/bin:$PATH"` at the end of your shell profile (.
 To compile jotadOS, open a new terminal in the directory, and run `./build`.
 
 You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `bochs`. There are equivalents for installing it in a virtual hard drive.
-
-## TODO list
-Here's a list of the things that are coming.
-
-- User space C library that can be dinamically linked with the binaries.
-- Network driver, IP, ARP, TCP...
-- Cryptography library.
-- Multitasking (scheduler).
-- FIFOs for inter-process communication.
-- Users and groups.
-- SSH-like remote system administration tool.
 
 ## Sources
 I have used several resources in order to do this project.

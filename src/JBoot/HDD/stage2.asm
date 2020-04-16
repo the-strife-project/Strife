@@ -408,8 +408,7 @@ mov ss, ax
 mov ebx, 0x20002C
 mov dl, byte [ebx]
 push dx	; Save it in the stack
-; Now, the size of each one is 32 bits. Because the ELF contains 32 bit instructions.
-; (According to specs).
+; The size of each one is 32 bytes.
 
 ; Get the start of the program header.
 mov ebx, 0x20001C
@@ -432,7 +431,7 @@ PHT:
 	cmp eax, 1
 	jnz .PHT_ignore
 
-	; At this point, type type is 1.
+	; At this point, type is 1.
 	; We have to "copy p_filesz bytes from p_offset to p_vaddr".
 
 	; Get "p_offset" (offset +4, dword) into the stack.
@@ -479,7 +478,7 @@ PHT:
 	cmp dh, dl
 	jl PHT
 
-; Everything set. Use the fake multiboot header (at the beginning) to locate
+; Everything set. Use the header at the beginning to locate
 ; the entry point ('_start').
 
 jmp (codedesc - gdt):protectedMode
