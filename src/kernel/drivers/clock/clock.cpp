@@ -1,10 +1,10 @@
-#include <kernel/drivers/clock/clock.h>
-#include <kernel/asm.h>
-#include <kernel/GDT/GDT.h>
-#include <kernel/drivers/PIC/PIC.h>
-#include <kernel/IDT/IDT.h>
-#include <kernel/drivers/term/term.h>
-#include <kernel/asm.h>
+#include <kernel/drivers/clock/clock.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/drivers/PIC/PIC.hpp>
+#include <kernel/IDT/IDT.hpp>
+#include <kernel/drivers/term/term.hpp>
+#include <kernel/asm.hpp>
 
 int ticks = 0;
 

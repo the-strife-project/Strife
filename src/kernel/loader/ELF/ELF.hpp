@@ -1,7 +1,7 @@
 #ifndef ELF_H
 #define ELF_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/STL/list>
 
 /*

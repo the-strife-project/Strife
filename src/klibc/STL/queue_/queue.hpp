@@ -1,7 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/STL/list>
 
 template<typename T> class queue {
@@ -22,6 +22,6 @@ public:
 	bool operator!=(const queue<T>& other) const;
 };
 
-#include <klibc/STL/queue_/queue_imp.h>
+#include <klibc/STL/queue_/queue_imp.hpp>
 
 #endif

@@ -8,7 +8,7 @@
 #ifndef _LIBALLOC_H
 #define _LIBALLOC_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 /**  liballoc hooks
  *

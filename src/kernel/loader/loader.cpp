@@ -1,7 +1,7 @@
 #include <kernel/loader/loader.hpp>
 #include <kernel/loader/ELF/ELF.hpp>
-#include <kernel/paging/paging.h>
-#include <klibc/stdlib.h>
+#include <kernel/paging/paging.hpp>
+#include <klibc/stdlib.hpp>
 
 // Remove when implementing this for real.
 #include <klibc/stdio>

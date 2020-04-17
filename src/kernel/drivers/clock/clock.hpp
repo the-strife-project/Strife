@@ -1,7 +1,7 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 #define CLOCK_IDT_ENTRY 0x20
 

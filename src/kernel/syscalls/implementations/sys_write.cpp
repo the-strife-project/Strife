@@ -1,5 +1,5 @@
-#include <kernel/syscalls/syscalls.h>
-#include <kernel/drivers/term/term.h>
+#include <kernel/syscalls/syscalls.hpp>
+#include <kernel/drivers/term/term.hpp>
 
 /*
 	fd: file descriptor

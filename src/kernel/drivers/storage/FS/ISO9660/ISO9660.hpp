@@ -8,7 +8,7 @@
 #define ISO9660_DIR_FILENAME_LENGTH 32
 #define ISO9660_DIR_FILENAME 33
 
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/STL/list>
 #include <klibc/string>
 

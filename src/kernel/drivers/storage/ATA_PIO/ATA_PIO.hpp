@@ -1,7 +1,7 @@
 #ifndef ATA_PIO_H
 #define ATA_PIO_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 #define BYTES_PER_SECTOR 512
 

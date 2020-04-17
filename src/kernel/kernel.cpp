@@ -1,27 +1,23 @@
-#include <kernel/drivers/term/term.h>
+#include <kernel/drivers/term/term.hpp>
 #include <klibc/stdio>
-#include <klibc/stdlib.h>
-#include <kernel/GDT/GDT.h>
-#include <kernel/paging/paging.h>
-#include <kernel/drivers/PIC/PIC.h>
-#include <kernel/IDT/IDT.h>
-#include <kernel/drivers/keyboard/keyboard.h>
-#include <kernel/drivers/clock/clock.h>
-#include <kernel/kernel_panic/kernel_panic.h>
-#include <kernel/asm.h>
-#include <kernel/PCI/PCI.h>
-#include <kernel/memutils/memutils.h>
-#include <kernel/install/install.h>
-#include <kernel/syscalls/syscalls.h>
-#include <kernel/TSS/TSS.h>
-#include <kernel/usermode/usermode.h>
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
-#include <kernel/drivers/term/font/font.h>
-
-#ifdef STL_TEST
-#include <klibc/STL/test.h>
-#endif
+#include <klibc/stdlib.hpp>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/paging/paging.hpp>
+#include <kernel/drivers/PIC/PIC.hpp>
+#include <kernel/IDT/IDT.hpp>
+#include <kernel/drivers/keyboard/keyboard.hpp>
+#include <kernel/drivers/clock/clock.hpp>
+#include <kernel/kernel_panic/kernel_panic.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/PCI/PCI.hpp>
+#include <kernel/memutils/memutils.hpp>
+#include <kernel/install/install.hpp>
+#include <kernel/syscalls/syscalls.hpp>
+#include <kernel/TSS/TSS.hpp>
+#include <kernel/usermode/usermode.hpp>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/ISO9660/ISO9660.hpp>
+#include <kernel/drivers/term/font/font.hpp>
 
 void printSplash() {
 	printf("\n");

@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/STL/list>
 
 template<typename T> class stack {
@@ -20,6 +20,6 @@ public:
 	bool operator!=(const stack<T>& other) const;
 };
 
-#include <klibc/STL/stack_/stack_imp.h>
+#include <klibc/STL/stack_/stack_imp.hpp>
 
 #endif

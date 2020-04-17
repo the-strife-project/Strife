@@ -1,5 +1,5 @@
-#include <kernel/PCI/PCI.h>
-#include <kernel/asm.h>
+#include <kernel/PCI/PCI.hpp>
+#include <kernel/asm.hpp>
 #include <klibc/stdio>
 
 /*

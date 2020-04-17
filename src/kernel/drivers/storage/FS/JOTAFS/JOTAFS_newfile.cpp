@@ -1,5 +1,5 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <klibc/stdlib.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <klibc/stdlib.hpp>
 #include <klibc/STL/list>
 
 uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {

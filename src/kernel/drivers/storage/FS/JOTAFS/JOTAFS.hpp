@@ -1,8 +1,8 @@
 #ifndef JOTAFS_H
 #define JOTAFS_H
 
-#include <common/types.h>
-#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
+#include <common/types.hpp>
+#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
 #include <klibc/string>
 #include <klibc/STL/list>
 #include <klibc/STL/pair>

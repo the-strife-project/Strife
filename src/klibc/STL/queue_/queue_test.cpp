@@ -1,7 +1,7 @@
 #ifdef STL_TEST
 
 #include <klibc/STL/queue>
-#include <klibc/stdio.h>
+#include <klibc/stdio.hpp>
 
 int queue_test() {
 	queue<int> q;

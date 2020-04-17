@@ -1,5 +1,5 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <klibc/stdlib.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <klibc/stdlib.hpp>
 
 uint32_t JOTAFS::findInDirectory(uint32_t inode_n, const string& next) {
 	list<pair<string, uint32_t>> children(DIR(this, inode_n).getChildren());

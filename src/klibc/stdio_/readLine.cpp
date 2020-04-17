@@ -1,5 +1,5 @@
-#include <klibc/stdlib.h>
-#include <kernel/drivers/keyboard/keyboard.h>
+#include <klibc/stdlib.hpp>
+#include <kernel/drivers/keyboard/keyboard.hpp>
 
 string readLine() {
 	keyboard_resume(1);

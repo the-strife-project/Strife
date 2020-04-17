@@ -1,7 +1,7 @@
 #ifndef REGS_H
 #define REGS_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 struct regs16_t {
 	uint16_t di, si, bp, sp, bx, dx, cx, ax;

@@ -1,4 +1,4 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
 
 // TODO: THIS SHOULD NOT BE PART OF THE FILESYSTEM IMPLEMENTATION, BUT AN INDEPENDENT PROGRAM.
 void JOTAFS::format() {

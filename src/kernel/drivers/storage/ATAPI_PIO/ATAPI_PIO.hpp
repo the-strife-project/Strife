@@ -1,7 +1,7 @@
 #ifndef ATAPI_PIO_H
 #define ATAPI_PIO_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 #define ATAPI_PIO_DRIVE 0xE0
 #define LBA_READ_INT 0x13
 #define ATAPI_PIO_DAPACK 0x7E00

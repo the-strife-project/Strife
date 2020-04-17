@@ -1,6 +1,6 @@
-#include <kernel/syscalls/syscalls.h>
-#include <kernel/GDT/GDT.h>
-#include <kernel/IDT/IDT.h>
+#include <kernel/syscalls/syscalls.hpp>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/IDT/IDT.hpp>
 
 void syscalls_init(void) {
 	IDT_SET_ENT(IDT[SYSCALL_INT], 0, _KERNEL_CODESEGMENT, (uint32_t)IDT_syscall, 3);

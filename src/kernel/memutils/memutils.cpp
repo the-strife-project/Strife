@@ -1,5 +1,5 @@
-#include <kernel/memutils/memutils.h>
-#include <kernel/paging/paging.h>
+#include <kernel/memutils/memutils.hpp>
+#include <kernel/paging/paging.hpp>
 
 // Available RAM in KiB.
 uint32_t memutils_memory;

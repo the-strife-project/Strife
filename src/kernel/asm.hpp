@@ -1,7 +1,7 @@
 #ifndef ASM_H
 #define ASM_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 inline uint8_t inb(uint16_t port) {
 	uint8_t ret;

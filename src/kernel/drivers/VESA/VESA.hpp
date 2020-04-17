@@ -6,8 +6,8 @@
 	https://wiki.osdev.org/User:Omarrx024/VESA_Tutorial
 */
 
-#include <common/types.h>
-#include <kernel/V86/V86.h>
+#include <common/types.hpp>
+#include <kernel/V86/V86.hpp>
 
 #define VESA_INT 0x10
 #define VESA_GET_INFO 0x4F00

@@ -1,7 +1,7 @@
 #ifndef TSS_H
 #define TSS_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 // Disgusting. Right?
 // Source: https://wiki.osdev.org/Getting_to_Ring_3

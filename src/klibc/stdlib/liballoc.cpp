@@ -1,9 +1,9 @@
-#include <klibc/stdlib/liballoc.h>
-#include <common/types.h>
-#include <kernel/asm.h>
-#include <kernel/paging/paging.h>
+#include <klibc/stdlib/liballoc.hpp>
+#include <common/types.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/paging/paging.hpp>
 
-// This right here is mine. The rest belongs to liballoc. See 'liballoc.h'.
+// This right here is mine. The rest belongs to liballoc. See 'liballoc.hpp'.
 
 // No locking/unlocking. Because fuck you. I'll probably regret this later.
 int liballoc_lock() { return 0; }
@@ -72,8 +72,8 @@ int liballoc_free(void* ptr, size_t p) {
 #define LIBALLOC_DEAD	0xdeaddead
 
 #if defined DEBUG || defined INFO
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.hpp>
+#include <stdlib.hpp>
 
 #define FLUSH()		fflush( stdout )
 

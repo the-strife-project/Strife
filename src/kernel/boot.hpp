@@ -1,7 +1,7 @@
 #ifndef BOOT_H
 #define BOOT_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 extern "C" void ASM_KERNEL_END(void);
 

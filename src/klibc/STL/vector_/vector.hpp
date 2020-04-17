@@ -1,7 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 template<typename T> class vector {
 private:
@@ -60,6 +60,6 @@ public:
 	const_iterator cend() const;
 };
 
-#include <klibc/STL/vector_/vector_imp.h>
+#include <klibc/STL/vector_/vector_imp.hpp>
 
 #endif

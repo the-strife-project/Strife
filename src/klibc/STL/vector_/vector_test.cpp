@@ -1,7 +1,7 @@
 #ifdef STL_TEST
 
 #include <klibc/STL/vector>
-#include <klibc/stdio.h>
+#include <klibc/stdio.hpp>
 
 int vector_test() {
 	vector<int> v;

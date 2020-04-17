@@ -1,5 +1,5 @@
-#include <klibc/stdlib.h>
-#include <klibc/math.h>
+#include <klibc/stdlib.hpp>
+#include <klibc/math.hpp>
 
 /*
 	Converts an integer into a string.

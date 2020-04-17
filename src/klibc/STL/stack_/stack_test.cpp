@@ -1,7 +1,7 @@
 #ifdef STL_TEST
 
 #include <klibc/STL/stack>
-#include <klibc/stdio.h>
+#include <klibc/stdio.hpp>
 
 int stack_test() {
 	stack<int> s;

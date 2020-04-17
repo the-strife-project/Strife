@@ -1,8 +1,8 @@
-#include <kernel/drivers/term/term.h>
-#include <kernel/paging/paging.h>
-#include <kernel/drivers/term/font/font.h>
-#include <kernel/drivers/term/cursor/cursor.h>
-#include <klibc/stdlib.h>
+#include <kernel/drivers/term/term.hpp>
+#include <kernel/paging/paging.hpp>
+#include <kernel/drivers/term/font/font.hpp>
+#include <kernel/drivers/term/cursor/cursor.hpp>
+#include <klibc/stdlib.hpp>
 
 size_t term_row;
 size_t term_column;

@@ -1,7 +1,7 @@
 #ifdef STL_TEST
 
 #include <klibc/STL/list>
-#include <klibc/stdio.h>
+#include <klibc/stdio.hpp>
 
 int list_test() {
 	list<int> l;

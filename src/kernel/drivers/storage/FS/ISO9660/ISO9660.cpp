@@ -1,6 +1,6 @@
-#include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
-#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
-#include <klibc/stdlib.h>
+#include <kernel/drivers/storage/FS/ISO9660/ISO9660.hpp>
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.hpp>
+#include <klibc/stdlib.hpp>
 
 struct ISO9660_entity* ISO9660_get(const list<string>& dirs) {
 	// Get the root directory record extent as 'last'.

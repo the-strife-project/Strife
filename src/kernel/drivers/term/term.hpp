@@ -1,7 +1,7 @@
 #ifndef TERM_H
 #define TERM_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 static const uint8_t TERM_WIDTH = 80;
 static const uint8_t TERM_HEIGHT = 25;

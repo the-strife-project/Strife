@@ -5,7 +5,7 @@ int list_test();
 int stack_test();
 int queue_test();
 
-#include <klibc/stdio.h>
+#include <klibc/stdio.hpp>
 void STL_test() {
 	printf("VECTOR: ");
 	int v = vector_test();

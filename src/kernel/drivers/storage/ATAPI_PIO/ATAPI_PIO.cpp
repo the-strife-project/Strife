@@ -1,5 +1,5 @@
-#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
-#include <kernel/V86/V86.h>
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.hpp>
+#include <kernel/V86/V86.hpp>
 
 void ATAPI_read(uint16_t nblocks, uint32_t lba) {
 	// Prepare the dapack @ ATAPI_PIO_BUFFER.

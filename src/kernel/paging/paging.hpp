@@ -1,7 +1,7 @@
 #ifndef PAGING_H
 #define PAGING_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 #define PAGE_SIZE 4096
 

@@ -1,5 +1,5 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
-#include <klibc/stdlib.h>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <klibc/stdlib.hpp>
 #include <klibc/STL/bitmap>
 #include <klibc/stdio>
 

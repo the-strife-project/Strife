@@ -1,7 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/STL/window>
 #include <klibc/string>
 

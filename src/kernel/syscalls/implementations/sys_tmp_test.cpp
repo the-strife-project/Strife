@@ -1,8 +1,8 @@
-#include <kernel/syscalls/syscalls.h>
+#include <kernel/syscalls/syscalls.hpp>
 #include <klibc/stdio>
-#include <klibc/stdlib.h>
-#include <kernel/memutils/memutils.h>
-#include <kernel/drivers/term/term.h>
+#include <klibc/stdlib.hpp>
+#include <kernel/memutils/memutils.hpp>
+#include <kernel/drivers/term/term.hpp>
 #include <klibc/string>
 
 void sys_tmp_test() {

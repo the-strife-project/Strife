@@ -1,8 +1,8 @@
-#include <kernel/IDT/IDT.h>
-#include <common/types.h>
+#include <kernel/IDT/IDT.hpp>
+#include <common/types.hpp>
 #include <klibc/stdio>
-#include <kernel/drivers/PIC/PIC.h>
-#include <kernel/asm.h>
+#include <kernel/drivers/PIC/PIC.hpp>
+#include <kernel/asm.hpp>
 
 struct IDT_entry IDT[256];
 

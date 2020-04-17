@@ -1,6 +1,6 @@
-#include <kernel/drivers/term/cursor/cursor.h>
-#include <kernel/asm.h>
-#include <kernel/drivers/term/term.h>
+#include <kernel/drivers/term/cursor/cursor.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/drivers/term/term.hpp>
 
 void CURSOR_enable(uint8_t cursor_start, uint8_t cursor_end) {
 	outb(0x3D4, 0x0A);

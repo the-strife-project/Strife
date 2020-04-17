@@ -1,7 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 template<typename T> class list {
 private:
@@ -83,6 +83,6 @@ public:
 	const_iterator cend() const;
 };
 
-#include <klibc/STL/list_/list_imp.h>
+#include <klibc/STL/list_/list_imp.hpp>
 
 #endif

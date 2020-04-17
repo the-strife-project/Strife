@@ -1,8 +1,8 @@
-#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
-#include <klibc/stdlib.h>
-#include <kernel/asm.h>
-#include <kernel/drivers/PIC/PIC.h>
-#include <kernel/IDT/IDT.h>
+#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
+#include <klibc/stdlib.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/drivers/PIC/PIC.hpp>
+#include <kernel/IDT/IDT.hpp>
 
 void ATA::init(uint8_t master, uint16_t portBase) {
 	this->master = master;

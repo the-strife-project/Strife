@@ -1,8 +1,8 @@
 #ifndef IDT_H
 #define IDT_H
 
-#include <common/types.h>
-#include <kernel/GDT/GDT.h>
+#include <common/types.hpp>
+#include <kernel/GDT/GDT.hpp>
 
 struct IDT_entry {
 	uint16_t base_low;

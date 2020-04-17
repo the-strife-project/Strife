@@ -1,13 +1,13 @@
-#include <kernel/drivers/keyboard/keyboard.h>
+#include <kernel/drivers/keyboard/keyboard.hpp>
 #include <klibc/stdio>
-#include <klibc/stdlib.h>
-#include <kernel/asm.h>
-#include <kernel/GDT/GDT.h>
-#include <kernel/drivers/PIC/PIC.h>
-#include <kernel/IDT/IDT.h>
-#include <kernel/kernel_panic/kernel_panic.h>
-#include <kernel/drivers/keyboard/kb_layout.h>
-#include <kernel/drivers/term/term.h>
+#include <klibc/stdlib.hpp>
+#include <kernel/asm.hpp>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/drivers/PIC/PIC.hpp>
+#include <kernel/IDT/IDT.hpp>
+#include <kernel/kernel_panic/kernel_panic.hpp>
+#include <kernel/drivers/keyboard/kb_layout.hpp>
+#include <kernel/drivers/term/term.hpp>
 
 #define IS_LATIN1(x) ((x == '\xC2') || (x == '\xC3'))
 

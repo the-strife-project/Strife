@@ -1,11 +1,11 @@
-#include <kernel/install/install.h>
+#include <kernel/install/install.hpp>
 #include <klibc/stdio>
-#include <klibc/stdlib.h>
-#include <kernel/drivers/term/term.h>
-#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.h>
-#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.h>
-#include <kernel/drivers/storage/FS/ISO9660/ISO9660.h>
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.h>
+#include <klibc/stdlib.hpp>
+#include <kernel/drivers/term/term.hpp>
+#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
+#include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.hpp>
+#include <kernel/drivers/storage/FS/ISO9660/ISO9660.hpp>
+#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
 #include <klibc/string>
 #include <klibc/STL/list>
 

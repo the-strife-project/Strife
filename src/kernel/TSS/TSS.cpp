@@ -1,6 +1,6 @@
-#include <kernel/TSS/TSS.h>
-#include <kernel/GDT/GDT.h>
-#include <kernel/paging/paging.h>
+#include <kernel/TSS/TSS.hpp>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/paging/paging.hpp>
 
 struct tss_entry_struct tss_entry;
 

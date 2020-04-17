@@ -1,7 +1,7 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 /*
 	This datatype has not been deeply tested and as a result might have bugs.

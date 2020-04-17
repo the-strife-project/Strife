@@ -1,4 +1,4 @@
-#include <kernel/drivers/keyboard/keyboard.h>
+#include <kernel/drivers/keyboard/keyboard.hpp>
 
 string getch() {
 	keyboard_setSilentMode();

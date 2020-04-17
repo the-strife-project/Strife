@@ -1,6 +1,6 @@
-#include <common/types.h>
+#include <common/types.hpp>
 #include <klibc/stdio>
-#include <klibc/stdlib.h>
+#include <klibc/stdlib.hpp>
 #include <stdarg.h>
 
 void __writes(const char* data) {

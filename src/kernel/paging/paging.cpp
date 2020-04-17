@@ -1,9 +1,9 @@
-#include <kernel/paging/paging.h>
-#include <common/types.h>
-#include <kernel/kernel_panic/kernel_panic.h>
-#include <kernel/memutils/memutils.h>
-#include <kernel/boot.h>
-#include <kernel/asm.h>
+#include <kernel/paging/paging.hpp>
+#include <common/types.hpp>
+#include <kernel/kernel_panic/kernel_panic.hpp>
+#include <kernel/memutils/memutils.hpp>
+#include <kernel/boot.hpp>
+#include <kernel/asm.hpp>
 
 // This is very inefficient. Improving it is not a priority.
 

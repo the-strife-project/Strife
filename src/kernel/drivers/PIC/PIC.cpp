@@ -1,4 +1,4 @@
-#include <kernel/drivers/PIC/PIC.h>
+#include <kernel/drivers/PIC/PIC.hpp>
 
 static uint16_t irqmask = 0xFFFF & ~(1<<PIC_IRQ_SLAVE);
 

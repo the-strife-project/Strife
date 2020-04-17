@@ -1,8 +1,8 @@
 #ifndef MEMUTILS_H
 #define MEMUTILS_H
 
-#include <common/types.h>
-#include <kernel/boot.h>
+#include <common/types.hpp>
+#include <kernel/boot.hpp>
 
 void memutils_init();
 uint32_t getFreeMemory();

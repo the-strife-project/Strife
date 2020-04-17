@@ -1,7 +1,7 @@
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
-#include <common/types.h>
+#include <common/types.hpp>
 
 extern "C" void IDT_syscall(void);
 void syscalls_init(void);

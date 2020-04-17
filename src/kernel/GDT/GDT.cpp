@@ -1,5 +1,5 @@
-#include <kernel/GDT/GDT.h>
-#include <kernel/TSS/TSS.h>
+#include <kernel/GDT/GDT.hpp>
+#include <kernel/TSS/TSS.hpp>
 
 uint64_t GDT[GDT_ENTRIES];
 
