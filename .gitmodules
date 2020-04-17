@@ -1,0 +1,4 @@
+[submodule "src/klibc/STL"]
+	path = src/klibc/STL
+	url = https://github.com/jotaOS/STL
+	branch = master
