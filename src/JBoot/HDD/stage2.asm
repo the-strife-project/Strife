@@ -401,7 +401,7 @@ mov ss, ax
 
 
 ; Everything set. Now it's time to parse the ELF.
-; jotadOS is x86, so I'll follow those specs.
+; jotaOS is x86, so I'll follow those specs.
 ; Guidance: https://wiki.osdev.org/ELF
 
 ; First, get the number of entries in the program header table (offset +44, byte)

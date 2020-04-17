@@ -1,4 +1,4 @@
-JBoot is the bootloader for jotadOS.
+JBoot is the bootloader for jotaOS.
 I'd rather not use grub, as it's quite big, and I want a tiny ISO.
 The purpose was to make this REALLY simple.
 JBoot consists in two stages.

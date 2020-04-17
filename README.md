@@ -1,15 +1,15 @@
-# jotadOS
+# jotaOS
 
 ## Introduction
-jotadOS is an x86 operating system made in C/C++ from scratch that I'm doing to learn. That's it. I'm not trying to make everything myself for any reason whatsoever but learning. There are so many topics in CS that I want to know in depth, and making an OS is a great way to touch all of them.
+jotaOS is an x86 operating system made in C/C++ from scratch that I'm doing to learn. That's it. I'm not trying to make everything myself for any reason whatsoever but learning. There are so many topics in CS that I want to know in depth, and making an OS is a great way to touch all of them.
 
 Please,
 
 - Do not trust that I know what I'm doing.
 - Do not copy/paste my code as it probably is improvable.
-- Do not run jotadOS outside of a virtual machine. It will almost definitely make your computer explode.
+- Do not run jotaOS outside of a virtual machine. It will almost definitely make your computer explode.
 
-The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be seen [here](https://jlxip.net/jotadOS/TODO.html).
+The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be seen [here](https://jlxip.net/jotaOS/TODO.html).
 
 ## What is done
 So, here's what I've managed to do so far. None of these things are finished. Some are more polished than others: some I consider to be dealt with, and I will rarely have to touch them again; some are terribly incomplete, and have the bare minimum functionality to be here, but will get better with time as other parts get more relied upon them.
@@ -22,7 +22,7 @@ These are parts that do not have to deal directly with the hardware, or do so in
 
 - Keyboard driver (Spanish layout).
 - Kernel panics.
-- Filesystems: ISO9660 and [JOTAFS](https://github.com/jlxip/jotadOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
+- Filesystems: ISO9660 and [JOTAFS](https://github.com/jlxip/jotaOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
 
 ### Low level
 These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.
@@ -35,14 +35,14 @@ These can be programed in non-assembly programming languages (ignoring `in` and 
 ### Really low level
 These can only be programmed in assembly, or require executing instructions that do not exist in C(++).
 
-- My own bootloader, [JBoot](https://github.com/jlxip/jotadOS/blob/master/src/JBoot/README.md).
+- My own bootloader, [JBoot](https://github.com/jlxip/jotaOS/blob/master/src/JBoot/README.md).
 - GDT and IDT.
 - Paging.
 - Virtual 8086.
 - User space.
 
 
-## Compiling jotadOS
+## Compiling jotaOS
 Before you can compile it, you need the following things:
 - `i686-elf-gcc`
 - `nasm`
@@ -78,7 +78,7 @@ make install-gcc
 
 Now write `PATH="$HOME/opt/cross/bin:$PATH"` at the end of your shell profile (.bashrc, .zshrc...)
 
-To compile jotadOS, open a new terminal in the directory, and run `./build`.
+To compile jotaOS, open a new terminal in the directory, and run `./build`.
 
 You can use `./run` to compile and run `qemu`, or `./debug` to compile and run `bochs`. There are equivalents for installing it in a virtual hard drive.
 

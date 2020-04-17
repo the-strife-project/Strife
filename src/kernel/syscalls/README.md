@@ -1,4 +1,4 @@
-# jotadOS system calls
+# jotaOS system calls
 
 The system calls are done by setting the eax register to an index, some other registers as parameters, and performing an `int 0x69`.
 

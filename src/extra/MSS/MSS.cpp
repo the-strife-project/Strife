@@ -1,6 +1,6 @@
 /*
 	This is not used yet (and will not be used in some time),
-	but this will be the first program I will get jotadOS to run.
+	but this will be the first program I will get jotaOS to run.
 	Simple, no includes, just a syscall and a global variable to see
 	if the data sector is imported correctly and so on.
 */

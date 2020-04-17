@@ -23,7 +23,7 @@ void printSplash() {
 	printf("\n");
 	term_setFGC(0x8);
 	term_setBGC(0xB);
-	printf("\n                                    jotadOS                                     \n");
+	printf("\n                                    jotaOS                                      \n");
 	term_setFGC(0xA);
 	term_setBGC(0x0);
 	printf("\n");

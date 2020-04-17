@@ -48,9 +48,9 @@ inline void __copy(JOTAFS& jotafs, const list<string>& path, uint8_t filetype, u
 
 void install() {
 	printf("%s", "You're booting from a CD!\n"
-		"This means that you got jotadOS booting, which is quite cool.\n"
+		"This means that you got jotaOS booting, which is quite cool.\n"
 		"However, you won't be able to do anything but install the OS onto the hard disk.\n\n"
-		"Note that you should ONLY be running jotadOS in a virtual machine,\n"
+		"Note that you should ONLY be running jotaOS in a virtual machine,\n"
 		"as it's incompatible with any other operating system.\n\n");
 
 	// Check the drive is there.
@@ -64,12 +64,12 @@ void install() {
 
 	// Check if the disk is already formatted with JOTAFS.
 	if(jotafs.checkSignature()) {
-		printf("jotadOS seems to be already installed on the hard disk.\n"
+		printf("jotaOS seems to be already installed on the hard disk.\n"
 			"Proceed with caution.\n\n"
 		);
 	}
 
-	printf("%s", "Now, write \"yes\" without quotes to install jotadOS into the\n"
+	printf("%s", "Now, write \"yes\" without quotes to install jotaOS into the\n"
 		"primary master ATA drive. Any other input will stop the installation.\n\n");
 
 	printf("-> ");

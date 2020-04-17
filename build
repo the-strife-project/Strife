@@ -38,7 +38,7 @@ _compileASM () {
 export -f _compileASM
 
 # Welcome!
-echo -e "\e[1;36mCompiling jotadOS...\e[0m"
+echo -e "\e[1;36mCompiling jotaOS...\e[0m"
 
 # Kernel (C)
 find src/kernel -type f -iname *.cpp | xargs -n1 bash -c '_compileGCC $1 || exit 255' || exit
@@ -81,7 +81,7 @@ nasm src/extra/MSS/MSS.asm -f bin -o iso/MSS.bin || exit 255
 echo -e "\e[1;33mMSS compiled.\e[0m"
 
 # Create ISO
-genisoimage -no-emul-boot -b boot/CD.bin -o jotadOS.iso iso
+genisoimage -no-emul-boot -b boot/CD.bin -o jotaOS.iso iso
 echo -e "\e[1;33mIso file created.\e[0m"
 
 echo -e "\e[1;36mCompilation successful!\e[0m"
