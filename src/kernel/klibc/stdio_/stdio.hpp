@@ -1,7 +1,7 @@
 #ifndef STDIO_H
 #define STDIO_H
 
-#include <klibc/string>
+#include <kernel/klibc/string>
 
 // Input
 string getch();

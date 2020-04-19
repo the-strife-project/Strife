@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 /*
 	TODO: This method can be optimized.

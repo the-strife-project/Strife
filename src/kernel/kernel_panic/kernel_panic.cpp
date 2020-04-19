@@ -1,7 +1,7 @@
 #include <kernel/kernel_panic/kernel_panic.hpp>
 #include <common/types.hpp>
 #include <kernel/drivers/term/term.hpp>
-#include <klibc/stdio>
+#include <kernel/klibc/stdio>
 #include <kernel/asm.hpp>
 
 static const char* kp_messages[] = {

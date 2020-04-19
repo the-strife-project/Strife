@@ -1,6 +1,6 @@
 #include <kernel/drivers/term/font/font.hpp>
 #include <kernel/asm.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 uint8_t* font;
 

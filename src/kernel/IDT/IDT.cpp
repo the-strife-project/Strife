@@ -1,6 +1,6 @@
 #include <kernel/IDT/IDT.hpp>
 #include <common/types.hpp>
-#include <klibc/stdio>
+#include <kernel/klibc/stdio>
 #include <kernel/drivers/PIC/PIC.hpp>
 #include <kernel/asm.hpp>
 

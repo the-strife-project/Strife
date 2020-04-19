@@ -1,4 +1,4 @@
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 void* operator new(size_t sz) { return jmalloc(sz); }
 void* operator new[](size_t sz) { return jmalloc(sz); }

@@ -1,9 +1,9 @@
 #include <kernel/syscalls/syscalls.hpp>
-#include <klibc/stdio>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdio>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/memutils/memutils.hpp>
 #include <kernel/drivers/term/term.hpp>
-#include <klibc/string>
+#include <kernel/klibc/string>
 
 void sys_tmp_test() {
 	printf("%dKiB of RAM available.\n", getFreeMemory());

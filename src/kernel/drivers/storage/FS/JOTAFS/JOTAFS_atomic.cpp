@@ -1,7 +1,7 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <klibc/stdlib.hpp>
-#include <klibc/STL/bitmap>
-#include <klibc/stdio>
+#include <kernel/klibc/stdlib.hpp>
+#include <kernel/klibc/STL/bitmap>
+#include <kernel/klibc/stdio>
 
 JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];

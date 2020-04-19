@@ -1,4 +1,4 @@
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 /*
 	Gets the hex representation of an integer.

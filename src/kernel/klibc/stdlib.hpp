@@ -2,10 +2,10 @@
 #define STDLIB_H
 
 #ifndef _LIBALLOC_H
-#include <klibc/stdlib/liballoc.hpp>
+#include <kernel/klibc/stdlib/liballoc.hpp>
 #endif
 
-#include <klibc/string>
+#include <kernel/klibc/string>
 
 void* operator new(size_t sz);
 void* operator new[](size_t sz);

@@ -1,4 +1,4 @@
-#include <klibc/stdlib/liballoc.hpp>
+#include <kernel/klibc/stdlib/liballoc.hpp>
 #include <common/types.hpp>
 #include <kernel/asm.hpp>
 #include <kernel/paging/paging.hpp>

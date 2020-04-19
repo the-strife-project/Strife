@@ -3,10 +3,10 @@
 
 #include <common/types.hpp>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
-#include <klibc/string>
-#include <klibc/STL/list>
-#include <klibc/STL/pair>
-#include <klibc/STL/stack>
+#include <kernel/klibc/string>
+#include <kernel/klibc/STL/list>
+#include <kernel/klibc/STL/pair>
+#include <kernel/klibc/STL/stack>
 
 #define JOTAFS_SECTOR_BOOT 0
 #define JOTAFS_SECTOR_SUPERBLOCK 1

@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/asm.hpp>
 #include <kernel/drivers/PIC/PIC.hpp>
 #include <kernel/IDT/IDT.hpp>

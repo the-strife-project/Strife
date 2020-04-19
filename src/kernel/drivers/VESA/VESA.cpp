@@ -1,9 +1,9 @@
 #include <kernel/drivers/VESA/VESA.hpp>
 #include <kernel/drivers/PIC/PIC.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/kernel_panic/kernel_panic.hpp>
 #include <kernel/paging/paging.hpp>
-#include <klibc/string>
+#include <kernel/klibc/string>
 
 uint16_t VESA_currentMode = 0xFFFF;
 uint16_t VESA_currentMode_width = 0;

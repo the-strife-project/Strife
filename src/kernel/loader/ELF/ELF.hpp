@@ -2,7 +2,7 @@
 #define ELF_H
 
 #include <common/types.hpp>
-#include <klibc/STL/list>
+#include <kernel/klibc/STL/list>
 
 /*
 	ELF specs taken from here:

@@ -1,8 +1,8 @@
 #ifndef STRING_IMP
 #define STRING_IMP
 
-#include <klibc/string>
-#include <klibc/utility>
+#include <kernel/klibc/string>
+#include <kernel/klibc/utility>
 
 string::string(const char* other) { for(size_t i=0; other[i]; i++) data.push_back(other[i]); }
 size_t string::size() const { return data.size(); }

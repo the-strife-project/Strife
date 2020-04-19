@@ -1,7 +1,7 @@
 QEMU=qemu-system-x86_64
 VHDD=hdd10M.img
 
-.PHONY: runHDD run debugHDD debug build welcome compile_kernel compile_klibc link_kernel compile_jboot compile_extras copy_extra clean
+.PHONY: runHDD run debugHDD debug build welcome kernel jboot extras extra_files clean
 
 # Target for building the ISO
 jotaOS.iso: build
@@ -17,7 +17,7 @@ run: jotaOS.iso
 	head -c 10485760 /dev/zero > $(VHDD)
 	$(QEMU) -cdrom jotaOS.iso -hda $(VHDD)
 
-# Target for debugging with a hard drive. Run the first time with qemu for faster process.
+# Target for debugging with a hard drive. Run the first time with qemu for a faster process
 debugHDD: run
 	bochs -f bochs_HDD.txt
 
@@ -26,12 +26,11 @@ debug: jotaOS.iso
 	head -c 10485760 /dev/zero > $(VHDD)
 	bochs -f bochs.txt
 
-build: welcome iso obj compile_kernel compile_klibc link_kernel compile_jboot compile_extras copy_extra
+build: welcome iso obj kernel jboot extras extra_files
 
 welcome:
 	@echo -e "\e[1;36mCompiling jotaOS...\e[0m"
 
-# Creates the 'iso' directory. That's it.
 iso:
 	mkdir -p iso/boot
 
@@ -39,26 +38,16 @@ iso:
 obj:
 	cd src && find . -type d -exec mkdir -p ../obj/{} \;
 
-compile_kernel:
+kernel:
 	cd src/kernel && make
 
-# TODO: Move all of this to the Makefile in "kernel". That implies moving "klibc" to "kernel/klibc". Will be done in the exact next commit. I don't want to make a huge commit for this.
-compile_klibc:
-	cd src/klibc && make
-
-# TODO: Will also have to move "boot.asm" inside "kernel". I want this to be modular, which means easy to work with. I do know the target below is horrible.
-link_kernel:
-	nasm src/boot.asm -o obj/boot.o -f elf32
-	i686-elf-g++ -T linker.ld -I./src -std=c++11 -ffreestanding -O2 -nostdlib `find obj -type f -iname '*.o'` -o iso/boot/kernel.bin
-
-compile_jboot:
+jboot:
 	cd src/JBoot && make
 
-compile_extras:
+extras:
 	cd src/extra && make
 
-# For copying extra files
-copy_extra:
+extra_files:
 	cp -r extra/font iso/font
 
 clean:

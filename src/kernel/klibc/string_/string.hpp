@@ -1,8 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <klibc/STL/vector>
-#include <klibc/STL/list>
+#include <kernel/klibc/STL/vector>
+#include <kernel/klibc/STL/list>
 
 // TODO: Should this inherit vector<char>?
 // It would simplify the code, no doubt.

@@ -1,10 +1,10 @@
 #include <kernel/loader/loader.hpp>
 #include <kernel/loader/ELF/ELF.hpp>
 #include <kernel/paging/paging.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 // Remove when implementing this for real.
-#include <klibc/stdio>
+#include <kernel/klibc/stdio>
 
 // This does almost no checks and it's trivial to break.
 list<uint8_t*> loadELF(uint8_t* data) {

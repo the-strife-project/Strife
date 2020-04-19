@@ -1,5 +1,5 @@
-#include <klibc/stdlib.hpp>
-#include <klibc/math.hpp>
+#include <kernel/klibc/stdlib.hpp>
+#include <kernel/klibc/math.hpp>
 
 int atoi(string str) {
 	if(str.length() == 0) return 0;

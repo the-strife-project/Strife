@@ -1,6 +1,6 @@
 #include <kernel/drivers/term/term.hpp>
-#include <klibc/stdio>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdio>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/GDT/GDT.hpp>
 #include <kernel/paging/paging.hpp>
 #include <kernel/drivers/PIC/PIC.hpp>

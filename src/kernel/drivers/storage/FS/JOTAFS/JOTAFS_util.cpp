@@ -2,7 +2,7 @@
 #define JOTAFS_UTIL
 
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 uint32_t JOTAFS::sector2inode(uint32_t sector) {
 	// Let's count: 0 is for the boot sector, 1 the superblock, 2 is the four (JOTAFS_INODES_PER_SECTOR) first inodes.

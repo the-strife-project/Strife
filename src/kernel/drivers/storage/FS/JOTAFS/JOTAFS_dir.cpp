@@ -1,5 +1,5 @@
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 JOTAFS::DIR::DIR(JOTAFS* parent, uint32_t inode_n, void* cached)
 	: parent(parent), inode_n(inode_n) {

@@ -2,7 +2,7 @@
 #include <kernel/paging/paging.hpp>
 #include <kernel/drivers/term/font/font.hpp>
 #include <kernel/drivers/term/cursor/cursor.hpp>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 
 size_t term_row;
 size_t term_column;

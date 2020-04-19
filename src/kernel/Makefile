@@ -1,4 +1,5 @@
 OBJPATH=../../obj/kernel
+RESULT=../../iso/boot/kernel.bin
 
 CXX=i686-elf-g++
 INCLUDES=-I../
@@ -7,12 +8,18 @@ CXXFLAGS=$(INCLUDES) -std=c++11 -ffreestanding -O3 -Wall -Wextra -Werror -fno-ex
 ASM=nasm
 ASMFLAGS=-f elf32
 
+LINKER=$(CXX)
+LINKER_FLAGS=-T linker.ld -std=c++11 -ffreestanding -O3 -nostdlib
+
 CXX_OBJS=$(shell find . -type f -iname '*.cpp' | sed 's/\.cpp/\.o/g' | xargs -I {} echo "$(OBJPATH)/"{})
 ASM_OBJS=$(shell find . -type f -iname '*.asm' | sed 's/\.asm/\.o/g' | xargs -I {} echo "$(OBJPATH)/"{})
 
-.PHONY: build build_cxx_objs build_asm_objs finished
+.PHONY: link build build_cxx_objs build_asm_objs
 
-build: build_cxx_objs build_asm_objs finished
+link: build
+	$(LINKER) `find $(OBJPATH) -type f -iname '*.o'` -o $(RESULT) $(LINKER_FLAGS)
+
+build: build_cxx_objs build_asm_objs
 
 build_cxx_objs: $(CXX_OBJS)
 build_asm_objs: $(ASM_OBJS)
@@ -22,6 +29,3 @@ $(OBJPATH)/%.o: %.cpp
 
 $(OBJPATH)/%.o: %.asm
 	$(ASM) $< -o $@ $(ASMFLAGS)
-
-finished:
-	@echo -e "\e[1;33mKernel files done.\e[0m"

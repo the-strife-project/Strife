@@ -1,13 +1,13 @@
 #include <kernel/install/install.hpp>
-#include <klibc/stdio>
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdio>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/drivers/term/term.hpp>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.hpp>
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.hpp>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <klibc/string>
-#include <klibc/STL/list>
+#include <kernel/klibc/string>
+#include <kernel/klibc/STL/list>
 
 static const char ERR_NOTFOUND[] = "[FAILED]\nISO might be badly created.\n";
 

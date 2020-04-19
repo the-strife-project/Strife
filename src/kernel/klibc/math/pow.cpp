@@ -1,4 +1,4 @@
-#include <klibc/math.hpp>
+#include <kernel/klibc/math.hpp>
 
 /*
 	Calculates a^b, being 'b' natural, and 'a' an integer.

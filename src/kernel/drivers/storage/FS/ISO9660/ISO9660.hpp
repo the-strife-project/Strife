@@ -9,8 +9,8 @@
 #define ISO9660_DIR_FILENAME 33
 
 #include <common/types.hpp>
-#include <klibc/STL/list>
-#include <klibc/string>
+#include <kernel/klibc/STL/list>
+#include <kernel/klibc/string>
 
 // It can be either a directory record or a file itself.
 struct ISO9660_entity {

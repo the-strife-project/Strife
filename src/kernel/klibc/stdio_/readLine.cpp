@@ -1,4 +1,4 @@
-#include <klibc/stdlib.hpp>
+#include <kernel/klibc/stdlib.hpp>
 #include <kernel/drivers/keyboard/keyboard.hpp>
 
 string readLine() {
