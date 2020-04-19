@@ -16,13 +16,10 @@ ASM_OBJS=$(shell find . -type f -iname '*.asm' | sed 's/\.asm/\.o/g' | xargs -I 
 
 .PHONY: link build build_cxx_objs build_asm_objs
 
-link: build
-	$(LINKER) `find $(OBJPATH) -type f -iname '*.o'` -o $(RESULT) $(LINKER_FLAGS)
+all: $(RESULT)
 
-build: build_cxx_objs build_asm_objs
-
-build_cxx_objs: $(CXX_OBJS)
-build_asm_objs: $(ASM_OBJS)
+$(RESULT): $(CXX_OBJS) $(ASM_OBJS)
+	$(LINKER) `find $(OBJPATH) -type f -iname '*.o'` -o $@ $(LINKER_FLAGS)
 
 $(OBJPATH)/%.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
