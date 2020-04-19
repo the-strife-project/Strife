@@ -1,6 +1,0 @@
-#!/bin/bash
-rm -rf obj \
-	iso \
-	jotaOS.iso.lock \
-	hdd10M.img \
-	jotaOS.iso &> /dev/null

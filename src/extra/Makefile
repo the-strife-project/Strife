@@ -1,0 +1,2 @@
+build:
+	cd MSS && make

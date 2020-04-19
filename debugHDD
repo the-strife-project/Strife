@@ -1,2 +1,0 @@
-#!/bin/bash
-./run && bochs -f bochs_HDD.txt

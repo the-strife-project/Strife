@@ -1,2 +1,0 @@
-#!/bin/bash
-./run $1 && qemu-system-x86_64 -hda hdd10M.img

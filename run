@@ -1,4 +1,0 @@
-#!/bin/bash
-./build $1 || exit
-head -c 10485760 /dev/zero > hdd10M.img
-qemu-system-x86_64 -cdrom jotaOS.iso -hda hdd10M.img
