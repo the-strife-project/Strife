@@ -3,7 +3,7 @@
 
 #include <common/types.hpp>
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
-#include <kernel/klibc/string>
+#include <kernel/klibc/STL/string>
 #include <kernel/klibc/STL/list>
 #include <kernel/klibc/STL/pair>
 #include <kernel/klibc/STL/stack>

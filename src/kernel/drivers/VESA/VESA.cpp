@@ -3,7 +3,7 @@
 #include <kernel/klibc/stdlib.hpp>
 #include <kernel/kernel_panic/kernel_panic.hpp>
 #include <kernel/paging/paging.hpp>
-#include <kernel/klibc/string>
+#include <kernel/klibc/STL/string>
 
 uint16_t VESA_currentMode = 0xFFFF;
 uint16_t VESA_currentMode_width = 0;

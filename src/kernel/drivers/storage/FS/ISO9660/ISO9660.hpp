@@ -10,7 +10,7 @@
 
 #include <common/types.hpp>
 #include <kernel/klibc/STL/list>
-#include <kernel/klibc/string>
+#include <kernel/klibc/STL/string>
 
 // It can be either a directory record or a file itself.
 struct ISO9660_entity {

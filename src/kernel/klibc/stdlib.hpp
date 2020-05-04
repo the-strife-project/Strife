@@ -5,7 +5,7 @@
 #include <kernel/klibc/stdlib/liballoc.hpp>
 #endif
 
-#include <kernel/klibc/string>
+#include <kernel/klibc/STL/string>
 
 void* operator new(size_t sz);
 void* operator new[](size_t sz);

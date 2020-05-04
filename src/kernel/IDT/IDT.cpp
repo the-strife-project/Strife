@@ -34,6 +34,7 @@ extern "C" void default_interrupt_handler(uint32_t intno) {
 				break;
 			case 6:
 				printf("\n[[[ INVALID OPCODE EXCEPTION ]]]\n");
+				while(true) {}
 				break;
 			case 7:
 				printf("\n[[[ DEVICE NOT AVAILABLE EXCEPTION ]]]\n");
@@ -52,6 +53,7 @@ extern "C" void default_interrupt_handler(uint32_t intno) {
 				break;
 			case 13:
 				printf("\n[[[ GENERAL PROTECTION EXCEPTION ]]]\n");
+				while(true) {}
 				break;
 			case 14:
 				printf("\n[[[ PAGE FAULT EXCEPTION ]]]\n");

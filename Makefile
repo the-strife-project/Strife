@@ -1,38 +1,33 @@
 QEMU=qemu-system-x86_64
 VHDD=hdd10M.img
+TARGET=jotaOS.iso
 
-.PHONY: all runHDD run debugHDD debug build welcome kernel jboot extras extra_files clean
+.PHONY: all runHDD run debugHDD debug kernel jboot extras extra_files clean
 
 # Default target, just build the ISO
-all: jotaOS.iso
+all: $(TARGET)
 
-# Target for building the ISO
-jotaOS.iso: build
-	genisoimage -no-emul-boot -b boot/CD.bin -o jotaOS.iso iso
-	@echo -e "\n\e[1;33mIso file created.\e[0m"
+# Main rule (builds the ISO)
+$(TARGET): iso obj kernel jboot extras extra_files
+	genisoimage -no-emul-boot -b boot/CD.bin -o $(TARGET) iso
 
 # Target for running with a hard drive (twice: CD and HDD)
 runHDD: run
 	$(QEMU) -hda $(VHDD)
 
 # Target for running the ISO
-run: jotaOS.iso
+run: $(TARGET)
 	head -c 10485760 /dev/zero > $(VHDD)
-	$(QEMU) -cdrom jotaOS.iso -hda $(VHDD)
+	$(QEMU) -cdrom $(TARGET) -hda $(VHDD)
 
 # Target for debugging with a hard drive. Run the first time with qemu for a faster process
 debugHDD: run
 	bochs -f bochs_config/bochs_HDD.txt
 
 # Target for debugging the ISO
-debug: jotaOS.iso
+debug: $(TARGET)
 	head -c 10485760 /dev/zero > $(VHDD)
 	bochs -f bochs_config/bochs.txt
-
-build: welcome iso obj kernel jboot extras extra_files
-
-welcome:
-	@echo -e "\e[1;36mCompiling jotaOS...\e[0m\n"
 
 iso:
 	mkdir -p iso/boot
@@ -51,7 +46,7 @@ extras:
 	cd src/extra && make
 
 extra_files:
-	cp -rv extra/font iso/font
+	cd extra && make
 
 clean:
-	rm -r obj/ iso/ jotaOS.iso jotaOS.iso.lock hdd10M.img &> /dev/null || true
+	rm -r obj/ iso/ $(TARGET) $(TARGET).lock hdd10M.img &> /dev/null || true

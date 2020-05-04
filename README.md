@@ -8,6 +8,7 @@ Please,
 - Do not trust that I know what I'm doing.
 - Do not copy/paste my code as it probably is improvable.
 - Do not run jotaOS outside of a virtual machine. It will almost definitely make your computer explode.
+- Read [the wiki](https://github.com/jotaOS/jotaOS/wiki).
 
 The big parts implemented so far can be read in the next section. The things I haven't done yet which keep me interested can be seen [here](https://jlxip.net/jotaOS/TODO.html).
 
@@ -15,14 +16,14 @@ The big parts implemented so far can be read in the next section. The things I h
 So, here's what I've managed to do so far. None of these things are finished. Some are more polished than others: some I consider to be dealt with, and I will rarely have to touch them again; some are terribly incomplete, and have the bare minimum functionality to be here, but will get better with time as other parts get more relied upon them.
 
 ### Medium-high level
-- Kernel C(++) library, using [liballoc](https://github.com/blanham/liballoc) as memory manager.
+- Kernel C++ library, using [liballoc](https://github.com/blanham/liballoc) as memory manager.
 
 ### Medium level
 These are parts that do not have to deal directly with the hardware, or do so in a very limited way.
 
 - Keyboard driver (Spanish layout).
 - Kernel panics.
-- Filesystems: ISO9660 and [JOTAFS](https://github.com/jotaOS/jotaOS/blob/master/src/kernel/drivers/storage/FS/JOTAFS/README.md), my own filesystem.
+- Filesystems: ISO9660 and [JOTAFS](https://github.com/jotaOS/jotaOS/wiki/JOTAFS), my own filesystem.
 
 ### Low level
 These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.

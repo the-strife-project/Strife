@@ -83,7 +83,7 @@ void bk(const string& a) {	// Buffer key
 		// Move the cursor back.
 		--buffer;
 		// Is the current character '\xC2' or '\xC3'?
-		if(IS_LATIN1(buffer.get())) {	// BUGGED
+		if(IS_LATIN1(buffer.get())) {	// TODO BUGGED
 			// Yep. Remove one extra byte.
 			buffer.remove();
 		}

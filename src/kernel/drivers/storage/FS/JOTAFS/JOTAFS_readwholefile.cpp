@@ -12,7 +12,7 @@
 uint8_t* JOTAFS::readWholeFile(uint32_t idx, uint8_t* buffer) {
 	INODE inode = getInode(idx);
 	if(!buffer) buffer = (uint8_t*)jmalloc(inode.size);
-	for(uint32_t i=0; i<inode.size; ++i) buffer[i] = 0;
+	for(uint32_t i=0; i<inode.size; ++i) buffer[i] = 0;	// Does this make sense?
 
 	for(uint32_t i=0; i<inode.n_blocks; i++) {
 		// Get the block no. i

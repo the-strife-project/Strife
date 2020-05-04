@@ -71,7 +71,7 @@ JOTAFS::DIR JOTAFS::newdir(uint32_t uid, uint16_t permissions, uint32_t parent_i
 	uint32_t inode_n = newfile(0, 0, uid, FILETYPE::DIRECTORY, permissions);
 	DIR ret(this, inode_n);
 
-	// Add '.'
+	// Add '.' and '..'
 	ret.addChild(".", inode_n);
 	ret.addChild("..", parent_inode_number);
 

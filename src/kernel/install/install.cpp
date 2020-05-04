@@ -6,7 +6,7 @@
 #include <kernel/drivers/storage/ATAPI_PIO/ATAPI_PIO.hpp>
 #include <kernel/drivers/storage/FS/ISO9660/ISO9660.hpp>
 #include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
-#include <kernel/klibc/string>
+#include <kernel/klibc/STL/string>
 #include <kernel/klibc/STL/list>
 
 static const char ERR_NOTFOUND[] = "[FAILED]\nISO might be badly created.\n";
