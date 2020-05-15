@@ -1,7 +1,7 @@
 #ifndef JRAMFS_HPP
 #define JRAMFS_HPP
 
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/STL/map>
 
 /*
@@ -9,21 +9,20 @@
 	Please read the wiki entry about this filesystem.
 */
 
-class JRAMFS {
+class JRAMFS_model {
 public:
 	// Inode, filetypes, and flags are kept.
-	typedef JOTAFS::INODE INODE;
-	typedef JOTAFS::FILETYPE FILETYPE;
+	typedef JOTAFS_model::INODE INODE;
+	typedef JOTAFS_model::FILETYPE FILETYPE;
 
 	struct RESERVED_INODE {
 		enum {
 			INULL,
-			KERNEL,
 			ROOT
 		};
 	};
 
-	typedef JOTAFS::FLAG FLAG;
+	typedef JOTAFS_model::FLAG FLAG;
 
 private:
 	map<uint32_t, INODE> inodes;
@@ -41,8 +40,8 @@ private:
 	void putBlockInInode(INODE& inode, uint32_t i, uint32_t block);
 
 public:
-	// This is done in 'util.cpp', I don't want to creat a new file just for that.
-	JRAMFS();
+	// This is done in 'util.cpp', I don't want to create a new file just for that.
+	JRAMFS_model();
 
 	inline INODE getInode(uint32_t idx) {
 		return inodes[idx];
@@ -58,20 +57,18 @@ public:
 
 	class DIR {
 	private:
-		JRAMFS* parent;
+		JRAMFS_model* parent;
 		uint32_t inode_n;
 		INODE inode_cache;
-
-		DIR(JRAMFS* parent, uint32_t inode_n);
-		friend class JRAMFS;
 	public:
 		DIR();
+		DIR(JRAMFS_model* parent, uint32_t inode_n);
 
 		inline uint32_t getInodeNumber() const {
 			return inode_n;
 		}
 		void addChild(string filename, uint32_t child_inode_number);
-		list<pair<string, uint32_t>> getChildren() const;
+		map<string, uint32_t> getChildren() const;
 	};
 
 	DIR newdir(uint32_t uid, uint16_t permissions, uint32_t parent_inode_number);

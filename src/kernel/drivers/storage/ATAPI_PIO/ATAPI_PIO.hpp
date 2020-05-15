@@ -20,6 +20,10 @@ struct dapack {
 } __attribute__((packed));
 
 void ATAPI_read(uint16_t nblocks, uint32_t lba);
+
+/*
+	It's disgusting that this method has to exist.
+*/
 void ATAPI_granularread(uint32_t nblocks, uint32_t lba, uint8_t* output);
 
 #endif

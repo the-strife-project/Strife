@@ -1,9 +1,9 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 #include <kernel/klibc/STL/bitmap>
 #include <kernel/klibc/stdio>
 
-JOTAFS::JOTAFS(ATA iface) : iface(iface) {
+JOTAFS_model::JOTAFS_model(ATA iface) : iface(iface) {
 	uint16_t identifydata[256*2];
 	int aux = iface.identify(identifydata);
 	status = (aux == 0);
@@ -14,28 +14,28 @@ JOTAFS::JOTAFS(ATA iface) : iface(iface) {
 	jfree(p);
 }
 
-bool JOTAFS::getStatus() { return status; }
-uint32_t JOTAFS::getMaxSector() { return maxSector; }
+bool JOTAFS_model::getStatus() { return status; }
+uint32_t JOTAFS_model::getMaxSector() { return maxSector; }
 
-uint8_t JOTAFS::writeBoot(uint8_t* boot) { return iface.write28(JOTAFS_SECTOR_BOOT, boot); }
+uint8_t JOTAFS_model::writeBoot(uint8_t* boot) { return iface.write28(JOTAFS_SECTOR_BOOT, boot); }
 
-uint8_t JOTAFS::writeSB(const SUPERBLOCK& sb) {
+uint8_t JOTAFS_model::writeSB(const SUPERBLOCK& sb) {
 	sb_cache = sb;
 	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
 
-uint8_t JOTAFS::updateSB() {
+uint8_t JOTAFS_model::updateSB() {
 	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
 }
 
-JOTAFS::INODE JOTAFS::getInode(uint32_t idx) {
+JOTAFS_model::INODE JOTAFS_model::getInode(uint32_t idx) {
 	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
 	INODE ret = inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR];
 	jfree(inodes);
 	return ret;
 }
 
-void JOTAFS::writeInode(uint32_t idx, const INODE& contents) {
+void JOTAFS_model::writeInode(uint32_t idx, const INODE& contents) {
 	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
 	inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR] = contents;
 	iface.write28(inode2sector(idx), (uint8_t*)inodes);
@@ -51,16 +51,22 @@ void JOTAFS::writeInode(uint32_t idx, const INODE& contents) {
 	Why? It's way more efficient searching for a given number of free blocks
 	than calling this function a bunch of times.
 */
-uint32_t JOTAFS::allocBlock() {
+const uint32_t bitmap_size = BYTES_PER_SECTOR*8;
+uint32_t JOTAFS_model::allocBlock() {
 	// Read the first non-full bitmap.
 	uint8_t* raw_bitmap = iface.read28(bitmap2sector(sb_cache.first_non_full_bitmap));
-	bitmap bm(BYTES_PER_SECTOR, raw_bitmap);
+
+	bitmap bm(bitmap_size, raw_bitmap);
 	uint32_t ret = (uint32_t)bm.getFirstZeroAndFlip();
-	if(ret == BYTES_PER_SECTOR) {
+
+	if(ret == bitmap_size) {
 		// This should NEVER happen.
-		printf("\n[[[ BLOCK BITMAP ASSUMPTIONS INVALIDATED ]]]\n");
+		printf("\n[[[ THE GREAT BUG ]]]\n");
 		while(true) {}
 	}
+
+	// The current "ret" is an offset of the actual block count.
+	ret += bitmap_size * sb_cache.first_non_full_bitmap;
 
 	// Write the new bitmap.
 	iface.write28(bitmap2sector(sb_cache.first_non_full_bitmap), raw_bitmap);
@@ -71,14 +77,27 @@ uint32_t JOTAFS::allocBlock() {
 		updateSB();
 	}
 
+	// Clear the contents.
+	uint8_t empty[512] = {0};
+	writeBlock(ret, empty);
+
 	jfree(raw_bitmap);
 	return ret;
 }
 
 // TODO: SAME AS ABOVE
-void JOTAFS::freeBlock(uint32_t idx) {
+void JOTAFS_model::freeBlock(uint32_t idx) {
+	/*
+		TODO: THINK THIS VERY CAREFULLY WHEN NEEDED.
+
+		I had a really big bug in allocBlock() and the code
+		below has it too. Offsets! Line 68. Be careful.
+	*/
+	if(idx == 0) {}
+	printf(" {{ jlxip's fault: tried to free a block }} ");
+	while(true) {}
 	// Which bitmap does this belong to?
-	uint32_t bitmap_idx = idx / BYTES_PER_SECTOR;
+	/*uint32_t bitmap_idx = idx / BYTES_PER_SECTOR;
 
 	// Read
 	uint8_t* raw_bitmap = iface.read28(bitmap2sector(bitmap_idx));
@@ -98,11 +117,11 @@ void JOTAFS::freeBlock(uint32_t idx) {
 		}
 	}
 
-	jfree(raw_bitmap);
+	jfree(raw_bitmap);*/
 }
 
 
-uint32_t JOTAFS::allocInode() {
+uint32_t JOTAFS_model::allocInode() {
 	// Read the front of the queue.
 	uint32_t ret = sb_cache.first_free_inode;
 
@@ -117,7 +136,7 @@ uint32_t JOTAFS::allocInode() {
 	return ret;
 }
 
-uint32_t JOTAFS::allocInodeAndWrite(const INODE& inode) {
+uint32_t JOTAFS_model::allocInodeAndWrite(const INODE& inode) {
 	/*
 		Similar to above. This one is done for optimizing 'newfile'.
 		'allocInode' and 'writeInode' called consecutively require 4
@@ -141,7 +160,7 @@ uint32_t JOTAFS::allocInodeAndWrite(const INODE& inode) {
 	return ret;
 }
 
-void JOTAFS::freeInode(uint32_t idx) {
+void JOTAFS_model::freeInode(uint32_t idx) {
 	// Put it at the end of the queue.
 	BOTH_INODES old;
 	old.inode = getInode(sb_cache.last_free_inode);

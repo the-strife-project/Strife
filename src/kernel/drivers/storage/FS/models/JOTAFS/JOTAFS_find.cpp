@@ -1,8 +1,8 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 
-uint32_t JOTAFS::findInDirectory(uint32_t inode_n, const string& next) {
-	list<pair<string, uint32_t>> children(DIR(this, inode_n).getChildren());
+uint32_t JOTAFS_model::findInDirectory(uint32_t inode_n, const string& next) {
+	map<string, uint32_t> children(DIR(this, inode_n).getChildren());
 
 	for(auto const& x : children)
 		if(x.f == next)
@@ -11,7 +11,7 @@ uint32_t JOTAFS::findInDirectory(uint32_t inode_n, const string& next) {
 	return RESERVED_INODE::INULL;
 }
 
-uint32_t JOTAFS::find(const string& path) {
+uint32_t JOTAFS_model::find(const string& path) {
 	uint32_t ret = RESERVED_INODE::ROOT;
 	list<string> splitted(path.split('/'));
 
@@ -20,7 +20,7 @@ uint32_t JOTAFS::find(const string& path) {
 
 		ret = findInDirectory(ret, x);
 		if(ret == RESERVED_INODE::INULL)
-		return ret;
+			return ret;
 	}
 
 	return ret;

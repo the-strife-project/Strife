@@ -1,4 +1,4 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 
 /*
@@ -6,10 +6,10 @@
 	For instance, use a list to save ALL the block IDs,
 	which would require WAY less accesses to disk.
 
-	list<uint32_t> JOTAFS::getAllBlocks(JOTAFS_INODE inode);
+	list<uint32_t> JOTAFS_model::getAllBlocks(JOTAFS_INODE inode);
 */
 
-uint8_t* JOTAFS::readWholeFile(uint32_t idx, uint8_t* buffer) {
+uint8_t* JOTAFS_model::readWholeFile(uint32_t idx, uint8_t* buffer) {
 	INODE inode = getInode(idx);
 	if(!buffer) buffer = (uint8_t*)jmalloc(inode.size);
 	for(uint32_t i=0; i<inode.size; ++i) buffer[i] = 0;	// Does this make sense?

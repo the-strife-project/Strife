@@ -9,8 +9,6 @@
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
-// TODO: MAKE THIS A CLASS WITH A GLOBAL INSTANCE
-
 window<char>& keyboard_getBuffer();
 bool keyboard_returnPressed();
 

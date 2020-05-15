@@ -32,6 +32,7 @@ static const char* KB_LAYOUT_ALTGR[] = {
 	/*50 */ 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
+// TODO: Use toUpperCase() and toLowerCase() for this.
 static const char* KB_LAYOUT_SHIFT[] = {
 	// No altgr, no shift, no num.
 	/*0 */ 0, 0, "!", "\"", "·", "$", "%", "&",

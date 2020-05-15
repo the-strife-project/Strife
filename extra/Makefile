@@ -1,5 +1,5 @@
 OUTPUT=../iso
-FILES=$(OUTPUT)/font
+FILES=$(OUTPUT)/font $(OUTPUT)/splash.txt $(OUTPUT)/shell.txt
 
 .PHONY: all
 

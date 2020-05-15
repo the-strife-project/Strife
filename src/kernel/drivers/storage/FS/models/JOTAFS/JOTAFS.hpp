@@ -5,7 +5,7 @@
 #include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
 #include <kernel/klibc/STL/string>
 #include <kernel/klibc/STL/list>
-#include <kernel/klibc/STL/pair>
+#include <kernel/klibc/STL/map>
 #include <kernel/klibc/STL/stack>
 
 #define JOTAFS_SECTOR_BOOT 0
@@ -14,6 +14,7 @@
 #define JOTAFS_INODES_PER_SECTOR 4
 #define JOTAFS_FIRST_NON_RESERVED_INODE 4
 #define JOTAFS_NUMBER_OF_DBPS 10
+#define JOTAFS_NUMBER_OF_IBPS 4
 #define JOTAFS_SEPARATOR '/'
 #define JOTAFS_SUPERUSER_UID 0
 
@@ -37,7 +38,7 @@
 
 
 
-class JOTAFS {
+class JOTAFS_model {
 public:
 	// Some data structures of the filesystem.
 	struct SUPERBLOCK {
@@ -85,11 +86,6 @@ public:
 
 
 	// Some enumerations.
-	/*
-		Tried "enum class": didn't work, no casting to uint8_t.
-		Tried "namespace ... enum": didn't work, no namespaces inside classes.
-		So I'm doing it this way.
-	*/
 	struct FILETYPE {
 		enum {
 			REGULAR_FILE,
@@ -150,7 +146,7 @@ private:
 
 public:
 	// JOTAFS_atomic.cpp
-	JOTAFS(ATA iface);
+	JOTAFS_model(ATA iface);
 
 	bool getStatus();
 	uint32_t getMaxSector();
@@ -189,18 +185,17 @@ public:
 	// JOTAFS_dir.cpp
 	class DIR {
 	private:
-		JOTAFS* parent;
+		JOTAFS_model* parent;
 		uint32_t inode_n;
 		INODE inode_cache;
-
-		// 'cached' is a JOTAFS_INODE address, in case it's in memory, so there's no need to read it again.
-		DIR(JOTAFS* parent, uint32_t inode_n, void* cached=0);
-		friend class JOTAFS;
 	public:
 		DIR();
+		// 'cached' is a JOTAFS_INODE address, in case it's in memory, so there's no need to read it again.
+		DIR(JOTAFS_model* parent, uint32_t inode_n, void* cached=0);
+
 		void addChild(string filename, uint32_t child_inode_number);
 		uint32_t getInodeNumber() const;
-		list<pair<string, uint32_t>> getChildren() const;
+		map<string, uint32_t> getChildren() const;
 	};
 	friend class DIR;
 

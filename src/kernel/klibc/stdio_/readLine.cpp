@@ -1,7 +1,9 @@
 #include <kernel/klibc/stdlib.hpp>
 #include <kernel/drivers/keyboard/keyboard.hpp>
+#include <kernel/drivers/term/term.hpp>
 
 string readLine() {
+	showCursor();
 	keyboard_resume(1);
 
 	string ret;

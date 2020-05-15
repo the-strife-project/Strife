@@ -1,7 +1,7 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 
 // TODO: THIS SHOULD NOT BE PART OF THE FILESYSTEM IMPLEMENTATION, BUT AN INDEPENDENT PROGRAM.
-void JOTAFS::format() {
+void JOTAFS_model::format() {
 	SUPERBLOCK sb;
 	sb.signature = 0x000CACADEBACA000;
 

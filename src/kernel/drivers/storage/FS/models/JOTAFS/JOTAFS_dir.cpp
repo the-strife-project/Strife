@@ -1,7 +1,7 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 
-JOTAFS::DIR::DIR(JOTAFS* parent, uint32_t inode_n, void* cached)
+JOTAFS_model::DIR::DIR(JOTAFS_model* parent, uint32_t inode_n, void* cached)
 	: parent(parent), inode_n(inode_n) {
 	if(cached)
 		inode_cache = *(INODE*)cached;
@@ -9,13 +9,13 @@ JOTAFS::DIR::DIR(JOTAFS* parent, uint32_t inode_n, void* cached)
 		inode_cache = parent->getInode(inode_n);
 }
 
-JOTAFS::DIR::DIR() {}
+JOTAFS_model::DIR::DIR() {}
 
 /*
 	This method adds a file to a directory.
 	It also defragmentates in case a child has been deleted.
 */
-void JOTAFS::DIR::addChild(string filename, uint32_t child_inode_number) {
+void JOTAFS_model::DIR::addChild(string filename, uint32_t child_inode_number) {
 	// Prepare the directory entry.
 	uint8_t* dirent = new uint8_t[filename.length() + 1 + 4];
 	uint8_t* aux = dirent;
@@ -38,14 +38,14 @@ void JOTAFS::DIR::addChild(string filename, uint32_t child_inode_number) {
 	parent->writeInode(child_inode_number, inode);
 }
 
-uint32_t JOTAFS::DIR::getInodeNumber() const { return inode_n; }
+uint32_t JOTAFS_model::DIR::getInodeNumber() const { return inode_n; }
 
 inline uint32_t getPtrDiff(uint8_t* ptr1, uint8_t* ptr2) {
 	return ((uint32_t)(ptr1 - ptr2));
 }
 
-list<pair<string, uint32_t>> JOTAFS::DIR::getChildren() const {
-	list<pair<string, uint32_t>> ret;
+map<string, uint32_t> JOTAFS_model::DIR::getChildren() const {
+	map<string, uint32_t> ret;
 
 	INODE inode = parent->getInode(inode_n);
 	uint8_t* children = parent->readWholeFile(inode_n);
@@ -55,11 +55,11 @@ list<pair<string, uint32_t>> JOTAFS::DIR::getChildren() const {
 		string str = (char*)auxchildren;
 		auxchildren += str.length() + 1;
 
-		pair<string, uint32_t> toPush;
-		toPush.f = str;
-		toPush.s = *(uint32_t*)auxchildren;
+		pair<string, uint32_t> toInsert;
+		toInsert.f = str;
+		toInsert.s = *(uint32_t*)auxchildren;
 
-		ret.push_back(toPush);
+		ret.insert(toInsert);
 		auxchildren += 4;
 	}
 
@@ -67,7 +67,7 @@ list<pair<string, uint32_t>> JOTAFS::DIR::getChildren() const {
 	return ret;
 }
 
-JOTAFS::DIR JOTAFS::newdir(uint32_t uid, uint16_t permissions, uint32_t parent_inode_number) {
+JOTAFS_model::DIR JOTAFS_model::newdir(uint32_t uid, uint16_t permissions, uint32_t parent_inode_number) {
 	uint32_t inode_n = newfile(0, 0, uid, FILETYPE::DIRECTORY, permissions);
 	DIR ret(this, inode_n);
 

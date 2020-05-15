@@ -13,12 +13,12 @@ $(TARGET): iso obj kernel jboot extras extra_files
 
 # Target for running with a hard drive (twice: CD and HDD)
 runHDD: run
-	$(QEMU) -hda $(VHDD)
+	$(QEMU) -drive file=$(VHDD),format=raw
 
 # Target for running the ISO
 run: $(TARGET)
 	head -c 10485760 /dev/zero > $(VHDD)
-	$(QEMU) -cdrom $(TARGET) -hda $(VHDD)
+	$(QEMU) -cdrom $(TARGET) -drive file=$(VHDD),format=raw
 
 # Target for debugging with a hard drive. Run the first time with qemu for a faster process
 debugHDD: run

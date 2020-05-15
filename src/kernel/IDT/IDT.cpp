@@ -64,8 +64,17 @@ extern "C" void default_interrupt_handler(uint32_t intno) {
 			case 17:
 				printf("\n[[[ ALIGNMENT CHECK EXCEPTION ]]]\n");
 				break;
+			case 32:
+				/*
+					Interrupt 0x20 fired by ATAPI_PIO. Anything else fires it?
+					I don't know. By now, ignore it...
+
+					TODO: remove this special case once I implement DMA.
+				*/
+				break;
 			default:
 				printf("\n[[[ DISR: 0x%x ]]]\n", intno);
+				while(true) {}
 		}
 		outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);	// Bochs breakpoint
 	}

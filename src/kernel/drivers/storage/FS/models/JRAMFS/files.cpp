@@ -1,7 +1,7 @@
-#include <kernel/drivers/storage/FS/JRAMFS/JRAMFS.hpp>
+#include <kernel/drivers/storage/FS/models/JRAMFS/JRAMFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 
-uint32_t JRAMFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
+uint32_t JRAMFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	INODE inode;
 	inode.n_links = 0;
 	inode.size = size;
@@ -33,7 +33,7 @@ uint32_t JRAMFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t fil
 	return ret;
 }
 
-void JRAMFS::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
+void JRAMFS_model::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
 	uint64_t appendsize = size;
 
 	INODE& inode = this->inodes[inode_n];
@@ -68,7 +68,7 @@ void JRAMFS::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
 	inode.n_blocks += extrablocks;
 }
 
-uint8_t* JRAMFS::readWholeFile(uint32_t inode_n, uint8_t* buffer) {
+uint8_t* JRAMFS_model::readWholeFile(uint32_t inode_n, uint8_t* buffer) {
 	INODE inode = this->inodes[inode_n];
 
 	if(!buffer)

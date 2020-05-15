@@ -1,8 +1,9 @@
-#include <kernel/drivers/storage/FS/JOTAFS/JOTAFS.hpp>
+#include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
 #include <kernel/klibc/STL/list>
+#include <kernel/klibc/stdio>
 
-uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
+uint32_t JOTAFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	INODE inode;
 	inode.used = 1;
 	inode.n_links = 0;	// Links will be created by DIR::addChild.
@@ -15,6 +16,12 @@ uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t fil
 	inode.permissions = permissions;
 	inode.filetype = filetype;
 	inode.flags = 0;
+
+	// Initialize all block pointers to zero.
+	for(uint8_t i=0; i<JOTAFS_NUMBER_OF_DBPS; ++i)
+		inode.DBPs[i] = 0;
+	for(uint8_t i=0; i<JOTAFS_NUMBER_OF_IBPS; ++i)
+		inode.IBPs[i] = 0;
 
 	// Let's start filling up the blocks.
 	uint32_t size_in_blocks = inode.n_blocks;
@@ -50,7 +57,7 @@ uint32_t JOTAFS::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t fil
 
 
 
-void JOTAFS::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
+void JOTAFS_model::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
 	uint64_t appendsize = size;
 
 	// Read the inode.
@@ -82,7 +89,7 @@ void JOTAFS::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) {
 	if(size % BYTES_PER_SECTOR) extrablocks++;
 
 	// Allocate them.
-	// TODO: Change this one allocBlock is improved.
+	// TODO: Change this once allocBlock is improved.
 	list<uint32_t> blocks;
 	for(uint32_t i=0; i<extrablocks; ++i)
 		blocks.push_back(allocBlock());
