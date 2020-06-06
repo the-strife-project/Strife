@@ -3,6 +3,19 @@
 
 #include <common/types.hpp>
 
-void kernel_panic(uint32_t id);
+enum {
+	KP_EXAMPLE,
+	KP_OUTOFMEM,
+	KP_MULTIBOOT,
+	KP_VBE2,
+	KP_GRAPHICS,
+	KP_PCI,
+	KP_DMA_BUSMASTER,
+	KP_NO_LBA,
+	KP_CD_NOT_FOUND,
+	KP_HDD_NOT_FOUND
+};
+
+void panic(uint32_t id);
 
 #endif

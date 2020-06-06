@@ -6,6 +6,11 @@ void JOTAFS_model::format() {
 	sb.signature = 0x000CACADEBACA000;
 
 	/*
+		TODO: Once I have entropy, this should be a random number.
+	*/
+	sb.UUID = 0x0123456789ABCDEF;
+
+	/*
 		I have no idea what number of inodes to choose.
 		Let's just say, for instance, that 1/32th of the
 		total size will be dedicated to inodes.
@@ -30,21 +35,21 @@ void JOTAFS_model::format() {
 
 		Let n be the number of blocks, and m the number of bitmaps.
 		This way, we know that:
-		n = m * BYTES_PER_SECTOR
+		n = m * ATA_SECTOR_SIZE
 		Also, we have the following requirement:
 		n + m <= sectors_left
 
 		Substitute:
-		m * (BYTES_PER_SECTOR + 1) <= sectors_left
+		m * (ATA_SECTOR_SIZE + 1) <= sectors_left
 		Therefore:
-		m <= sectors_left / (BYTES_PER_SECTOR + 1)
+		m <= sectors_left / (ATA_SECTOR_SIZE + 1)
 		Approximating:
-		m = lower(sectors_left / (BYTES_PER_SECTOR + 1))
+		m = lower(sectors_left / (ATA_SECTOR_SIZE + 1))
 	*/
 	uint32_t sectors_left = getMaxSector() - sb.s_first_bitmap;
-	uint32_t n_bitmaps = sectors_left / (BYTES_PER_SECTOR + 1);
+	uint32_t n_bitmaps = sectors_left / (ATA_SECTOR_SIZE + 1);
 	sb.s_first_block = sb.s_first_bitmap + n_bitmaps;
-	sb.n_blocks = n_bitmaps * BYTES_PER_SECTOR;
+	sb.n_blocks = n_bitmaps * ATA_SECTOR_SIZE;
 	// That's done. At this point we have the right numbers.
 
 
@@ -65,10 +70,11 @@ void JOTAFS_model::format() {
 		}
 
 		// Do not use writeInode. If we want to copy 4, this is more efficient.
-		iface.write28(inode2sector(i), (uint8_t*)inodes);
+		ide.ATA_write(driveid, inode2sector(i), 1, (uint8_t*)inodes);
 		i += JOTAFS_INODES_PER_SECTOR-1;
 	}
 
 	// Initialize the bitmaps.
-	for(uint32_t i=0; i<getNumberOfBitmaps(); i++) iface.clear28(bitmap2sector(i));
+	uint8_t emptySector[512] = {0};
+	ide.ATA_write(driveid, bitmap2sector(0), getNumberOfBitmaps(), emptySector);
 }

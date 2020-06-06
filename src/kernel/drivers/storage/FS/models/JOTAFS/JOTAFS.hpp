@@ -2,11 +2,11 @@
 #define JOTAFS_H
 
 #include <common/types.hpp>
-#include <kernel/drivers/storage/ATA_PIO/ATA_PIO.hpp>
 #include <kernel/klibc/STL/string>
 #include <kernel/klibc/STL/list>
 #include <kernel/klibc/STL/map>
 #include <kernel/klibc/STL/stack>
+#include <kernel/drivers/storage/IDE/IDE.hpp>
 
 #define JOTAFS_SECTOR_BOOT 0
 #define JOTAFS_SECTOR_SUPERBLOCK 1
@@ -50,7 +50,9 @@ public:
 		uint32_t s_first_bitmap;	// 's_' is for sector.
 		uint32_t first_non_full_bitmap;
 		uint32_t s_first_block;
-		uint8_t padding[476];
+		uint32_t padding;
+		uint64_t UUID;
+		uint8_t padding0[476];
 	} __attribute__((packed));
 
 	struct FREE_INODE {
@@ -115,10 +117,9 @@ public:
 	};
 
 private:
-	ATA iface;
+	uint8_t driveid;
 	SUPERBLOCK sb_cache;
 	uint32_t maxSector;
-	bool status;
 
 	// Some private functions that will make the code way easier to read.
 	uint32_t sector2inode(uint32_t sector);
@@ -146,23 +147,24 @@ private:
 
 public:
 	// JOTAFS_atomic.cpp
-	JOTAFS_model(ATA iface);
+	JOTAFS_model();
+	JOTAFS_model(uint8_t driveid);
 
 	bool getStatus();
 	uint32_t getMaxSector();
 
-	uint8_t writeBoot(uint8_t* boot);
+	void writeBoot(uint8_t* boot);
 
 	inline const SUPERBLOCK& getSB() const { return sb_cache; }
 	inline bool checkSignature() const { return sb_cache.signature == 0x000CACADEBACA000; }
-	uint8_t writeSB(const SUPERBLOCK& sb);
-	uint8_t updateSB();
+	void writeSB(const SUPERBLOCK& sb);
+	void updateSB();
 
 	INODE getInode(uint32_t idx);
 	void writeInode(uint32_t idx, const INODE& contents);
 
-	inline uint8_t* getBlock(uint32_t idx) { return iface.read28(block2sector(idx)); }
-	inline void writeBlock(uint32_t idx, uint8_t* contents) { iface.write28(block2sector(idx), contents); }
+	inline FSRawChunk getBlock(uint32_t idx) { return ide.ATA_read(driveid, block2sector(idx), 1); }
+	inline void writeBlock(uint32_t idx, uint8_t* contents) { ide.ATA_write(driveid, block2sector(idx), 1, contents); }
 
 	uint32_t allocBlock();
 	void freeBlock(uint32_t idx);

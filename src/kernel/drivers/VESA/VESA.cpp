@@ -33,7 +33,7 @@ uint16_t* VESA_getModes() {
 	struct VBE_info_structure* info = (struct VBE_info_structure*)info_addr;
 
 	// Check VBE2 is supported.
-	if(string(info->signature) != "VESA") kernel_panic(3);	// VBE2 not supported.
+	if(string(info->signature) != "VESA") panic(KP_VBE2);	// VBE2 not supported.
 
 	// Get the number of modes.
 	int numberOfModes = 1;	// Count 0xFFFF.
@@ -125,7 +125,7 @@ void VESA_init(uint16_t width, uint16_t height, uint8_t colordepth) {
 		In the future this would have to be changed into falling into another mode
 		with fewer colors.
 	*/
-	if(VESA_currentMode == 0xFFFF) kernel_panic(4);
+	if(VESA_currentMode == 0xFFFF) panic(KP_GRAPHICS);
 
 	// Set the mode.
 	VESA_setMode(VESA_currentMode);

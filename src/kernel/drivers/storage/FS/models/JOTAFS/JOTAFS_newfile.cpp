@@ -10,8 +10,8 @@ uint32_t JOTAFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8
 	inode.size = size;
 	// The line below is to be kept until I implement POSIX time.
 	inode.creation_time = inode.last_mod_time = inode.last_access_time = 0;
-	inode.n_blocks = size / BYTES_PER_SECTOR;
-	if(size % BYTES_PER_SECTOR) inode.n_blocks++;
+	inode.n_blocks = size / ATA_SECTOR_SIZE;
+	if(size % ATA_SECTOR_SIZE) inode.n_blocks++;
 	inode.uid = uid;
 	inode.permissions = permissions;
 	inode.filetype = filetype;
@@ -31,7 +31,7 @@ uint32_t JOTAFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8
 
 		if(i != size_in_blocks-1) {
 			writeBlock(thisblock, data);
-		} else if(size % BYTES_PER_SECTOR) {
+		} else if(size % ATA_SECTOR_SIZE) {
 			/*
 				We're on the last block and the file is not padded.
 				We now copy the contents to a new memory location,
@@ -39,12 +39,12 @@ uint32_t JOTAFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8
 				memory is written.
 			*/
 			uint8_t contents[512] = {0};
-			for(uint16_t i=0; i<size % BYTES_PER_SECTOR; i++) contents[i] = data[i];
+			for(uint16_t i=0; i<size % ATA_SECTOR_SIZE; i++) contents[i] = data[i];
 			writeBlock(thisblock, contents);
 		} else {
 			writeBlock(thisblock, data);
 		}
-		data += BYTES_PER_SECTOR;
+		data += ATA_SECTOR_SIZE;
 
 		// 'thisblock' is now set.
 		// It's time to put the block in the inode.
@@ -64,29 +64,29 @@ void JOTAFS_model::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) 
 	INODE inode = getInode(inode_n);
 
 	// First: is there space in the last block?
-	uint32_t spacestart = inode.size % BYTES_PER_SECTOR;
+	uint32_t spacestart = inode.size % ATA_SECTOR_SIZE;
 	if(spacestart) {
 		// Yep. Append the bytes we need there.
 		// Read the block.
 		uint32_t blockid = getSequentialBlock(inode, inode.n_blocks - 1);
-		uint8_t* contents = getBlock(blockid);
+		FSRawChunk contents = getBlock(blockid);
 
 		// Start putting the data.
 		uint16_t written;
-		for(written=0; written < size && written+spacestart < BYTES_PER_SECTOR; ++written) {
-			contents[written+spacestart] = *data;
+		for(written=0; written < size && written+spacestart < ATA_SECTOR_SIZE; ++written) {
+			contents.get()[written+spacestart] = *data;
 			++data;
 		}
 		size -= written;
 
 		// That's done. Write the block.
-		writeBlock(blockid, contents);
-		jfree(contents);
+		writeBlock(blockid, contents.get());
+		contents.destroy();
 	}
 
 	// How many extra blocks do we need?
-	uint32_t extrablocks = size / BYTES_PER_SECTOR;
-	if(size % BYTES_PER_SECTOR) extrablocks++;
+	uint32_t extrablocks = size / ATA_SECTOR_SIZE;
+	if(size % ATA_SECTOR_SIZE) extrablocks++;
 
 	// Allocate them.
 	// TODO: Change this once allocBlock is improved.
@@ -96,9 +96,9 @@ void JOTAFS_model::appendToFile(uint32_t inode_n, uint64_t size, uint8_t* data) 
 
 	// Write the data!
 	for(auto const& blockid : blocks) {
-		uint8_t contents[BYTES_PER_SECTOR] = {0};
+		uint8_t contents[ATA_SECTOR_SIZE] = {0};
 		uint16_t written;
-		for(written=0; written < size && written < BYTES_PER_SECTOR; ++written) {
+		for(written=0; written < size && written < ATA_SECTOR_SIZE; ++written) {
 			contents[written] = *data;
 			++data;
 		}

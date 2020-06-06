@@ -12,7 +12,7 @@ inline void copyOrLink(bool ram, const string& orig, const string& dst) {
 		copy(orig, dst);
 }
 
-void init_fs(VFS* vfs) {
+void init_fs(VFS* vfs, uint8_t driveid) {
 	bool jramfs = vfs->isRAM();
 
 	// Where do we start from.
@@ -24,7 +24,7 @@ void init_fs(VFS* vfs) {
 		mkd("/mnt/");
 		dst = "/";
 		mkd(orig);
-		mount(orig, new ISO9660);
+		mount(orig, new ISO9660(driveid));
 	} else {
 		// At this point in time, /mnt is already there.
 		dst = "/mnt/HDD";

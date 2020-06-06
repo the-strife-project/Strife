@@ -3,43 +3,45 @@
 #include <kernel/klibc/STL/bitmap>
 #include <kernel/klibc/stdio>
 
-JOTAFS_model::JOTAFS_model(ATA iface) : iface(iface) {
-	uint16_t identifydata[256*2];
-	int aux = iface.identify(identifydata);
-	status = (aux == 0);
-	maxSector = (identifydata[61] << 16) + identifydata[60];
+JOTAFS_model::JOTAFS_model() {}
 
-	SUPERBLOCK* p = (SUPERBLOCK*)iface.read28(JOTAFS_SECTOR_SUPERBLOCK);
-	sb_cache = *p;
-	jfree(p);
+JOTAFS_model::JOTAFS_model(uint8_t driveid) : driveid(driveid) {
+	maxSector = ide.getDevices()[driveid].Size - 1;
+
+	FSRawChunk sb_chunk = ide.ATA_read(driveid, JOTAFS_SECTOR_SUPERBLOCK, 1);
+	sb_cache = *(SUPERBLOCK*)(sb_chunk.get());
+	sb_chunk.destroy();
 }
 
-bool JOTAFS_model::getStatus() { return status; }
 uint32_t JOTAFS_model::getMaxSector() { return maxSector; }
 
-uint8_t JOTAFS_model::writeBoot(uint8_t* boot) { return iface.write28(JOTAFS_SECTOR_BOOT, boot); }
-
-uint8_t JOTAFS_model::writeSB(const SUPERBLOCK& sb) {
-	sb_cache = sb;
-	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
+void JOTAFS_model::writeBoot(uint8_t* boot) {
+	ide.ATA_write(driveid, JOTAFS_SECTOR_BOOT, 1, boot);
 }
 
-uint8_t JOTAFS_model::updateSB() {
-	return iface.write28(JOTAFS_SECTOR_SUPERBLOCK, (uint8_t*)&sb_cache);
+void JOTAFS_model::writeSB(const SUPERBLOCK& sb) {
+	sb_cache = sb;
+	updateSB();
+}
+
+void JOTAFS_model::updateSB() {
+	ide.ATA_write(driveid, JOTAFS_SECTOR_SUPERBLOCK, 1, (uint8_t*)&sb_cache);
 }
 
 JOTAFS_model::INODE JOTAFS_model::getInode(uint32_t idx) {
-	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
+	FSRawChunk chunk = ide.ATA_read(driveid, inode2sector(idx), 1);
+	INODE* inodes = (INODE*)chunk.get();
 	INODE ret = inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR];
-	jfree(inodes);
+	chunk.destroy();
 	return ret;
 }
 
 void JOTAFS_model::writeInode(uint32_t idx, const INODE& contents) {
-	INODE* inodes = (INODE*)iface.read28(inode2sector(idx));
+	FSRawChunk chunk = ide.ATA_read(driveid, inode2sector(idx), 1);
+	INODE* inodes = (INODE*)chunk.get();
 	inodes[(idx-1) % JOTAFS_INODES_PER_SECTOR] = contents;
-	iface.write28(inode2sector(idx), (uint8_t*)inodes);
-	jfree(inodes);
+	ide.ATA_write(driveid, inode2sector(idx), 1, chunk.get());
+	chunk.destroy();
 }
 
 
@@ -51,12 +53,12 @@ void JOTAFS_model::writeInode(uint32_t idx, const INODE& contents) {
 	Why? It's way more efficient searching for a given number of free blocks
 	than calling this function a bunch of times.
 */
-const uint32_t bitmap_size = BYTES_PER_SECTOR*8;
+const uint32_t bitmap_size = ATA_SECTOR_SIZE*8;
 uint32_t JOTAFS_model::allocBlock() {
 	// Read the first non-full bitmap.
-	uint8_t* raw_bitmap = iface.read28(bitmap2sector(sb_cache.first_non_full_bitmap));
+	FSRawChunk chunk = ide.ATA_read(driveid, bitmap2sector(sb_cache.first_non_full_bitmap), 1);
 
-	bitmap bm(bitmap_size, raw_bitmap);
+	bitmap bm(bitmap_size, chunk.get());
 	uint32_t ret = (uint32_t)bm.getFirstZeroAndFlip();
 
 	if(ret == bitmap_size) {
@@ -69,7 +71,7 @@ uint32_t JOTAFS_model::allocBlock() {
 	ret += bitmap_size * sb_cache.first_non_full_bitmap;
 
 	// Write the new bitmap.
-	iface.write28(bitmap2sector(sb_cache.first_non_full_bitmap), raw_bitmap);
+	ide.ATA_write(driveid, bitmap2sector(sb_cache.first_non_full_bitmap), 1, chunk.get());
 
 	// Time to check if this is still the first non-full bitmap.
 	if(bm.getAllOne()) {
@@ -81,7 +83,7 @@ uint32_t JOTAFS_model::allocBlock() {
 	uint8_t empty[512] = {0};
 	writeBlock(ret, empty);
 
-	jfree(raw_bitmap);
+	chunk.destroy();
 	return ret;
 }
 
@@ -97,13 +99,13 @@ void JOTAFS_model::freeBlock(uint32_t idx) {
 	printf(" {{ jlxip's fault: tried to free a block }} ");
 	while(true) {}
 	// Which bitmap does this belong to?
-	/*uint32_t bitmap_idx = idx / BYTES_PER_SECTOR;
+	/*uint32_t bitmap_idx = idx / ATA_SECTOR_SIZE;
 
 	// Read
 	uint8_t* raw_bitmap = iface.read28(bitmap2sector(bitmap_idx));
-	bitmap bm(BYTES_PER_SECTOR, raw_bitmap);
+	bitmap bm(ATA_SECTOR_SIZE, raw_bitmap);
 	// Flip
-	bm.set(idx % BYTES_PER_SECTOR, false);
+	bm.set(idx % ATA_SECTOR_SIZE, false);
 	// Write
 	iface.write28(bitmap2sector(bitmap_idx), raw_bitmap);
 
@@ -145,18 +147,18 @@ uint32_t JOTAFS_model::allocInodeAndWrite(const INODE& inode) {
 	uint32_t ret = sb_cache.first_free_inode;
 	if(!ret) return 0;
 
-	INODE* inodes = (INODE*)iface.read28(inode2sector(ret));
+	FSRawChunk chunk = ide.ATA_read(driveid, inode2sector(ret), 1);
+	INODE* inodes = (INODE*)chunk.get();
 
 	BOTH_INODES b;
 	b.inode = inodes[(ret-1) % JOTAFS_INODES_PER_SECTOR];
 	sb_cache.first_free_inode = b.free_inode.next;
 
 	inodes[(ret-1) % JOTAFS_INODES_PER_SECTOR] = inode;
-	iface.write28(inode2sector(ret), (uint8_t*)inodes);
+	ide.ATA_write(driveid, inode2sector(ret), 1, chunk.get());
 
 	updateSB();
-	jfree(inodes);
-
+	chunk.destroy();
 	return ret;
 }
 

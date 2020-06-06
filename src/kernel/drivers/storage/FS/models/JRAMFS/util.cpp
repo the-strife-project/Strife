@@ -71,7 +71,7 @@ void JRAMFS_model::putBlockInInode(INODE& inode, uint32_t i, uint32_t block) {
 	// Go down the IBPs tree, creating nodes if necessary.
 	uint32_t idx = discardLowerLevels(i, level);
 	// Is the IBP already there? If not, create it.
-	if(!inode.IBPs[level-1]) inode.IBPs[level-1] = (uint32_t)(new uint8_t[BYTES_PER_SECTOR]);
+	if(!inode.IBPs[level-1]) inode.IBPs[level-1] = (uint32_t)(new uint8_t[ATA_SECTOR_SIZE]);
 	uint32_t nextBlock = inode.IBPs[level-1];
 	while(level) {
 		// Get ready to read the contents.
@@ -83,13 +83,13 @@ void JRAMFS_model::putBlockInInode(INODE& inode, uint32_t i, uint32_t block) {
 		// Are there any indirect levels left?
 		if(level > 1) {
 			// Is it already there?
-			if(!contents[index]) contents[index] = (uint32_t)(new uint8_t[BYTES_PER_SECTOR]);
+			if(!contents[index]) contents[index] = (uint32_t)(new uint8_t[ATA_SECTOR_SIZE]);
 		} else {
 			// Just put the block we just wrote.
 			contents[index] = block;
 		}
 
-		memcpy(contents, (uint8_t*)nextBlock, BYTES_PER_SECTOR);
+		memcpy(contents, (uint8_t*)nextBlock, ATA_SECTOR_SIZE);
 		nextBlock = contents[index];
 		level--;
 	}

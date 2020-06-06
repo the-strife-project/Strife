@@ -111,7 +111,7 @@ uint32_t paging_findPages(uint32_t count) {
 		}
 	}
 
-	kernel_panic(1);	// Out of memory.
+	panic(KP_OUTOFMEM);	// Out of memory.
 	return 0;
 }
 

@@ -12,7 +12,7 @@ string shortenPath(const string& str);
 void mountRoot(VFS* vfs);
 void mount(const string& path, VFS* vfs);
 void umount(const string& path);
-FSRawChunk readFile(const string& path, bool big);
+FSRawChunk readFile(const string& path);
 void mkd(const string& path);
 set<string> ls(const string& path);
 void link(const string& orig, const string& dst);

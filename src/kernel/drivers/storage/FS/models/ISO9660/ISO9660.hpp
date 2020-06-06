@@ -13,23 +13,28 @@
 #include <kernel/klibc/STL/string>
 #include <kernel/klibc/STL/set>
 #include <kernel/klibc/STL/map>
+#include <kernel/drivers/storage/FSRawChunk.hpp>
 
-// It can be either a directory record or a file itself.
-struct ISO9660_entity {
-	uint32_t LBA;
-	uint32_t length;
+class ISO9660_model {
+public:
+	// It can be either a directory record or a file itself.
+	struct entity {
+		uint32_t LBA;
+		uint32_t length;
+		bool found;
+	};
+
+private:
+	uint8_t driveid;
+
+public:
+	ISO9660_model();
+	ISO9660_model(uint8_t driveid);
+
+	entity get(const list<string>& dirs);
+	map<string, pair<uint32_t, uint32_t>> getChildren(uint32_t lba, uint32_t len);
+	set<string> getChildren_IamNotInsane(const entity& entity);
+	FSRawChunk read(const entity& entity);
 };
-
-// TODO: PLEASE GET RID OF THESE POINTERS!!!!!!!!!!!!!!!!
-ISO9660_entity* ISO9660_get(const list<string>& dirs);
-
-map<string, pair<uint32_t, uint32_t>> ISO9660_getChildren(uint32_t lba, uint32_t len);
-set<string> ISO9660_getChildren_IamNotInsane(ISO9660_entity* entity);
-
-// Why the fuck would this reserve memory? Omg this needs deep changes.
-uint8_t* ISO9660_read(ISO9660_entity* entity);
-
-// This is disgusting.
-uint8_t* ISO9660_granularread(ISO9660_entity* entity);
 
 #endif

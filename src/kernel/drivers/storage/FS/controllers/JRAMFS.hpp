@@ -13,8 +13,8 @@ public:
 	inline bool isReadOnly() const override { return false; }
 	inline bool isRAM() const override { return true; }
 
-	inline FSRawChunk readFile(const string& path, bool big=false) override {
-		return common_readFile<JRAMFS_model>(model, path, big);
+	inline FSRawChunk readFile(const string& path) override {
+		return common_readFile<JRAMFS_model>(model, path);
 	}
 
 	inline void readFileTo(const string& path, FSRawChunk& theto) override {

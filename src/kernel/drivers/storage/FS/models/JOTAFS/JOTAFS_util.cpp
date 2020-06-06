@@ -86,12 +86,13 @@ uint32_t JOTAFS_model::getSequentialBlock(const INODE& inode, uint32_t i) {	// O
 
 	uint32_t nextBlock = inode.IBPs[level-1];
 	while(level) {
-		uint32_t* contents = (uint32_t*)getBlock(nextBlock);
+		FSRawChunk contents_chunk = getBlock(nextBlock);
+		uint32_t* contents = (uint32_t*)contents_chunk.get();
 
 		// Get the index of the next level.
 		uint32_t idx = div_power128(i, level-1) % 128;
 		nextBlock = contents[idx];
-		delete [] contents;
+		contents_chunk.destroy();
 
 		--level;
 	}
@@ -116,7 +117,8 @@ void JOTAFS_model::putBlockInInode(INODE& inode, uint32_t i, uint32_t block) {	/
 	uint32_t nextBlock = inode.IBPs[level-1];
 	while(level) {
 		// Get ready to read the contents.
-		uint32_t* contents = (uint32_t*)getBlock(nextBlock);
+		FSRawChunk contents_chunk = getBlock(nextBlock);
+		uint32_t* contents = (uint32_t*)contents_chunk.get();
 
 		// Get the index.
 		uint32_t idx = div_power128(i, level-1) % 128;
@@ -133,7 +135,7 @@ void JOTAFS_model::putBlockInInode(INODE& inode, uint32_t i, uint32_t block) {	/
 
 		writeBlock(nextBlock, (uint8_t*)contents);
 		nextBlock = contents[idx];
-		delete [] contents;
+		contents_chunk.destroy();
 
 		--level;
 	}

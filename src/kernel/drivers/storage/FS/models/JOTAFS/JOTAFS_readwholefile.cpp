@@ -19,16 +19,16 @@ uint8_t* JOTAFS_model::readWholeFile(uint32_t idx, uint8_t* buffer) {
 		uint32_t thisblock = getSequentialBlock(inode, i);
 
 		// Read it.
-		uint8_t* thisblock_contents = getBlock(thisblock);
+		FSRawChunk thisblock_contents = getBlock(thisblock);
 
 		// Append only the required.
-		uint16_t upper_bound = BYTES_PER_SECTOR;
-		if(i == inode.n_blocks - 1 && inode.size % BYTES_PER_SECTOR)
-			upper_bound = inode.size % BYTES_PER_SECTOR;
+		uint16_t upper_bound = ATA_SECTOR_SIZE;
+		if(i == inode.n_blocks - 1 && inode.size % ATA_SECTOR_SIZE)
+			upper_bound = inode.size % ATA_SECTOR_SIZE;
 
-		memcpy(buffer + i*BYTES_PER_SECTOR, thisblock_contents, upper_bound);
+		memcpy(buffer + i*ATA_SECTOR_SIZE, thisblock_contents.get(), upper_bound);
 
-		jfree(thisblock_contents);
+		thisblock_contents.destroy();
 	}
 
 	return buffer;

@@ -6,11 +6,17 @@
 #include <kernel/klibc/stdio>
 
 class ISO9660 : public VFS {
+private:
+	ISO9660_model model;
+
 public:
+	ISO9660() {}
+	ISO9660(uint32_t driveid) : model(driveid) {}
+
 	inline bool isReadOnly() const override { return true; }
 	inline bool isRAM() const override { return false; }
 
-	FSRawChunk readFile(const string& path, bool big=false) override;
+	FSRawChunk readFile(const string& path) override;
 	void readFileTo(const string& path, FSRawChunk& theto) override;
 
 	void newdir(const string& path) override {
@@ -35,12 +41,8 @@ public:
 	}
 
 	inline bool exists(const string& path) {
-		ISO9660_entity* entity = ISO9660_get(path.split('/'));
-		if(!entity)
-			return false;
-
-		delete entity;
-		return true;
+		ISO9660_model::entity entity = model.get(path.split('/'));
+		return entity.found;
 	}
 
 	inline bool isDir(const string& path) override {
@@ -49,7 +51,7 @@ public:
 	}
 
 	inline bool isFile(const string& path) override {
-		// TODO: Same as above.
+		// TODO: How do I do this?
 		return exists(path);
 	}
 

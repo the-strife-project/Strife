@@ -104,9 +104,9 @@ void umount(const string& path) {
 	_mounts.erase(pair<string, VFS*>(getActualPath(path).f, _mounts[path]));
 }
 
-FSRawChunk readFile(const string& path, bool big) {
+FSRawChunk readFile(const string& path) {
 	pair<string, VFS*> actual(getActualPath(path));
-	return actual.s->readFile(actual.f, big);
+	return actual.s->readFile(actual.f);
 }
 
 void mkd(const string& path) {
@@ -136,7 +136,7 @@ bool isFile(const string& path) {
 }
 
 void copy(const string& orig, const string& dst) {
-	FSRawChunk contents(readFile(orig, false));
+	FSRawChunk contents(readFile(orig));
 
 	string short_dst = shortenPath(dst);
 	pair<string, VFS*> inner_dst = getInnerPath(short_dst);

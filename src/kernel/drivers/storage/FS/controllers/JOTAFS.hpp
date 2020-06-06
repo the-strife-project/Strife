@@ -13,10 +13,10 @@ public:
 	inline bool isReadOnly() const override { return false; }
 	inline bool isRAM() const override { return false; }
 
-	JOTAFS(ATA iface) : model(JOTAFS_model(iface)) {}
+	JOTAFS(uint8_t driveid) : model(JOTAFS_model(driveid)) {}
 
-	inline FSRawChunk readFile(const string& path, bool big=false) override {
-		return common_readFile<JOTAFS_model>(model, path, big);
+	inline FSRawChunk readFile(const string& path) override {
+		return common_readFile<JOTAFS_model>(model, path);
 	}
 
 	inline void readFileTo(const string& path, FSRawChunk& theto) override {

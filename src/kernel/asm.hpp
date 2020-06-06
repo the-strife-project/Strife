@@ -48,4 +48,11 @@ inline void invlpg(uint32_t addr) {
 	asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
 }
 
+// Ugly, right? Yeah, don't care.
+inline void insl(uint16_t port, uint32_t* buffer, uint32_t cnt) {
+	uint32_t* buff = buffer + cnt;
+	while(buffer != buff)
+		*(buffer++) = inl(port);
+}
+
 #endif

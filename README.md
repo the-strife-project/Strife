@@ -23,7 +23,7 @@ These are parts that do not have to deal directly with the hardware, or do so in
 
 - Keyboard driver (Spanish layout).
 - Kernel panics.
-- Filesystems: ISO9660 and [JOTAFS](https://github.com/jotaOS/jotaOS/wiki/JOTAFS), my own filesystem.
+- Filesystems: ISO9660, [JOTAFS](https://github.com/jotaOS/jotaOS/wiki/JOTAFS), and [JRAMFS](https://github.com/jotaOS/jotaOS/wiki/JRAMFS).
 
 ### Low level
 These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.

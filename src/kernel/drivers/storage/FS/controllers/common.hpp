@@ -12,10 +12,7 @@
 	The filesystems are almost the same, so no need to repeat code.
 */
 
-template<typename T> FSRawChunk common_readFile(T& model, const string& path, bool big) {
-	// Damn I really need that DMA.
-	if(big) {}
-
+template<typename T> FSRawChunk common_readFile(T& model, const string& path) {
 	uint32_t inode_n = model.find(path);
 	if(inode_n == T::RESERVED_INODE::INULL)
 		return FSRawChunk();
