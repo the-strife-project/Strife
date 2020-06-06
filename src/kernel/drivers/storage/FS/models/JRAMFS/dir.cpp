@@ -12,7 +12,6 @@ void JRAMFS_model::DIR::addChild(string filename, uint32_t child_inode_number) {
 	// Pretty trivial.
 	map<string, uint32_t>* dir = (map<string, uint32_t>*)(this->parent->inodes[inode_n].DBPs[0]);
 	(*dir)[filename] = child_inode_number;
-	this->parent->inodes[child_inode_number].n_links++;
 }
 
 map<string, uint32_t> JRAMFS_model::DIR::getChildren() const {

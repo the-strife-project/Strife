@@ -3,7 +3,6 @@
 
 uint32_t JRAMFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	INODE inode;
-	inode.n_links = 0;
 	inode.size = size;
 	inode.creation_time = inode.last_mod_time = inode.last_access_time = 0;
 	inode.n_blocks = size / ATA_SECTOR_SIZE;
@@ -29,7 +28,7 @@ uint32_t JRAMFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8
 	}
 
 	uint32_t ret = this->inodes.size();
-	this->inodes[ret] = inode;
+	inodes.push_back(inode);
 	return ret;
 }
 

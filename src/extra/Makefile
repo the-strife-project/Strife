@@ -1,2 +1,3 @@
+.PHONY: build
 build:
-	cd MSS && make
+	cd MSS && $(MAKE)

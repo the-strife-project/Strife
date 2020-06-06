@@ -37,16 +37,16 @@ obj:
 	cd src && find . -type d -exec mkdir -p ../obj/{} \;
 
 kernel:
-	cd src/kernel && make
+	cd src/kernel && $(MAKE)
 
 jboot:
-	cd src/JBoot && make
+	cd src/JBoot && $(MAKE)
 
 extras:
-	cd src/extra && make
+	cd src/extra && $(MAKE)
 
 extra_files:
-	cd extra && make
+	cd extra && $(MAKE)
 
 clean:
 	rm -r obj/ iso/ $(TARGET) $(TARGET).lock hdd10M.img &> /dev/null || true

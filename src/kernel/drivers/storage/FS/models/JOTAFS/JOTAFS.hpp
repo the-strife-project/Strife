@@ -64,8 +64,7 @@ public:
 
 	struct INODE {
 		uint8_t used;
-		uint8_t padding0[3];
-		uint32_t n_links;
+		uint8_t padding0[7];
 		uint64_t size;
 		uint32_t creation_time;
 		uint32_t last_mod_time;
@@ -95,7 +94,6 @@ public:
 			FIFO,
 			SUCTION,
 			SOCKET,
-			VOLATILE,
 			SYSTEM,
 			SOFT
 		};

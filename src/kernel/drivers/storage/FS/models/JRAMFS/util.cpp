@@ -3,7 +3,7 @@
 
 JRAMFS_model::JRAMFS_model() {
 	// Inode 0 is NULL, so must not be assigned.
-	this->inodes[0] = INODE();
+	this->inodes.push_back(INODE());
 	// Let's create the root as well.
 	newdir(JOTAFS_SUPERUSER_UID, JP_USER | JP_GR | JP_GX | JP_OR | JP_OX, JRAMFS_model::RESERVED_INODE::ROOT);
 }

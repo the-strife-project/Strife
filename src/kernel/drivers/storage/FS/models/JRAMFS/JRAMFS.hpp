@@ -25,7 +25,7 @@ public:
 	typedef JOTAFS_model::FLAG FLAG;
 
 private:
-	map<uint32_t, INODE> inodes;
+	vector<INODE> inodes;
 
 	// Get the level of a block 'i' in the inode.
 	uint8_t getLevel(uint32_t i);

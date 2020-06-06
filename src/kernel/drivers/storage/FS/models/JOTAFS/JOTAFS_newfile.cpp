@@ -6,7 +6,6 @@
 uint32_t JOTAFS_model::newfile(uint64_t size, uint8_t* data, uint32_t uid, uint8_t filetype, uint16_t permissions) {
 	INODE inode;
 	inode.used = 1;
-	inode.n_links = 0;	// Links will be created by DIR::addChild.
 	inode.size = size;
 	// The line below is to be kept until I implement POSIX time.
 	inode.creation_time = inode.last_mod_time = inode.last_access_time = 0;

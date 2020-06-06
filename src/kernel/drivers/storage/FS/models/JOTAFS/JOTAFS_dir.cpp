@@ -34,7 +34,6 @@ void JOTAFS_model::DIR::addChild(string filename, uint32_t child_inode_number) {
 
 	// Increment the number of links of child_inode_number.
 	INODE inode = parent->getInode(child_inode_number);
-	++inode.n_links;
 	parent->writeInode(child_inode_number, inode);
 }
 
