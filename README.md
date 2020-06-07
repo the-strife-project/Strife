@@ -1,5 +1,7 @@
 # jotaOS
 
+[![Build Status](https://travis-ci.org/jotaOS/jotaOS.svg?branch=master)](https://travis-ci.org/jotaOS/jotaOS)
+
 ## Introduction
 jotaOS is an x86 operating system made in C/C++ from scratch that I'm doing to learn. That's it. I'm not trying to make everything myself for any reason whatsoever but learning. There are so many topics in CS that I want to know in depth, and making an OS is a great way to touch all of them.
 
