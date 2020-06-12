@@ -34,7 +34,7 @@ These can be programed in non-assembly programming languages (ignoring `in` and 
 - PCI driver.
 - Management of VESA video modes.
 - IDE driver (PIO).
-- Syscalls (well, some are more low level than others).
+- Syscalls (some are more low level than others).
 
 ### Really low level
 These can only be programmed in assembly, or require executing instructions that do not exist in C(++).
