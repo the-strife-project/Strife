@@ -1,17 +1,24 @@
+os: linux
 dist: trusty
-sudo: required
 language: cpp
+
+branches:
+  only: master
+
 services:
-- docker
-before_install:
-- docker pull jlxip/jotaos-build-tools:latest
+  - docker
+
+before_install: docker pull jlxip/jotaos-build-tools:latest
+
 script:
 - docker run -v `pwd`:/root/jotaOS -w /root/jotaOS -t jlxip/jotaos-build-tools:latest
   sh /root/build-travis.sh
+
 before_deploy: git tag $(date +'%Y%m%d.%H%M%S')
+
 deploy:
   provider: releases
-  api_key:
+  token:
     secure: X93s+Qk1tpAm1iKEB9imejWSQffHK7o1msrmJTAguI8Exbhv5u4uL7kZFds3fY8p2MR3QQY701nqZgJiZ059+8nETRxzueLl+9vWRCj1GKcWVHgKmda53suEEAH3vHqxv5jHPva+hx4U6Wtgz49Bg6MVucNELJS40jCLQI4+nqnGBRvvunMt0vq2QGPpAZhwPsjRIaLi7t6UajIvfXz8DOlYShjmrPBTLMX3sTVwd+ygoLs0irdz0ZLwGWLqfJUtzbvODeFahnInYBC5JCF2fZfSoxtPPxNpeaxAldmCKZs6oDzdiTq7MfpGnxoPbG/dcc05sa3AGDuLV/46v4pFciE5viGx+Cc2AEeHEPDp23gE+G07iOfcggZmCo/WphyxVOW2DBCTcBl6pBsebK7FpZnVt6nNKZNrOY5jgffGlPDbGfDfHdPNUIu7am6RpikRWIFfUGAX+/1ScoSLMUf8ff3xn8ygr2ayF8xXO0XbepuApw3li4bAEgJqfSRt2eu5iwLE3Ru+t9PtNYk540COxCYzpqONFtmRnQKOqlubxZoIpRbFyF7Ch60zQ8svhhEAxPTROp72FpFr2Hg9lde30HSz/mKZZxopkA60+CS1jBwrQZwFgVYUWzlnU0k9t3I+gvP/xRyZPHq5Y2GUayYnau/tBdCymUapCMrGPhIkiXI=
   file:
     - jotaOS.iso

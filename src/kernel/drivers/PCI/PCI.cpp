@@ -1,7 +1,7 @@
 #include <kernel/drivers/PCI/PCI.hpp>
 #include <kernel/asm.hpp>
-#include <kernel/klibc/stdio>
 #include <kernel/kernel_panic/kernel_panic.hpp>
+#include <kernel/paging/paging.hpp>
 
 uint32_t __PCI_getAddress(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
 	// Compute the address according to the structure above.
@@ -15,6 +15,9 @@ uint32_t __PCI_getAddress(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offse
 }
 
 void PCI::prepare(uint8_t offset) {
+	// Mark the page of the address as present.
+	uint32_t addr = __PCI_getAddress(bus, slot, func, offset);
+	paging_setPresent(addr);
 	outl(PCI_CONFIG_PORT, __PCI_getAddress(bus, slot, func, offset));
 }
 

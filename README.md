@@ -26,13 +26,14 @@ These are parts that do not have to deal directly with the hardware, or do so in
 - Keyboard driver (Spanish layout).
 - Kernel panics.
 - Filesystems: ISO9660, [JOTAFS](https://github.com/jotaOS/jotaOS/wiki/JOTAFS), and [JRAMFS](https://github.com/jotaOS/jotaOS/wiki/JRAMFS).
+- Binary and shared library loader.
 
 ### Low level
 These can be programed in non-assembly programming languages (ignoring `in` and `out` instructions), but are still parts of an operating system that deal directly with the hardware.
 
 - PCI driver.
 - Management of VESA video modes.
-- Programmed I/O drivers: ATA and ATAPI.
+- IDE driver (PIO).
 - Syscalls (well, some are more low level than others).
 
 ### Really low level

@@ -23,6 +23,8 @@
 #include <kernel/install/install.hpp>
 #include <kernel/drivers/storage/IDE/IDE.hpp>
 #include <kernel/V86/V86.hpp>
+#include <kernel/loader/loader.hpp>
+#include <kernel/tasks/task.hpp>
 
 void printSplash() {
 	printf("\n");
@@ -205,6 +207,38 @@ extern "C" void kernel_main(void) {
 	/*
 		--- All the code below this point will be certainly changed ---
 	*/
+
+	// --- TEST ---
+	/*mkd("/lib");
+	link("/lib/libbruh.so", "/mnt/CDROM/LIB/LIBBRUH.SO");
+	FSRawChunk bruh = readFile("/mnt/CDROM/BRUH.BIN");
+	if(!bruh.good()) {
+		printf(":s\n");
+		while(true) {}
+	}
+	Program bruh_p;
+	bruh_p.parse(bruh.get());
+	if(!bruh_p.loadDynamicLibraries()) {
+		printf("Not found: /lib/%S\n", bruh_p.getFailedDynamicLibrary());
+		while(true) {}
+	}
+	bruh_p.load();
+
+	Task t = createTask(1, 0, 0, bruh_p.getPages());
+	switch_page_table(t.pageDirectory);
+	if(!bruh_p.relocate()) {
+		printf("Function not found: %S\n", bruh_p.getFailedRelocation());
+		while(true) {}
+	}
+	bruh.destroy();
+
+	int (*main)(void) = (int (*)(void))(16 * 1024 * 1024);
+	outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
+	int ret = (*main)();
+	printf("Return value: %d\n", ret);
+
+	while(true) {}*/
+	// --- END ---
 
 	showWarning();
 

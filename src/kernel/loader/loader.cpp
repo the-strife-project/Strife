@@ -1,43 +1,99 @@
 #include <kernel/loader/loader.hpp>
-#include <kernel/loader/ELF/ELF.hpp>
 #include <kernel/paging/paging.hpp>
 #include <kernel/klibc/stdlib.hpp>
-
-// Remove when implementing this for real.
 #include <kernel/klibc/stdio>
+#include <kernel/mounts/mounts.hpp>
 
-// This does almost no checks and it's trivial to break.
-list<uint8_t*> loadELF(uint8_t* data) {
-	list<uint8_t*> pages;
+map<string, SharedLibrary*> loadedSharedLibraries;
+bool mapInitialized = false;
 
-	list<ELF::segment> segments = ELF::parse(data);
-	for(auto const& x : segments) {
-		// Will do this at some point. By now I just want to finish the parser.
-		printf("Off(0x%x) Size(%d) to Addr(0x%x) Size(%d)\n", x.file_offset, x.file_length, x.start_addr, x.size_memory);
-
-		/*
-		OLD CODE IN CASE I WANT TO CHECK SOMETHING OFF IT.
-
-		// Copy p_filesz bytes from p_offset to new pages.
-		uint32_t npages = phe->p_filesz / PAGE_SIZE;
-		for(uint32_t i=0; i<npages; ++i) {
-			// Allocate the page.
-			uint32_t page = paging_allocPages(1);
-
-			// Set it to user mode.
-			paging_setUser(page, 1);
-
-			// By now, all pages are RWX. Don't care about that right now.
-			// They should be changed here.
-
-			// Copy the contents.
-			memcpy((uint8_t*)page, data + phe->p_offset, PAGE_SIZE);
-
-			pages.push_back((uint8_t*)page);
-		}*/
+bool Program::loadDynamicLibraries() {
+	if(!mapInitialized) {
+		loadedSharedLibraries = map<string, SharedLibrary*>();
+		mapInitialized = true;
 	}
 
-	// Create the process and probably call the scheduler.
+	for(auto const& x : elf.libraries) {
+		// Already loaded?
+		if(!loadedSharedLibraries[x]) {
+			// Must load now.
+			FSRawChunk lib_raw = readFile(string("/lib/") + x);
+			if(!lib_raw.good()) {
+				failedDynamicLibrary = x;
+				return false;
+			}
 
-	return pages;
+			SharedLibrary* lib = new SharedLibrary;
+			lib->parse(lib_raw.get());
+			lib->load();
+
+			lib_raw.destroy();
+			loadedSharedLibraries[x] = lib;
+		}
+
+		SharedLibrary* thisLibrary = loadedSharedLibraries[x];
+		for(auto const& x : thisLibrary->getGlobalFunctions())
+			dynFunctions[x.f] = FunctionPair(thisLibrary, x.s);
+	}
+
+	return true;
+}
+
+void ELFSomething::load() {
+	// TODO: Segments in the GDT.
+	map<uint32_t, uint32_t> alreadyAllocated;	// (virt, phys)
+	for(auto const& x : elf.sections) {
+		if(x.s->addr == 0)
+			continue;
+
+		uint32_t npages = x.s->size / PAGE_SIZE;
+		if(x.s->size % PAGE_SIZE)
+			++npages;
+
+		for(uint32_t i=0; i<npages; ++i) {
+			uint32_t virtPage = (x.s->addr + i*PAGE_SIZE) & ~0xFFF;
+			if(alreadyAllocated.find(pair<uint32_t, uint32_t>(virtPage, 0)) == alreadyAllocated.end()) {
+				uint32_t page = paging_allocPages(1);
+				paging_setUser(page);
+				alreadyAllocated[virtPage] = page;
+				pages.push_back(pair<uint32_t, uint32_t>(alreadyAllocated[virtPage], x.s->addr + PAGE_SIZE*i));
+			}
+
+			// Permissions?
+
+			memcpy(
+				(uint8_t*)alreadyAllocated[virtPage] + ((x.s->offset - i*PAGE_SIZE) % PAGE_SIZE),
+				raw + x.s->offset,
+				(x.s->size - i*PAGE_SIZE) % PAGE_SIZE);
+		}
+	}
+
+	/*
+		Mount shared library on pages.
+		Virtual pages will be offsetted with the first physical page.
+	*/
+	for(auto const& x : elf.libraries) {
+		SharedLibrary* lib = loadedSharedLibraries[x];
+		uint32_t firstPhysicalPage = (*(lib->getPages().begin())).f;
+		for(auto const& page : lib->getPages())
+			pages.push_back(pair<uint32_t, uint32_t>(page.f, firstPhysicalPage + page.s));
+		libraryMounts[lib] = firstPhysicalPage;
+	}
+}
+
+bool ELFSomething::relocate() {
+	for(auto const& x : elf.dynReferences) {
+		auto func = dynFunctions[x.f];
+
+		if(!func.f) {
+			failedRelocation = x.f;
+			return false;
+		}
+
+		// Fill the got entry.
+		*(x.s) = libraryMounts[func.f] + func.s;
+	}
+
+	// TODO: make GOT pages RO.
+	return true;
 }

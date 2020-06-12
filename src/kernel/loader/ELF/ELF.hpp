@@ -3,6 +3,8 @@
 
 #include <common/types.hpp>
 #include <kernel/klibc/STL/list>
+#include <kernel/klibc/STL/string>
+#include <kernel/klibc/STL/map>
 
 /*
 	ELF specs taken from here:
@@ -10,19 +12,10 @@
 */
 
 #define ELF_PHEADER_SIZE 32
+#define ELF_SHEADER_SIZE 40
+#define ELF_ST_INFO_GLOBAL_FUNC 0x12
 
 namespace ELF {
-	// These are stuff for the loader.
-	struct segment {
-		uint32_t file_offset;
-		uint32_t file_length;
-		uint32_t start_addr;
-		uint32_t size_memory;
-		//uint32_t protFlags;	// At some point.
-	};
-
-	list<segment> parse(uint8_t* data);
-
 	// These are real ELF types.
 	enum class ELFtype : uint16_t {
 		__NONE,
@@ -82,6 +75,99 @@ namespace ELF {
 		uint32_t flags;
 		uint32_t alignment;
 	};
+
+	// -- Sections --
+	enum class section_type : uint32_t {
+		SNULL,
+		PROGBITS,
+		SYMTAB,
+		STRTAB,
+		RELA,
+		HASH,
+		DYNAMIC,
+		NOTE,
+		NOBITS,
+		REL,
+		SHLIB,
+		DYNSYM,
+		INIT_ARRAY,
+		FINI_ARRAY,
+		PREINIT_ARRAY,
+		GROUP,
+		SYMTAB_SHNDX,
+		NUM
+	};
+
+	struct section_header_entry {
+		uint32_t name;	// Offset to string in .shstrtab
+		section_type type;
+		uint32_t flags;
+		uint32_t addr;
+		uint32_t offset;
+		uint32_t size;
+		uint32_t link;
+		uint32_t info;
+		uint32_t addralign;
+		uint32_t entsize;
+	};
+
+	// -- Dynamic --
+	struct dynamic_entry {
+		uint32_t needed;
+		uint32_t value;
+	};
+
+	struct dynsym_entry {
+		uint32_t name;
+		uint32_t value;
+		uint32_t size;
+		uint8_t info;
+		uint8_t other;
+		uint16_t shndx;
+	};
+
+	struct rel_entry {
+		uint32_t offset;
+		uint32_t info;
+	};
+
+	enum class relocation_type : uint8_t {
+		R_386_NONE,
+		R_386_32,
+		R_386_PC32,
+		R_386_GOT32,
+		R_386_PLT32,
+		R_386_COPY,
+		R_386_GLOB_DAT,
+		R_386_JMP_SLOT,
+		R_386_RELATIVE,
+		R_386_GOTOFF,
+		R_386_GOTPC,
+		R_386_32PLT
+	};
+
+
+
+	// These are stuff for the loader.
+	struct segment {
+		uint32_t file_offset;
+		uint32_t file_length;
+		uint32_t start_addr;
+		uint32_t size_memory;
+		//uint32_t protFlags;	// At some point.
+	};
+
+	typedef map<string, ELF::section_header_entry*> sections_t;
+
+	struct ParsedELF {
+		list<segment> segments;
+		sections_t sections;
+		list<string> libraries;
+		map<string, uint32_t> globalFunctions;	// (name, offset)
+		map<string, uint32_t*> dynReferences;
+	};
+
+	ParsedELF parse(uint8_t* data);
 };
 
 #endif

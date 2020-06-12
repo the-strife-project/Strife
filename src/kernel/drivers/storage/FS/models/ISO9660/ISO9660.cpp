@@ -73,12 +73,16 @@ map<string, pair<uint32_t, uint32_t>> ISO9660_model::getChildren(uint32_t lba, u
 		}
 
 		// Get the filename.
-		char* filename = (char*)(chunk.get() + i + ISO9660_DIR_FILENAME);
-		for(uint32_t j=0; j<ISO9660_DIR_FILENAME_LENGTH; ++j) {
-			if(filename[j] == ';') {
-				filename[j] = 0;
+		uint8_t filename_len = *(uint8_t*)(chunk.get() + i + ISO9660_DIR_FILENAME_LENGTH);
+
+		string filename;
+		char* filename_orig = (char*)(chunk.get() + i + ISO9660_DIR_FILENAME);
+
+		for(uint32_t j=0; j<filename_len; ++j) {
+			if(filename_orig[j] == ';')
 				break;
-			}
+
+			filename += filename_orig[j];
 		}
 
 		uint32_t this_lba = *(uint32_t*)(chunk.get() + i + ISO9660_DIR_EAR_LBA);

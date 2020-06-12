@@ -10,11 +10,10 @@ int liballoc_lock() { return 0; }
 int liballoc_unlock() { return 0; }
 
 void* liballoc_alloc(size_t p) {
-	uint32_t ptr = paging_allocPages((uint32_t)p);
-	return (void*)ptr;
+	return (void*)paging_allocPages((uint32_t)p);
 }
 int liballoc_free(void* ptr, size_t p) {
-	paging_setFree((uint32_t)ptr, (uint32_t)p);
+	paging_freePages((uint32_t)ptr, (uint32_t)p);
 	return 0;
 }
 // End of my stuff.

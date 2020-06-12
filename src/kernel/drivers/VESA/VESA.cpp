@@ -106,11 +106,7 @@ void VESA_init(uint16_t width, uint16_t height, uint8_t colordepth) {
 			// Map the pages of the framebuffer.
 			uint32_t fb_psize = width * height * (colordepth >> 3);
 			for(uint32_t z=0; z<fb_psize; z+=4096)
-				paging_mapPage(
-					VESA_framebuffer + z,
-					VESA_framebuffer + z,
-					PT_PRESENT | PT_RW | PT_USED
-				);
+				paging_setPresent(VESA_framebuffer + z);
 
 			jfree(info);
 			break;

@@ -3,7 +3,6 @@
 
 #include <common/types.hpp>
 
-// Disgusting. Right?
 // Source: https://wiki.osdev.org/Getting_to_Ring_3
 struct tss_entry_struct {
 	uint32_t prev_tss;	// The previous TSS - if we used hardware task switching this would form a linked list.
