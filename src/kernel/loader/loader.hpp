@@ -21,25 +21,35 @@ struct FunctionPair : public pair<SharedLibrary*, uint32_t> {
 	};
 };
 
+struct PhysVirt {
+	uint32_t phys;
+	uint32_t virtoff;
+	uint32_t virt;	// virt = beginning + virtoff.
+
+	PhysVirt() : phys(0) {}
+	PhysVirt(uint32_t phys, uint32_t virtoff) : phys(phys), virtoff(virtoff) {}
+};
+
 class ELFSomething {
 protected:
 	uint8_t* raw;
 	ELF::ParsedELF elf;
 	map<string, FunctionPair> dynFunctions;	// (name, (library, offset in library))
-	list<pair<uint32_t, uint32_t>> pages;	// (phys, virt)
+	list<PhysVirt> pages;
 	map<SharedLibrary*, uint32_t> libraryMounts;
 	string failedRelocation;
+	uint32_t beginning;	// Entry point (virtual address).
 
 public:
-	inline void parse(uint8_t* _raw) {
-		raw = _raw;
-		elf = ELF::parse(raw);
+	void load();
+	void relocate();
+	bool relocate2();
+
+	inline uint32_t getBeginning() const {
+		return beginning;
 	}
 
-	void load();
-	bool relocate();
-
-	inline const list<pair<uint32_t, uint32_t>>& getPages() const {
+	inline const list<PhysVirt>& getPages() const {
 		return pages;
 	}
 
@@ -51,12 +61,15 @@ public:
 
 class SharedLibrary : public ELFSomething {
 public:
+	inline void parse(uint8_t* _raw) {
+		raw = _raw;
+		elf = ELF::parse(raw, true);	// true: shared object.
+	}
+
 	// TODO: Why can't I make this const?
 	inline map<string, uint32_t>& getGlobalFunctions() {
 		return elf.globalFunctions;
 	}
-
-	// TODO: nested shared libraries.
 };
 
 class Program : public ELFSomething {
@@ -64,6 +77,11 @@ private:
 	string failedDynamicLibrary;
 
 public:
+	inline void parse(uint8_t* _raw) {
+		raw = _raw;
+		elf = ELF::parse(raw, false);	// false: executable.
+	}
+
 	bool loadDynamicLibraries();
 
 	inline string getFailedDynamicLibrary() const {

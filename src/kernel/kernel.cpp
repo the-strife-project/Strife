@@ -208,9 +208,10 @@ extern "C" void kernel_main(void) {
 		--- All the code below this point will be certainly changed ---
 	*/
 
-	// --- TEST ---
-	/*mkd("/lib");
+	/*// --- TEST ---
+	mkd("/lib");
 	link("/lib/libbruh.so", "/mnt/CDROM/LIB/LIBBRUH.SO");
+
 	FSRawChunk bruh = readFile("/mnt/CDROM/BRUH.BIN");
 	if(!bruh.good()) {
 		printf(":s\n");
@@ -223,22 +224,25 @@ extern "C" void kernel_main(void) {
 		while(true) {}
 	}
 	bruh_p.load();
+	bruh_p.relocate();
 
 	Task t = createTask(1, 0, 0, bruh_p.getPages());
 	switch_page_table(t.pageDirectory);
-	if(!bruh_p.relocate()) {
+	if(!bruh_p.relocate2()) {
 		printf("Function not found: %S\n", bruh_p.getFailedRelocation());
 		while(true) {}
 	}
+
 	bruh.destroy();
 
-	int (*main)(void) = (int (*)(void))(16 * 1024 * 1024);
+	printf("Boutta jump to 0x%x\n", bruh_p.getBeginning());
+	int (*main)(void) = (int (*)(void))(bruh_p.getBeginning());
 	outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
 	int ret = (*main)();
 	printf("Return value: %d\n", ret);
 
-	while(true) {}*/
-	// --- END ---
+	while(true) {}
+	// --- END ---*/
 
 	showWarning();
 

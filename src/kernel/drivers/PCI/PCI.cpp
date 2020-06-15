@@ -4,7 +4,6 @@
 #include <kernel/paging/paging.hpp>
 
 uint32_t __PCI_getAddress(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset) {
-	// Compute the address according to the structure above.
 	return (uint32_t)(
 		(bus << 16) |
 		(slot << 11) |
@@ -17,7 +16,7 @@ uint32_t __PCI_getAddress(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offse
 void PCI::prepare(uint8_t offset) {
 	// Mark the page of the address as present.
 	uint32_t addr = __PCI_getAddress(bus, slot, func, offset);
-	paging_setPresent(addr);
+	paging_setPresent(addr);	// TODO: Just one?
 	outl(PCI_CONFIG_PORT, __PCI_getAddress(bus, slot, func, offset));
 }
 

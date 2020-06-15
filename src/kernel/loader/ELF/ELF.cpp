@@ -38,17 +38,21 @@ ELF::sections_t getSections(uint8_t* data, ELF::header* header) {
 	return ret;
 }
 
-void parseExecutable(uint8_t* data, ELF::header* header, ELF::ParsedELF& ret) {
+ELF::ParsedELF ELF::parse(uint8_t* data, bool isLibrary) {
+	ELF::ParsedELF ret;
+
+	ELF::header* header = (ELF::header*)data;
+	ret.sections = getSections(data, header);
+
 	parseSegments(ret, data, header);
 
 	// Look for ".dynstr" and ".dynamic".
 	char* dynstr = nullptr;
-	ELF::section_header_entry* dynamic = nullptr;
 
 	auto* aux = ret.sections[".dynstr"];
 	if(aux)
 		dynstr = (char*)(data + aux->offset);
-	dynamic = ret.sections[".dynamic"];
+	auto* dynamic = ret.sections[".dynamic"];
 
 	if(dynamic && dynstr) {
 		// There is a dynamic section. Time to look for dependencies.
@@ -58,21 +62,10 @@ void parseExecutable(uint8_t* data, ELF::header* header, ELF::ParsedELF& ret) {
 				ret.libraries.push_back(string(dynstr + dent->value));
 		}
 	}
-}
 
-void parseSharedLibrary(uint8_t* data, ELF::header* header, ELF::ParsedELF& ret) {
-	parseSegments(ret, data, header);
+	auto* dynsym = ret.sections[".dynsym"];
 
-	// Look for ".dynstr" and ".dynsym".
-	char* dynstr = nullptr;
-	ELF::section_header_entry* dynsym = nullptr;
-
-	auto* aux = ret.sections[".dynstr"];
-	if(aux)
-		dynstr = (char*)(data + aux->offset);
-	dynsym = ret.sections[".dynsym"];
-
-	if(dynstr && dynsym) {
+	if(isLibrary && dynstr && dynsym) {
 		// Start looking for global symbols.
 		for(uint32_t off=0; off<dynsym->size; off+=dynsym->entsize) {
 			ELF::dynsym_entry* dsent = (ELF::dynsym_entry*)(data + dynsym->offset + off);
@@ -80,39 +73,12 @@ void parseSharedLibrary(uint8_t* data, ELF::header* header, ELF::ParsedELF& ret)
 				ret.globalFunctions[string(dynstr + dsent->name)] = dsent->value;
 		}
 	}
-}
 
-ELF::ParsedELF ELF::parse(uint8_t* data) {
-	ELF::ParsedELF ret;
-
-	ELF::header* header = (ELF::header*)data;
-	ret.sections = getSections(data, header);
-
-	if(header->elftype == ELF::ELFtype::EXECUTABLE) {
-		parseExecutable(data, header, ret);
-	} else if(header->elftype == ELF::ELFtype::SHARED) {
-		parseSharedLibrary(data, header, ret);
-	}
-
-	// Fill dynamic references.
-	char* shstrtab = get_shstrtab(data, header);
-	ELF::section_header_entry* reldynent = nullptr;
-	for(uint16_t i=0; i<header->n_entries_sheader; ++i) {
-		ELF::section_header_entry* she = (ELF::section_header_entry*)(data + header->s_header + i*ELF_SHEADER_SIZE);
-
-		if(string(shstrtab + she->name) == ".rel.dyn")
-			reldynent = she;
-	}
-
-	auto* dynsym = ret.sections[".dynsym"];
-	auto* dynstr_ = ret.sections[".dynstr"];
-	char* dynstr = nullptr;
-	if(dynstr_)
-		dynstr = (char*)(data + dynstr_->offset);
-
-	if(reldynent && dynsym && dynstr) {
-		for(uint32_t off=0; off<reldynent->size; off+=reldynent->entsize) {
-			rel_entry* relent = (rel_entry*)(data + reldynent->offset + off);
+	// Get dynamic references.
+	auto* reldyn = ret.sections[".rel.dyn"];
+	if(reldyn && dynsym && dynstr) {
+		for(uint32_t off=0; off<reldyn->size; off+=reldyn->entsize) {
+			rel_entry* relent = (rel_entry*)(data + reldyn->offset + off);
 
 			if((relent->info & 0xFF) != (uint8_t)relocation_type::R_386_JMP_SLOT) {
 				// TODO: Fail less miserably.

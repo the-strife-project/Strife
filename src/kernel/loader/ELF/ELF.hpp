@@ -15,6 +15,14 @@
 #define ELF_SHEADER_SIZE 40
 #define ELF_ST_INFO_GLOBAL_FUNC 0x12
 
+// Section header flags.
+#define ELF_SHF_WRITE 0x1
+#define ELF_SHF_ALLOC 0x2
+#define ELF_SHF_EXECINSTR 0x4
+#define ELF_SHF_RELA_LIVEPATCH 0x00100000
+#define ELF_SHF_RO_AFTER_INIT 0x00200000
+#define ELF_SHF_MASKPROC 0xf0000000
+
 namespace ELF {
 	// These are real ELF types.
 	enum class ELFtype : uint16_t {
@@ -167,7 +175,7 @@ namespace ELF {
 		map<string, uint32_t*> dynReferences;
 	};
 
-	ParsedELF parse(uint8_t* data);
+	ParsedELF parse(uint8_t* data, bool isLibrary);
 };
 
 #endif

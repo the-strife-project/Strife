@@ -4,6 +4,7 @@
 #include <kernel/klibc/STL/set>
 #include <kernel/klibc/STL/list>
 #include <kernel/klibc/STL/pair>
+#include <kernel/loader/loader.hpp>	// For PhysVirt.
 
 typedef uint32_t PID_t;
 
@@ -26,6 +27,6 @@ struct Task {
 	{}
 };
 
-Task createTask(PID_t pid, uint32_t priority, PID_t parent, const list<pair<uint32_t, uint32_t>>& pages);
+Task createTask(PID_t pid, uint32_t priority, PID_t parent, const list<PhysVirt>& pages);
 
 #endif
