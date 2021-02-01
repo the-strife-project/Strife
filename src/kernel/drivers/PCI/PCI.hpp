@@ -2,7 +2,7 @@
 #define PCI_H
 
 #include <common/types.hpp>
-#include <kernel/klibc/STL/list>
+#include <list>
 
 #define PCI_CONFIG_PORT 0xCF8
 #define PCI_DATA_PORT 0xCFC

@@ -23,7 +23,7 @@ void pic_disable_irq(int irq) {
 }
 
 // Note: ICW = Initialization command words
-void pic_init(void) {
+void pic_init() {
 	//pic_set_mask();
 
 	// ICW1: begin initialization.
@@ -43,4 +43,9 @@ void pic_init(void) {
     outb(PIC_IO_PIC2 + 1, 0x01);
 
 	pic_set_mask();
+}
+
+void pic_finished_handling() {
+	outb(PIC_IO_PIC1, PIC_EOI);
+	outb(PIC_IO_PIC2, PIC_EOI);
 }

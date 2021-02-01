@@ -35,13 +35,18 @@ void init_fs(VFS* vfs, uint8_t driveid) {
 	mkd(dst + "/sys/");
 	mkd(dst + "/sys/fonts/");
 	mkd(dst + "/sys/fonts/lat1-16/");
-
 	copyOrLink(jramfs, orig+"/FONT/LAT1/README.TXT", dst+"/sys/fonts/lat1-16/readme.txt");
 	copyOrLink(jramfs, orig+"/FONT/LAT1/LAT1.RAW", dst+"/sys/fonts/lat1-16/lat1-16.raw");
 	copyOrLink(jramfs, orig+"/SPLASH.TXT", dst+"/sys/splash.txt");
 	copyOrLink(jramfs, orig+"/SHELL.TXT", dst+"/sys/shell.txt");
 
-	//mkd("/bin/");
-	//mkd("/bin/core/");
-	// MSS here.
+	mkd(dst + "/lib/");
+	copyOrLink(jramfs, orig+"/LIB/LIBSTD.SO", dst+"/lib/libstd.so");
+
+	mkd(dst + "/tmp/");
+
+	mkd("/bin/");
+	mkd("/bin/core/");
+	copyOrLink(jramfs, orig+"/BIN/CORE/INIT.BIN", dst+"/bin/core/init");
+	copyOrLink(jramfs, orig+"/BIN/CORE/TEST.BIN", dst+"/bin/core/test");
 }

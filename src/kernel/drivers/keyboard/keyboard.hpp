@@ -2,8 +2,8 @@
 #define KEYBOARD_H
 
 #include <common/types.hpp>
-#include <kernel/klibc/STL/window>
-#include <kernel/klibc/STL/string>
+#include <window>
+#include <string>
 
 #define KEYBOARD_IDT_ENTRY 0x21
 #define KEYBOARD_DATA_PORT 0x60

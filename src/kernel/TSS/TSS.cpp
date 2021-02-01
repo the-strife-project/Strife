@@ -26,9 +26,9 @@ void TSS_write(uint64_t* gdt) {
 	tss_entry.iomap_base = sizeof(struct tss_entry_struct);
 }
 
-void TSS_flush(void) {
-	// esp value at system call. Maybe 4KiB of stack? Idk...
-	tss_entry.esp0 = 4096 + paging_allocPages(1);
+void TSS_flush() {
+	// Stack pointer at syscall. A page? Maybe more? I don't know.
+	tss_entry.esp0 = PAGE_SIZE + kernelPaging.alloc();
 
 	asm volatile(
 		"ltr %%ax"

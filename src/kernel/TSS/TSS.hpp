@@ -35,6 +35,8 @@ struct tss_entry_struct {
 } __attribute__((packed));
 
 void TSS_write(uint64_t* gdt);
-void TSS_flush(void);
+void TSS_flush();
+
+extern tss_entry_struct tss_entry;
 
 #endif

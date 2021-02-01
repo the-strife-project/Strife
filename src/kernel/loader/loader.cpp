@@ -4,16 +4,11 @@
 #include <kernel/klibc/stdio>
 #include <kernel/mounts/mounts.hpp>
 
-map<string, SharedLibrary*> loadedSharedLibraries;
-bool mapInitialized = false;
+map<string, SharedLibrary*> loadedSharedLibraries = map<string, SharedLibrary*>();
 
 bool Program::loadDynamicLibraries() {
-	if(!mapInitialized) {
-		loadedSharedLibraries = map<string, SharedLibrary*>();
-		mapInitialized = true;
-	}
-
 	for(auto const& x : elf.libraries) {
+		printf("Ola me gustaría un poco de %S\n", x);
 		// Already loaded?
 		if(!loadedSharedLibraries[x]) {
 			// Must load now.
@@ -55,7 +50,7 @@ bool Program::loadDynamicLibraries() {
 	that contain phys=0.
 
 	I don't know how other operating systems do this, probably easier,
-	but this is what I came up with.
+	but this is what I came up with. It's quite efficient, I think.
 */
 
 void ELFSomething::load() {
@@ -74,7 +69,7 @@ void ELFSomething::load() {
 
 			// If current page is not allocated, do it now.
 			if(alreadyAllocated.find(pair<uint32_t, uint32_t>(virtPage, 0)) == alreadyAllocated.end()) {
-				uint32_t page = paging_allocPages(1);
+				uint32_t page = kernelPaging.calloc();
 				alreadyAllocated[virtPage] = page;
 
 				pages.push_back(PhysVirt(alreadyAllocated[virtPage], virtPage));
@@ -91,16 +86,23 @@ void ELFSomething::load() {
 		}
 	}
 
+	pages.push_back(PhysVirt(0, 0));	// Separator.
+
 	// Mount shared libraries.
 	for(auto const& x : elf.libraries) {
-		pages.push_back(PhysVirt(0, 0));	// Separator.
-
 		SharedLibrary* lib = loadedSharedLibraries[x];
-		for(auto const& page : lib->getPages())
-			pages.push_back(PhysVirt(page.phys, page.virtoff));
+		for(auto const& page : lib->getPages()) {
+			// Copy all pages of the library. TODO: COW.
+			if(page.phys == 0) {
+				// It's a separator. Don't touch.
+				pages.push_back(page);
+			} else {
+				uint32_t newpage = kernelPaging.calloc();
+				memcpy((void*)newpage, (void*)page.phys, PAGE_SIZE);
+				pages.push_back(PhysVirt(newpage, page.virtoff));
+			}
+		}
 	}
-
-	pages.push_back(PhysVirt(0, 0));
 }
 
 void ELFSomething::relocate() {
@@ -164,12 +166,25 @@ bool ELFSomething::relocate2() {
 		}
 
 		// Fill the got entry.
-		// This only works with the binary. No relocation for libraries. Therefore, no nested libraries (TODO).
 		uint32_t* gotent = (uint32_t*)(beginning + (uint32_t)x.s);
+		printf("Relocating %S to %x (writing at %x)\n", x.f, libraryMounts[func.f]+func.s, gotent);
 		*gotent = libraryMounts[func.f] + func.s;
 	}
+	printf("\n");
 
-	// RELRO here.
+	// Relocate2 other libraries.
+	for(auto const& x : elf.libraries) {
+		// Simple ELFSomething to relocate.
+		SharedLibrary* orig = loadedSharedLibraries[x];	// Do not use this, it's not relocated.
+		ELFSomething aux;
+		aux.elf = orig->elf;	// Only needs references.
+		aux.dynFunctions = this->dynFunctions;
+		aux.libraryMounts = this->libraryMounts;
+		aux.beginning = libraryMounts[orig];
+		aux.relocate2();
+	}
+
+	// TODO RELRO here.
 
 	return true;
 }

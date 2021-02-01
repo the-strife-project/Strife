@@ -2,7 +2,7 @@
 #define JRAMFS_HPP
 
 #include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
-#include <kernel/klibc/STL/map>
+#include <map>
 
 /*
 	JRAMFS is basically a hack on JOTAFS.

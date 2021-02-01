@@ -18,6 +18,7 @@ inline void pic_refresh(void) {
 
 void pic_enable_irq(int irq);
 void pic_disable_irq(int irq);
-void pic_init(void);
+void pic_init();
+void pic_finished_handling();
 
 #endif

@@ -4,13 +4,13 @@
 
 void V86(uint8_t intnum, struct regs16_t *regs) {
 	// Disable paging.
-	paging_disable();
+	goback_paging();
 
 	// Run the interrupt.
 	int32(intnum, regs);
 
 	// Enable paging again.
-	paging_enable();
+	go_paging();
 }
 
 struct dapack {

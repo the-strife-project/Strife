@@ -1,21 +1,42 @@
 #include <kernel/klibc/stdlib.hpp>
 
-void* operator new(size_t sz) { return jmalloc(sz); }
-void* operator new[](size_t sz) { return jmalloc(sz); }
-void operator delete(void* p) { jfree(p); }
-void operator delete[](void* p) { jfree(p); }
+void* operator new(size_t sz) {
+	return jmalloc(sz);
+}
 
-/*
-	This functions moves memory in the most efficient way I know.
-	As we're in a x86 environment, it uses the size of the register
-	to move 4 bytes at a time in the first stage, and then move
-	the remaining bytes individually.
+void* operator new[](size_t sz) {
+	return jmalloc(sz);
+}
 
-	Is it an overkill? I don't know.
-	This function will be called when moving big chunks of memory,
-	so this at least is as fast as moving single characters.
-*/
+inline void generalDelete(void* p) {
+#ifdef STDLIB_DEBUG
+	bool found = false;
+	for(size_t i=0; i<ctr; ++i) {
+		if(debug[i] == p) {
+			debug[i] = nullptr;
+			found = true;
+			break;
+		}
+	}
+	if(!found)
+		while(true);
+	jfree(p);
+#else
+	jfree(p);
+#endif
+}
+
+void operator delete(void* p) {
+	return jfree(p);
+}
+
+void operator delete[](void* p) {
+	return jfree(p);
+}
+
+// TODO: use Duff's drive.
 void memcpy(void* dst, void* src, size_t sz) {
+	// TODO: Check if both dst and src are aligned. Change MPI/messages.cpp when done.
 	union u {
 		void* v;
 		size_t* b;
@@ -32,4 +53,11 @@ void memcpy(void* dst, void* src, size_t sz) {
 	sz_round = sz & 0b11;
 	while(sz_round--)
 		*(u_dst.l++) = *(u_src.l++);
+}
+
+void memclear(void* dst, size_t sz) {
+	// Really slow. I mean, the slowest possible. I'll improve this soon, don't dwell on it.
+	uint8_t* i = (uint8_t*)dst;
+	while(sz--)
+		*(i++) = 0;
 }

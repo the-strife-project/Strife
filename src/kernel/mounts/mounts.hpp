@@ -1,7 +1,7 @@
 #ifndef MOUNTS_HPP
 #define MOUNTS_HPP
 
-#include <kernel/klibc/STL/map>
+#include <map>
 #include <kernel/drivers/storage/FS/VFS.hpp>
 
 // Assumes there is a mount point in path or upper.

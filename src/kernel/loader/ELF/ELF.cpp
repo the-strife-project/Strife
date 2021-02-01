@@ -1,6 +1,8 @@
 #include <kernel/loader/ELF/ELF.hpp>
 #include <kernel/klibc/stdio>
 
+// TODO: ALL OF THIS IS REALLY INSECURE. NO OFFSET SHOULD BE LEFT UNCHECKED.
+
 void parseSegments(ELF::ParsedELF& elf, uint8_t* data, ELF::header* header) {
 	for(uint16_t i=0; i<header->n_entries_pheader; ++i) {
 		ELF::program_header_entry* phe = (ELF::program_header_entry*)(data + header->p_header + i*ELF_PHEADER_SIZE);
@@ -44,6 +46,9 @@ ELF::ParsedELF ELF::parse(uint8_t* data, bool isLibrary) {
 	ELF::header* header = (ELF::header*)data;
 	ret.sections = getSections(data, header);
 
+	// Entry point is the first byte of the .text section.
+	ret.entryPoint = ret.sections[".text"]->addr;
+
 	parseSegments(ret, data, header);
 
 	// Look for ".dynstr" and ".dynamic".
@@ -81,9 +86,26 @@ ELF::ParsedELF ELF::parse(uint8_t* data, bool isLibrary) {
 			rel_entry* relent = (rel_entry*)(data + reldyn->offset + off);
 
 			if((relent->info & 0xFF) != (uint8_t)relocation_type::R_386_JMP_SLOT) {
-				// TODO: Fail less miserably.
-				printf(" {{ jlxip's fault: unsupported relocation type. }} ");
-				while(true) {}
+				// TODO RIGHT NOW: Fail less miserably.
+				printf(" {{ Unsupported relocation type. Have you compiled with RELRO? }} ");
+				while(true);
+			}
+
+			uint8_t symbol_idx = relent->info >> 8;
+			dynsym_entry* dynsyment = (dynsym_entry*)(data + dynsym->offset + dynsym->entsize*symbol_idx);
+			ret.dynReferences[dynstr + dynsyment->name] = (uint32_t*)(relent->offset);
+		}
+	}
+
+	auto* relplt = ret.sections[".rel.plt"];
+	if(relplt && dynsym && dynstr) {
+		for(uint32_t off=0; off<relplt->size; off+=relplt->entsize) {
+			rel_entry* relent = (rel_entry*)(data + relplt->offset + off);
+
+			if((relent->info & 0xFF) != (uint8_t)relocation_type::R_386_JMP_SLOT) {
+				// TODO SAME AS ABOVE.
+				printf(" {{ WOAH THERE BUD }} ");
+				while(true);
 			}
 
 			uint8_t symbol_idx = relent->info >> 8;

@@ -1,8 +1,8 @@
 #ifndef VFS_HPP
 #define VFS_HPP
 
-#include <kernel/klibc/STL/string>
-#include <kernel/klibc/STL/set>
+#include <string>
+#include <set>
 #include <kernel/drivers/storage/FSRawChunk.hpp>
 
 /*

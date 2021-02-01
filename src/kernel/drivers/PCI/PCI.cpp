@@ -16,7 +16,10 @@ uint32_t __PCI_getAddress(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offse
 void PCI::prepare(uint8_t offset) {
 	// Mark the page of the address as present.
 	uint32_t addr = __PCI_getAddress(bus, slot, func, offset);
-	paging_setPresent(addr);	// TODO: Just one?
+	// TODO: Just one?
+	Paging::Page p = kernelPaging.get(addr);
+	p.present = true;
+	p.flush();
 	outl(PCI_CONFIG_PORT, __PCI_getAddress(bus, slot, func, offset));
 }
 

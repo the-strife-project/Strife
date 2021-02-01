@@ -8,7 +8,6 @@
 #include <kernel/drivers/keyboard/keyboard.hpp>
 #include <kernel/drivers/clock/clock.hpp>
 #include <kernel/kernel_panic/kernel_panic.hpp>
-#include <kernel/asm.hpp>
 #include <kernel/drivers/PCI/PCI.hpp>
 #include <kernel/memutils/memutils.hpp>
 #include <kernel/syscalls/syscalls.hpp>
@@ -21,10 +20,9 @@
 #include <kernel/mounts/mounts.hpp>
 #include <kernel/drivers/storage/FS/init_fs/init_fs.hpp>
 #include <kernel/install/install.hpp>
-#include <kernel/drivers/storage/IDE/IDE.hpp>
 #include <kernel/V86/V86.hpp>
 #include <kernel/loader/loader.hpp>
-#include <kernel/tasks/task.hpp>
+#include <kernel/tasks/scheduler/scheduler.hpp>
 
 void printSplash() {
 	printf("\n");
@@ -73,7 +71,11 @@ extern "C" void kernel_main(void) {
 
 	printf("Beginning paging...\n");
 	paging_init();
-	paging_enable();
+	kernelPaging.use();
+	go_paging();
+
+	printf("Quieto parao!!!\nAhora serían las pruebas.");
+	while(true);
 
 	printf("Remapping PIC...\n");
 	pic_init();
@@ -81,14 +83,15 @@ extern "C" void kernel_main(void) {
 	printf("Setting IDT...\n");
 	idt_init();
 
+	printf("%d\n", sizeof(Scheduler::SchedulerTask)); while(true);
+
 	printf("Scanning PCI devices...\n");
 	list<PCI> devices(PCI_probe());
 
 	printf("Loading drivers...\n");
 	keyboard_init();
-
 	clock_init();
-	clock_start();
+	clock_enable();
 
 	printf("Looking for IDE PCI devices...\n");
 	// Just one ;)
@@ -192,6 +195,9 @@ extern "C" void kernel_main(void) {
 		mountRoot(jotafs);
 	}
 
+	mount("/tmp/", new JRAMFS);
+
+
 	printf("Loading font... ");
 	FSRawChunk font = readFile("/sys/fonts/lat1-16/lat1-16.raw");
 	if(font.good()) {
@@ -203,208 +209,49 @@ extern "C" void kernel_main(void) {
 	}
 
 	printSplash();
-
-	/*
-		--- All the code below this point will be certainly changed ---
-	*/
-
-	/*// --- TEST ---
-	mkd("/lib");
-	link("/lib/libbruh.so", "/mnt/CDROM/LIB/LIBBRUH.SO");
-
-	FSRawChunk bruh = readFile("/mnt/CDROM/BRUH.BIN");
-	if(!bruh.good()) {
-		printf(":s\n");
-		while(true) {}
-	}
-	Program bruh_p;
-	bruh_p.parse(bruh.get());
-	if(!bruh_p.loadDynamicLibraries()) {
-		printf("Not found: /lib/%S\n", bruh_p.getFailedDynamicLibrary());
-		while(true) {}
-	}
-	bruh_p.load();
-	bruh_p.relocate();
-
-	Task t = createTask(1, 0, 0, bruh_p.getPages());
-	switch_page_table(t.pageDirectory);
-	if(!bruh_p.relocate2()) {
-		printf("Function not found: %S\n", bruh_p.getFailedRelocation());
-		while(true) {}
-	}
-
-	bruh.destroy();
-
-	printf("Boutta jump to 0x%x\n", bruh_p.getBeginning());
-	int (*main)(void) = (int (*)(void))(bruh_p.getBeginning());
-	outw(0x8A00,0x8A00);outw(0x8A00,0x08AE0);
-	int ret = (*main)();
-	printf("Return value: %d\n", ret);
-
-	while(true) {}
-	// --- END ---*/
-
-	showWarning();
-
-	string workingDirectory("/");
-	while(true) {
-		// Read.
-		term_setFGC(0xE);
-		printf("[%S] $ ", workingDirectory);
-		term_setFGC(0xA);
-		string line(readLine());
-
-		// Parse.
-		list<string> parts = line.split(' ');
-		string command = *parts.begin();
-		auto it = parts.begin();
-		++it;
-		string arg;
-		if(it != parts.end())
-			arg = *it;
-
-		// Interpret.
-		if(command == "") {
-			// Do nothing.
-		} else if(command == "help") {
-			if(arg == "") {
-				printf("Usage: help <command>\n");
-			} else if(arg == "help") {
-				printf("I see you like recursion.\n");
-			} else if(arg == "echo") {
-				printf("Repeats whatever you tell it to.\n");
-				printf("Usage: echo <something>\n");
-			} else if(arg == "ls") {
-				printf("Shows the contents of the current directory.\n");
-				printf("Usage: ls\n");
-			} else if(arg == "cd") {
-				printf("Change current directory.\n");
-				printf("Usage: cd <path>\n");
-			} else if(arg == "mkd") {
-				printf("Creates a directory under the current one.\n");
-				printf("Usage: mkd <name>\n");
-			} else if(arg == "rd") {
-				printf("Prints the contents of a file.\n");
-				printf("Usage: rd <path>\n");
-			} else if(arg == "install") {
-				printf("Installs jotaOS onto the hard disk.\n");
-				printf("Usage: install\n");
-			} else if(arg == "reboot") {
-				printf("You tell me.\n");
-				printf("Usage: reboot\n");
-			} else {
-				printError("Bruh what is that?");
-			}
-		} else if(command == "echo") {
-			parts.pop_front();
-			for(auto const& x : parts)
-				printf("%S ", x);
-			printf("\n");
-		} else if(command == "ls") {
-			for(auto const& x : ls(workingDirectory))
-				printf("%S\n", x);
-		} else if(command == "cd") {
-			if(arg == "") {
-				printf("Usage: cd <path>\n");
-			} else {
-				// Does it exist?
-				string path;
-				if(arg[0] != '/') {
-					path = workingDirectory;
-					path += '/';
-				}
-				path += arg;
-
-				path = shortenPath(path);
-				if(isDir(path)) {
-					workingDirectory = path;
-				} else {
-					printError("Path not found!");
-				}
-			}
-		} else if(command == "mkd") {
-			if(arg == "") {
-				printf("Usage: mkd <name>\n");
-			} else {
-				bool bad = false;
-				for(auto const& x : arg) {
-					if(x == '/') {
-						bad = true;
-						break;
-					}
-				}
-
-				if(bad) {
-					printError("No slashes!!!");
-				} else {
-					string path = workingDirectory;
-					path += '/';
-					path += arg;
-					mkd(path);
-				}
-			}
-		} else if(command == "rd") {
-			if(arg == "") {
-				printf("Usage: rd <path>\n");
-			} else {
-				// Does the file exist tho?
-				string path;
-				if(arg[0] != '/') {
-					path = workingDirectory;
-					path += '/';
-				}
-				path += arg;
-
-				if(!isFile(path)) {
-					printError("That file doesn't exist, bro.");
-				} else {
-					FSRawChunk contents(readFile(path));
-					if(!contents.good()) {
-						printError("Woah, what happened there? You found a bug! Write down immediately what you did and send it to me.");
-					} else {
-						printf("%S\n", contents.str());
-					}
-				}
-			}
-		} else if(command == "install") {
-			printf("Running installation program...\n\n");
-			install(iso);
-		} else if(command == "reboot") {
-			// Temporal way to reboot.
-			uint8_t good = 0x02;
-			while (good & 0x02)
-				good = inb(0x64);
-			outb(0x64, 0xFE);
-
-			printf("Could not reboot. Please pull the cord.\n");
-			while(true) {}
-		} else {
-			printError("What is that?");
-		}
-	}
-
-	/*// Enable syscalls.
 	syscalls_init();
-
-	// Load the TSS.
 	TSS_flush();
 
-	// Load and run MSS.
-	uint32_t mss = paging_allocPages(1);
-	paging_setUser(mss, 1);
-	FSRawChunk mss_chunk((uint8_t*)mss, PAGE_SIZE);
-	if(isCD)
-		readFileTo("MSS.BIN", mss_chunk);
-	else
-		readFileTo("/bin/core/mss", mss_chunk);
-
-	if(!mss_chunk.good()) {
-		printf("MSS not found!");
+	// Run init.
+	FSRawChunk init_chunk = readFile("/bin/core/init");
+	if(!init_chunk.good()) {
+		// TODO: Panic.
+		printf(" {{ No init }} ");
 		while(true) {}
 	}
 
-	jump_usermode(mss);
+	Program init_p;
+	init_p.parse(init_chunk.get());
+	if(!init_p.loadDynamicLibraries()) {
+		// TODO: Panic.
+		printf("Not found: /lib/%S\n", init_p.getFailedDynamicLibrary());
+		while(true) {}
+	}
 
-	printf("\n[[[ MSS RETURNED?!?!?! ]]]");
-	while(1) {}*/
+	init_p.load();
+	init_p.relocate();
+
+	Task init_task(init_p.getPages(), init_p.getEntryPoint());
+
+	init_task.paging->use();
+	if(!init_p.relocate2()) {
+		// TODO: Panic.
+		printf("Function not found: %S\n", init_p.getFailedRelocation());
+		while(true) {}
+	}
+	kernelPaging.use();
+
+	init_chunk.destroy();
+
+	uint8_t cores = 1;
+
+	// Let's go!
+	initializeSchedulers(cores, init_task);
+
+	printf("Cojones, todo fue bien.\n");
+	while(true);
+
+	schedulers[0].resume();
+
+	// And that's all.
 }

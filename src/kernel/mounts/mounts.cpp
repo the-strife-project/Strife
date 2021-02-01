@@ -1,9 +1,10 @@
 #include <kernel/mounts/mounts.hpp>
 #include <kernel/klibc/stdio>
-#include <kernel/klibc/STL/dlist>
+#include <dlist>
 
 // Mount points.
-static map<string, VFS*, greater<pair<string, VFS*>>> _mounts;
+typedef map<string, VFS*, greater<pair<string, VFS*>>> _mounts_t;
+_mounts_t _mounts = _mounts_t();
 
 bool startsWith(const string& str, const string& substr) {
 	if(str.length() < substr.length())

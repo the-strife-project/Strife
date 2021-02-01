@@ -1,6 +1,0 @@
-Beware! This is not an actual shell.
-It is a really simple temporal ring 0 interpreter to show that jotaOS has
-several working filesystems and that operations on them are possible.
-This interpreter has some bugs I am not willing to fix, it's all temporal.
-
-Available commands: help, echo, ls, cd, mkd, rd, install, reboot.

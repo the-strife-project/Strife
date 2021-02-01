@@ -3,10 +3,10 @@
 
 #include <common/types.hpp>
 #include <kernel/loader/ELF/ELF.hpp>
-#include <kernel/klibc/STL/list>
-#include <kernel/klibc/STL/pair>
-#include <kernel/klibc/STL/map>
-#include <kernel/klibc/STL/string>
+#include <list>
+#include <pair>
+#include <map>
+#include <string>
 
 class SharedLibrary;
 
@@ -25,9 +25,15 @@ struct PhysVirt {
 	uint32_t phys;
 	uint32_t virtoff;
 	uint32_t virt;	// virt = beginning + virtoff.
+	bool ro, cow, exe;
 
-	PhysVirt() : phys(0) {}
-	PhysVirt(uint32_t phys, uint32_t virtoff) : phys(phys), virtoff(virtoff) {}
+	PhysVirt()
+		: phys(0), virtoff(0), virt(0), ro(false), cow(false), exe(true)
+	{}
+
+	PhysVirt(uint32_t phys, uint32_t virtoff)
+		: phys(phys), virtoff(virtoff), virt(0), ro(false), cow(false), exe(true)	// TODO COW
+	{}
 };
 
 class ELFSomething {
@@ -38,15 +44,15 @@ protected:
 	list<PhysVirt> pages;
 	map<SharedLibrary*, uint32_t> libraryMounts;
 	string failedRelocation;
-	uint32_t beginning;	// Entry point (virtual address).
+	uint32_t beginning;	// The base virtual address.
 
 public:
 	void load();
 	void relocate();
 	bool relocate2();
 
-	inline uint32_t getBeginning() const {
-		return beginning;
+	inline uint32_t getEntryPoint() const {
+		return beginning + elf.entryPoint;
 	}
 
 	inline const list<PhysVirt>& getPages() const {

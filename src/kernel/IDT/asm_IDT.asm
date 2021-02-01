@@ -1,3 +1,8 @@
+BITS 32
+
+%define KERNEL_DATASEGMENT 0x10
+%define INSTRUCTION_FLAG_MASK 0x0200
+
 global default_ISR
 extern default_interrupt_handler
 
@@ -5,27 +10,43 @@ extern default_interrupt_handler
 %assign i 0
 %rep 256
 default_ISR_ %+ i:
+	;pop edx	; Error code. TODO: some produce it and some don't.
+	pushad
+	mov ebx, esp
+
 	push ds
     push es
     push fs
 	push gs
-	pusha
 
-	mov ax, 0x10
+	; Load kernel segments.
+	mov ax, KERNEL_DATASEGMENT
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 
+	; Allow interrupts.
+	pushfd
+	pop eax
+	or eax, INSTRUCTION_FLAG_MASK
+	push eax
+	popfd
+
+	mov eax, cr2
+	push eax
+	push ebx
 	push i
 	call default_interrupt_handler
-	add esp, 4
+	add esp, 4*3
 
-	popa
 	pop gs
     pop fs
     pop es
 	pop ds
+
+	popad
+	; Should push here error code if needed (or not?)
 	iret
 %assign i i+1
 %endrep

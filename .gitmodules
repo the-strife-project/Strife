@@ -1,8 +1,8 @@
-[submodule "src/kernel/klibc/STL"]
-	path = src/kernel/klibc/STL
-	url = https://github.com/jotaOS/STL
-	branch = master
 [submodule "src/JBoot"]
 	path = src/JBoot
 	url = https://github.com/jotaOS/JBoot
+	branch = master
+[submodule "src/kernel/klibc/STL"]
+	path = src/kernel/klibc/STL
+	url = git@github.com:jotaOS/stdlib.git
 	branch = master

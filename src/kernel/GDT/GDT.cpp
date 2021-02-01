@@ -47,7 +47,7 @@ void gdt_init(void) {
 		SEG_DATA_RDWR	// Read + Write
 	);
 	// Fourth entry: user code segment.
-	GDT[_USER_CODESEGMENT_N] = createGDTEntry(0, 0x000FFFF,
+	GDT[_USER_CODESEGMENT_N] = createGDTEntry(0, 0x000FFFFF,
 		SEG_DESCTYPE(1) |	// Code segment.
 		SEG_PRES(1) |	// Present.
 		SEG_SAVL(0) |	// Available to the system.
@@ -58,7 +58,7 @@ void gdt_init(void) {
 		SEG_CODE_EXRD	// Execute + Read
 	);
 	// Fifth entry: user data segment.
-	GDT[_USER_DATASEGMENT_N] = createGDTEntry(0, 0x000FFFF,
+	GDT[_USER_DATASEGMENT_N] = createGDTEntry(0, 0x000FFFFF,
 		SEG_DESCTYPE(1) |	// Data segment.
 		SEG_PRES(1) |	// Present.
 		SEG_SAVL(0) |	// Available to the system.

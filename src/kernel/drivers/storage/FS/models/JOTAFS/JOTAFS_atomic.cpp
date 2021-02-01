@@ -1,6 +1,6 @@
 #include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
 #include <kernel/klibc/stdlib.hpp>
-#include <kernel/klibc/STL/bitmap>
+#include <bitmap>
 #include <kernel/klibc/stdio>
 
 JOTAFS_model::JOTAFS_model() {}

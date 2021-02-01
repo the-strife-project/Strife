@@ -1,6 +1,14 @@
-# jotaOS
+# THIS BRANCH IS KEPT FOR ARCHIVAL PURPOSES. DO NOT TRY TO COMPILE IT
 
-[![Build Status](https://travis-ci.org/jotaOS/jotaOS.svg?branch=master)](https://travis-ci.org/jotaOS/jotaOS)
+Today is February the 1st 2021, and I have decided to rewrite the whole thing from scratch. Why? There are some *MAJOR* changes that are about to happen to jotaOS, these are:
+- Changing the whole type of kernel. From the current monolithic to a microkernel.
+- Changing the whole architecture. From x86, to x86_64.
+- Due to the previous change, changing the bootloader. From JBoot, the one I made, to Limine.
+
+These changes are not worth making, specially not at the current state of jotaOS, and it's extremely worth indeed starting from scratch. This branch is only kept for archival purposes. Don't try to do anything with it besides maybe look at the commit history so you can really appreciate how much time I've dedicated to this project. This very commit will be the last, and contains PARTIAL and INCOMPLETE changes to the switch to a microkernel, this includes the scheduler and a whole bunch of stuff. That's it, see you in the new branch!
+
+
+# jotaOS
 
 ## Introduction
 jotaOS is an x86 operating system made in C/C++ from scratch that I'm doing to learn. That's it. I'm not trying to make everything myself for any reason whatsoever but learning. There are so many topics in CS that I want to know in depth, and making an OS is a great way to touch all of them.

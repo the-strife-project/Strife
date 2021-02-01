@@ -2,9 +2,9 @@
 #define ELF_H
 
 #include <common/types.hpp>
-#include <kernel/klibc/STL/list>
-#include <kernel/klibc/STL/string>
-#include <kernel/klibc/STL/map>
+#include <list>
+#include <string>
+#include <map>
 
 /*
 	ELF specs taken from here:
@@ -173,6 +173,7 @@ namespace ELF {
 		list<string> libraries;
 		map<string, uint32_t> globalFunctions;	// (name, offset)
 		map<string, uint32_t*> dynReferences;
+		uint32_t entryPoint;
 	};
 
 	ParsedELF parse(uint8_t* data, bool isLibrary);

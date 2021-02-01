@@ -2,7 +2,7 @@
 #define COMMON_TO_BOTH_FILESYSTEMS_H
 
 #include <kernel/drivers/storage/FS/VFS.hpp>
-#include <kernel/klibc/STL/bitmap>
+#include <bitmap>
 
 // Just for the constants. TODO: remove this when implemented users and permissions.
 #include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>

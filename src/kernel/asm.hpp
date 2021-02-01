@@ -55,4 +55,40 @@ inline void insl(uint16_t port, uint32_t* buffer, uint32_t cnt) {
 		*(buffer++) = inl(port);
 }
 
+// Registers pushed by 'pushad', obviously.
+struct PushadRegs {
+	size_t edi, esi, ebp, esp;
+	size_t ebx, edx, ecx, eax;
+};
+
+struct iretValues {
+	size_t eip;
+	uint16_t cs;
+	size_t flags, esp;
+	uint16_t ss;
+};
+
+inline void bochs_breakpoint() {
+	outw(0x8A00,0x8A00);
+	outw(0x8A00,0x08AE0);
+}
+
+inline uint32_t getCR3() {
+	uint32_t ret;
+	asm volatile(
+		"mov %%cr3, %0"
+		: "=r" (ret)
+		:: "%eax");
+	return ret;
+}
+
+inline uint32_t getCR2() {
+	uint32_t ret;
+	asm volatile(
+		"mov %%cr2, %0"
+		: "=r" (ret)
+		:: "%eax");
+	return ret;
+}
+
 #endif

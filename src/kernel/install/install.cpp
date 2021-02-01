@@ -3,8 +3,8 @@
 #include <kernel/klibc/stdlib.hpp>
 #include <kernel/drivers/term/term.hpp>
 #include <kernel/drivers/storage/FS/models/JOTAFS/JOTAFS.hpp>
-#include <kernel/klibc/STL/string>
-#include <kernel/klibc/STL/list>
+#include <string>
+#include <list>
 #include <kernel/drivers/storage/FS/VFS.hpp>
 #include <kernel/drivers/storage/FS/JOTAFS>
 #include <kernel/drivers/storage/FS/init_fs/init_fs.hpp>

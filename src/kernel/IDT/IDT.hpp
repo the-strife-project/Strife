@@ -3,6 +3,7 @@
 
 #include <common/types.hpp>
 #include <kernel/GDT/GDT.hpp>
+#include <kernel/asm.hpp>
 
 struct IDT_entry {
 	uint16_t base_low;
@@ -37,9 +38,15 @@ extern uint32_t* default_ISR_array;
 extern uint32_t empty_ISR;
 extern "C" void load_idt(struct IDT_ptr* idtptr);
 
-void ISR_ignoreUP(uint8_t intno);
-void ISR_ignoreDOWN(uint8_t intno);
+typedef void (*ISR_delegate_t)(uint32_t topesp);
 
 void idt_init(void);
+void IDT_setPL(uint32_t intno, uint8_t pl);
+void ISR_delegate(uint32_t intno, ISR_delegate_t delegate);
+
+// Helpers.
+PushadRegs* ISR_get_PushadRegs(uint32_t esp);
+iretValues* ISR_get_iretValues(uint32_t esp);
+uint32_t ISR_get_error(uint32_t esp);
 
 #endif

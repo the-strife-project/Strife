@@ -2,10 +2,10 @@
 #define JOTAFS_H
 
 #include <common/types.hpp>
-#include <kernel/klibc/STL/string>
-#include <kernel/klibc/STL/list>
-#include <kernel/klibc/STL/map>
-#include <kernel/klibc/STL/stack>
+#include <string>
+#include <list>
+#include <map>
+#include <stack>
 #include <kernel/drivers/storage/IDE/IDE.hpp>
 
 #define JOTAFS_SECTOR_BOOT 0

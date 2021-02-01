@@ -9,10 +9,10 @@
 #define ISO9660_DIR_FILENAME 33
 
 #include <common/types.hpp>
-#include <kernel/klibc/STL/list>
-#include <kernel/klibc/STL/string>
-#include <kernel/klibc/STL/set>
-#include <kernel/klibc/STL/map>
+#include <list>
+#include <string>
+#include <set>
+#include <map>
 #include <kernel/drivers/storage/FSRawChunk.hpp>
 
 class ISO9660_model {
