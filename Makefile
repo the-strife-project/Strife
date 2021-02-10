@@ -1,25 +1,27 @@
-IMG=img.hdd
-TMPDIR=tmp
+IMG := img.hdd
+TMPDIR := tmp
 
-IMGPATH=img
-BOOT=$(IMGPATH)/boot
+IMGPATH := img
+BOOT := $(IMGPATH)/boot
 
-LIMINE=limine/limine-install
+LIMINE := limine/limine-install
 
-# I don't think I'm able to stress how much I hate the mounting/unmount of img.hdd. I'll change this very soon
-# Also, this Makefile in general isn't general at all. Will change that even sooner
+# I don't think I'm able to stress how much I hate the mounting/unmount of img.hdd. I'll improve this soon
 
-.PHONY: run debug all files clean
+.PHONY: run debug all clean
 
+all: $(IMG)
 run: all
 	qemu-system-x86_64 -hda $(IMG)
-
 debug: all
 	bochs -f bochs_config/bochs.txt
 
-all: $(IMG)
+-include projects/projects.txt
+_BOOTFILES := limine.cfg $(foreach x,$(PROJECTS),$($(x)))
+BOOTFILES := $(_BOOTFILES:%=$(BOOT)/%)
 
-$(IMG): files $(LIMINE)
+$(IMG): $(BOOT) $(BOOTFILES) $(LIMINE)
+	@echo -e "\n\n--- Creating $(IMG) now ---\n"
 	dd if=/dev/zero bs=1M count=0 seek=64 of=$@
 	parted -s $@ mklabel gpt
 	parted -s $@ mkpart primary 2048s 100%
@@ -40,24 +42,23 @@ $(IMG): files $(LIMINE)
 
 	$(LIMINE) $(IMG)
 
-files: $(BOOT) projects/.done $(BOOT)/limine.cfg $(BOOT)/kernel.elf
-
 $(BOOT):
 	mkdir -p $(BOOT)
 
-projects/.done:
-	$(MAKE) -C projects
-
 $(BOOT)/limine.cfg: limine.cfg
-	cp -v $< $@
+	@cp -v $< $@
 
-$(BOOT)/kernel.elf: projects/kernel/kernel.elf
-	cp -v $< $@
+noext = $(firstword $(subst ., ,$(1)))
+.SECONDEXPANSION:
+$(BOOT)/%: projects/$$(call noext,$$*)/%
+	@cp -v $< $@
+projects/%:
+	$(MAKE) -C projects/$(firstword $(subst /, ,$*))
 
 $(LIMINE): limine/limine-install.c
 	$(MAKE) -C limine limine-install
 
 clean:
 	$(MAKE) -C limine clean
-	$(MAKE) -C projects clean
+	$(foreach x,$(PROJECTS),$(MAKE) -C projects/$(x) clean)
 	rm -rf $(IMG) $(IMGPATH)
