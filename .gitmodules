@@ -1,0 +1,7 @@
+[submodule "projects/kernel"]
+	path = projects/kernel
+	url = git@github.com:jotaOS/kernel
+[submodule "limine"]
+	path = limine
+	url = git@github.com:limine-bootloader/limine
+	branch = v1.0-branch
