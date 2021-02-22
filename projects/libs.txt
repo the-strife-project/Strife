@@ -1,0 +1,5 @@
+# ORDER MATTERS!
+
+LIBS := stdlib
+
+stdlib := libstd.so

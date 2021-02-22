@@ -1,7 +1,12 @@
 [submodule "projects/kernel"]
 	path = projects/kernel
 	url = git@github.com:jotaOS/kernel
-[submodule "limine"]
-	path = limine
-	url = git@github.com:limine-bootloader/limine
-	branch = v1.0-branch
+[submodule "projects/ELF"]
+	path = projects/ELF
+	url = git@github.com:jotaOS/ELF
+[submodule "stdlib"]
+	path = projects/stdlib
+	url = git@github.com:jotaOS/stdlib
+[submodule "helper"]
+	path = projects/helper
+	url = git@github.com:jotaOS/helper

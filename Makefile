@@ -1,64 +1,72 @@
-IMG := img.hdd
+IMG := jotaOS.iso
 TMPDIR := tmp
 
 IMGPATH := img
 BOOT := $(IMGPATH)/boot
+LIBSPATH := $(IMGPATH)/libs
+export JOTAOS_LIBS := $(shell pwd)/$(LIBSPATH)
+export JOTAOS_STDLIB_HEADERS := $(shell pwd)/projects/stdlib/pubheaders
 
-LIMINE := limine/limine-install
+LIMINE_PATH := limine
+_LIMINE_FILES := limine-cd.bin limine.sys
+LIMINE_FILES := $(_LIMINE_FILES:%=$(LIMINE_PATH)/%)
 
-# I don't think I'm able to stress how much I hate the mounting/unmount of img.hdd. I'll improve this soon
-
-.PHONY: run debug all clean
+.PHONY: run debug all $(IMG) clean
 
 all: $(IMG)
 run: all
-	qemu-system-x86_64 -hda $(IMG)
+	qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge
 debug: all
 	bochs -f bochs_config/bochs.txt
 
--include projects/projects.txt
-_BOOTFILES := limine.cfg $(foreach x,$(PROJECTS),$($(x)))
-BOOTFILES := $(_BOOTFILES:%=$(BOOT)/%)
+pretty = "\e[34m\e[1m--- "$(1)" ---\e[0m"
+$(IMG):
+	@echo -e $(call pretty,LIMINE)
+	@$(MAKE) $(LIMINE_FILES) -j`nproc` --no-print-directory
 
-$(IMG): $(BOOT) $(BOOTFILES) $(LIMINE)
-	@echo -e "\n\n--- Creating $(IMG) now ---\n"
-	dd if=/dev/zero bs=1M count=0 seek=64 of=$@
-	parted -s $@ mklabel gpt
-	parted -s $@ mkpart primary 2048s 100%
+	@echo -e $(call pretty,LIBRARIES)
+	@$(MAKE) libs --no-print-directory	# -j makes no difference
 
-	mkdir tmp
-	sudo losetup -Pf --show $(IMG) > loopback_dev
-	sudo partprobe `cat loopback_dev`
-	sudo mkfs.fat -F32 `cat loopback_dev`p1
-	sudo mount `cat loopback_dev`p1 $(TMPDIR)
+	@echo -e $(call pretty,PROGRAMS)
+	@$(MAKE) programs -j`nproc` --no-print-directory
 
-	sudo cp -rv img/* $(TMPDIR)
-	sync
+	@echo -e $(call pretty,$(IMG))
+	@cp -v limine.cfg $(LIMINE_FILES) $(BOOT)/
+	@genisoimage -no-emul-boot -b boot/limine-cd.bin -boot-load-size 4 -boot-info-table -o $@ $(IMGPATH) 2> /dev/null
 
-	sudo umount $(TMPDIR)
-	sudo losetup -d `cat loopback_dev`
-	rmdir $(TMPDIR)
-	rm -f loopback_dev
 
-	$(LIMINE) $(IMG)
+# This hardcoded URL is just until 2.0 is released,
+# which contains my additions (ISO9660)
+$(LIMINE_FILES):
+	@mkdir -p limine
+	@echo -e "Downloading $@..."
+	@wget "https://jlxip.net/jotaOS/$@" -O $@ 2>/dev/null
 
+
+-include projects/libs.txt
+-include projects/programs.txt
+
+# Always compile
+.PHONY: libs programs $(PROGRAMS)
+
+
+# Order is critical
+libs: | $(LIBSPATH)
+	$(foreach lib, $(LIBS), @$(MAKE) -C projects/$(lib) -j`nproc`; \
+		cp -v projects/$(lib)/$($(lib)) $(LIBSPATH)/$($(lib)))
+$(LIBSPATH):
+	@mkdir -p $@
+
+
+# Order doesn't matter
+programs: $(PROGRAMS)
+$(PROGRAMS): | $(BOOT)
+	@$(MAKE) -C projects/$@	# Do not use -j!
+	@cp -v projects/$@/$($@) $(BOOT)/$($@)
 $(BOOT):
-	mkdir -p $(BOOT)
+	@mkdir -p $@
 
-$(BOOT)/limine.cfg: limine.cfg
-	@cp -v $< $@
-
-noext = $(firstword $(subst ., ,$(1)))
-.SECONDEXPANSION:
-$(BOOT)/%: projects/$$(call noext,$$*)/%
-	@cp -v $< $@
-projects/%:
-	$(MAKE) -C projects/$(firstword $(subst /, ,$*))
-
-$(LIMINE): limine/limine-install.c
-	$(MAKE) -C limine limine-install
 
 clean:
-	$(MAKE) -C limine clean
-	$(foreach x,$(PROJECTS),$(MAKE) -C projects/$(x) clean)
-	rm -rf $(IMG) $(IMGPATH)
+	@$(foreach x, $(LIBS) $(PROGRAMS), $(MAKE) -C projects/$(x) clean;)
+	rm -rf $(LIMINE_PATH) $(IMG) $(IMGPATH)

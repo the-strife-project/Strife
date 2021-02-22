@@ -1,0 +1,4 @@
+PROGRAMS := kernel ELF
+
+kernel := kernel.elf
+ELF := ELF.usu
