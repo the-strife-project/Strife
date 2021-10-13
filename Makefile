@@ -21,9 +21,6 @@ debug: all
 
 pretty = "\e[34m\e[1m--- "$(1)" ---\e[0m"
 $(IMG):
-	@echo -e $(call pretty,LIMINE)
-	@$(MAKE) $(LIMINE_FILES) -j`nproc` --no-print-directory
-
 	@echo -e $(call pretty,LIBRARIES)
 	@$(MAKE) libs --no-print-directory	# -j makes no difference
 
@@ -35,19 +32,11 @@ $(IMG):
 	@genisoimage -no-emul-boot -b boot/limine-cd.bin -boot-load-size 4 -boot-info-table -o $@ $(IMGPATH) 2> /dev/null
 
 
-# This hardcoded URL is just until 2.0 is released,
-# which contains my additions (ISO9660)
-$(LIMINE_FILES):
-	@mkdir -p limine
-	@echo -e "Downloading $@..."
-	@wget "https://jlxip.net/jotaOS/$@" -O $@ 2>/dev/null
-
-
 -include projects/libs.txt
 -include projects/programs.txt
 
 # Always compile
-.PHONY: libs programs $(PROGRAMS)
+.PHONY: libs programs clean $(PROGRAMS)
 
 
 # Order is critical
@@ -69,4 +58,4 @@ $(BOOT):
 
 clean:
 	@$(foreach x, $(LIBS) $(PROGRAMS), $(MAKE) -C projects/$(x) clean;)
-	rm -rf $(LIMINE_PATH) $(IMG) $(IMGPATH)
+	rm -rf $(IMG) $(IMGPATH)

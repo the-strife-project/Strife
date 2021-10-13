@@ -1,4 +1,4 @@
-PROGRAMS := kernel ELF
+PROGRAMS := kernel loader
 
 kernel := kernel.elf
-ELF := ELF.usu
+loader := loader.sus
