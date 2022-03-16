@@ -1,6 +1,4 @@
 IMG := jotaOS.iso
-TMPDIR := tmp
-
 IMGPATH := img
 BOOT := $(IMGPATH)/boot
 LIBSPATH := $(IMGPATH)/libs
@@ -42,7 +40,7 @@ $(IMG):
 # Order is critical
 libs: | $(LIBSPATH)
 	$(foreach lib, $(LIBS), @$(MAKE) -C projects/$(lib) -j`nproc`; \
-		cp -v projects/$(lib)/$($(lib)) $(LIBSPATH)/$($(lib)))
+		cp -v projects/$(lib)/$($(lib)) $(LIBSPATH)/)
 $(LIBSPATH):
 	@mkdir -p $@
 
@@ -51,7 +49,7 @@ $(LIBSPATH):
 programs: $(PROGRAMS)
 $(PROGRAMS): | $(BOOT)
 	@$(MAKE) -C projects/$@	# Do not use -j!
-	@cp -v projects/$@/$($@) $(BOOT)/$($@)
+	@cp -v projects/$@/$($@) $(BOOT)/
 $(BOOT):
 	@mkdir -p $@
 

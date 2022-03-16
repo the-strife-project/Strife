@@ -1,4 +1,5 @@
-PROGRAMS := kernel loader
+PROGRAMS := kernel loader term
 
 kernel := kernel.elf
 loader := loader.sus
+term := term
