@@ -17,3 +17,6 @@
 [submodule "term"]
 	path = projects/term
 	url = git@github.com:jotaOS/term
+[submodule "projects/PCI"]
+	path = projects/PCI
+	url = git@github.com:jotaOS/PCI

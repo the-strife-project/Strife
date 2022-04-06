@@ -1,5 +1,6 @@
-PROGRAMS := kernel loader term
+PROGRAMS := kernel loader term PCI
 
 kernel := kernel.elf
 loader := loader.sus
 term := term
+PCI := pci
