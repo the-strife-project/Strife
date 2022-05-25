@@ -2,4 +2,4 @@
 
 LIBS := stdlib
 
-stdlib := libstd.so
+stdlib := libstd.{so,a}
