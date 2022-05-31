@@ -1,5 +1,6 @@
 IMG := jotaOS.iso
 IMGPATH := img
+SHELL := /bin/bash
 BOOT := $(IMGPATH)/boot
 LIBSPATH := $(IMGPATH)/libs
 export JOTAOS_LIBS := $(shell pwd)/$(LIBSPATH)

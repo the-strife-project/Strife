@@ -1,0 +1,33 @@
+name: Make
+on:
+  create:
+    tags:
+      - '*'
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dependencies
+        run: sudo apt install -y nasm genisoimage
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Download toolchain
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'jotaOS/toolchain'
+          file: 'cross.tar'
+      - name: Extract toolchain
+        run: tar xf cross.tar
+      - name: Compile
+        run: $GITHUB_WORKSPACE/.github/make.sh
+      - name: Compress ISO
+        run: xz -k $GITHUB_WORKSPACE/jotaOS.iso
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            jotaOS.iso
+            jotaOS.iso.xz
