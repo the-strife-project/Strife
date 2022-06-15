@@ -1,6 +1,10 @@
-PROGRAMS := kernel loader term PCI
+PROGRAMS := kernel loader term PCI AHCI block ISO9660 VFS
 
 kernel := kernel.elf
 loader := loader.sus
 term := term
 PCI := pci
+AHCI := ahci
+block := block
+ISO9660 := ISO9660
+VFS := vfs

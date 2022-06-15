@@ -14,12 +14,10 @@ LIMINE_FILES := $(_LIMINE_FILES:%=$(LIMINE_PATH)/%)
 
 all: $(IMG)
 run: all
-	qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge
-debug: all
-	bochs -f bochs_config/bochs.txt
+	qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge -machine q35
 
 pretty = "\e[34m\e[1m--- "$(1)" ---\e[0m"
-$(IMG):
+$(IMG): limine/limine-deploy
 	@echo -e $(call pretty,LIBRARIES)
 	@$(MAKE) libs --no-print-directory	# -j makes no difference
 
@@ -28,7 +26,13 @@ $(IMG):
 
 	@echo -e $(call pretty,$(IMG))
 	@cp -v limine.cfg $(LIMINE_FILES) $(BOOT)/
-	@genisoimage -no-emul-boot -b boot/limine-cd.bin -boot-load-size 4 -boot-info-table -o $@ $(IMGPATH) 2> /dev/null
+	@xorriso -as mkisofs -b boot/limine-cd.bin -no-emul-boot \
+		-boot-load-size 4 -boot-info-table \
+		--protective-msdos-label -o $@ $(IMGPATH) &> /dev/null
+	@limine/limine-deploy $(IMG)
+
+limine/limine-deploy: limine/limine-deploy.c
+	@$(MAKE) -C limine/
 
 
 -include projects/libs.txt

@@ -20,3 +20,15 @@
 [submodule "projects/PCI"]
 	path = projects/PCI
 	url = git@github.com:jotaOS/PCI
+[submodule "projects/AHCI"]
+	path = projects/AHCI
+	url = git@github.com:jotaOS/AHCI
+[submodule "projects/block"]
+	path = projects/block
+	url = git@github.com:jotaOS/block
+[submodule "projects/ISO9660"]
+	path = projects/ISO9660
+	url = git@github.com:jotaOS/ISO9660
+[submodule "projects/VFS"]
+	path = projects/VFS
+	url = git@github.com:jotaOS/VFS
