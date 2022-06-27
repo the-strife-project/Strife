@@ -1,34 +1,34 @@
 [submodule "projects/kernel"]
 	path = projects/kernel
-	url = git@github.com:jotaOS/kernel
+	url = git@github.com:the-strife-project/kernel
 [submodule "stdlib"]
 	path = projects/stdlib
-	url = git@github.com:jotaOS/stdlib
+	url = git@github.com:the-strife-project/stdlib
 [submodule "helper"]
 	path = projects/helper
-	url = git@github.com:jotaOS/helper
+	url = git@github.com:the-strife-project/helper
 [submodule "limine"]
 	path = limine
 	url = https://github.com/limine-bootloader/limine
 	branch = v2.0-branch-binary
 [submodule "loader"]
 	path = projects/loader
-	url = git@github.com:jotaOS/loader
+	url = git@github.com:the-strife-project/loader
 [submodule "term"]
 	path = projects/term
-	url = git@github.com:jotaOS/term
+	url = git@github.com:the-strife-project/term
 [submodule "projects/PCI"]
 	path = projects/PCI
-	url = git@github.com:jotaOS/PCI
+	url = git@github.com:the-strife-project/PCI
 [submodule "projects/AHCI"]
 	path = projects/AHCI
-	url = git@github.com:jotaOS/AHCI
+	url = git@github.com:the-strife-project/AHCI
 [submodule "projects/block"]
 	path = projects/block
-	url = git@github.com:jotaOS/block
+	url = git@github.com:the-strife-project/block
 [submodule "projects/ISO9660"]
 	path = projects/ISO9660
-	url = git@github.com:jotaOS/ISO9660
+	url = git@github.com:the-strife-project/ISO9660
 [submodule "projects/VFS"]
 	path = projects/VFS
-	url = git@github.com:jotaOS/VFS
+	url = git@github.com:the-strife-project/VFS

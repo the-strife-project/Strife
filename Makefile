@@ -1,10 +1,10 @@
-IMG := jotaOS.iso
+IMG := Strife.iso
 IMGPATH := img
 SHELL := /bin/bash
 BOOT := $(IMGPATH)/boot
 LIBSPATH := $(IMGPATH)/libs
-export JOTAOS_LIBS := $(shell pwd)/$(LIBSPATH)
-export JOTAOS_STDLIB_HEADERS := $(shell pwd)/projects/stdlib/pubheaders
+export STRIFE_LIBS := $(shell pwd)/$(LIBSPATH)
+export STRIFE_STDLIB_HEADERS := $(shell pwd)/projects/stdlib/pubheaders
 
 LIMINE_PATH := limine
 _LIMINE_FILES := limine-cd.bin limine.sys

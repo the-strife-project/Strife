@@ -16,18 +16,18 @@ jobs:
       - name: Download toolchain
         uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: 'jotaOS/toolchain'
+          repo: 'the-strife-project/toolchain'
           file: 'cross.tar'
       - name: Extract toolchain
         run: tar xf cross.tar
       - name: Compile
         run: $GITHUB_WORKSPACE/.github/make.sh
       - name: Compress ISO
-        run: xz -k $GITHUB_WORKSPACE/jotaOS.iso
+        run: xz -k $GITHUB_WORKSPACE/Strife.iso
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            jotaOS.iso
-            jotaOS.iso.xz
+            Strife.iso
+            Strife.iso.xz
