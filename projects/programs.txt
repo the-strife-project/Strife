@@ -1,10 +1,31 @@
-PROGRAMS := kernel loader term PCI AHCI block ISO9660 VFS
+BASE := kernel loader PSNS term PCI
+BASE := $(addprefix base/,$(BASE))
 
-kernel := kernel.elf
-loader := loader.sus
-term := term
-PCI := pci
-AHCI := ahci
-block := block
-ISO9660 := ISO9660
-VFS := vfs
+base/kernel := kernel.elf
+base/loader := loader.sus
+base/PSNS := psns
+base/term := term
+base/PCI := pci
+
+
+
+STORAGE := AHCI ramblock block ISO9660 StrifeFS VFS
+STORAGE := $(addprefix storage/,$(STORAGE))
+
+storage/AHCI := ahci
+storage/ramblock := ramblock
+storage/block := block
+storage/ISO9660 := ISO9660
+storage/StrifeFS := strifefs
+storage/VFS := vfs
+
+
+
+PROGRAMS := init
+PROGRAMS := $(addprefix programs/,$(PROGRAMS))
+
+programs/init := init
+
+
+
+PROJECTS := $(BASE) $(STORAGE) $(PROGRAMS)

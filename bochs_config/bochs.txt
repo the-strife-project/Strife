@@ -1,5 +1,5 @@
 megs: 64
-ata0-master: type=cdrom, path=./jotaOS.iso, status=inserted
+ata0-master: type=cdrom, path=./Strife.iso, status=inserted
 boot: cdrom
 mouse: enabled=0
 clock: sync=realtime

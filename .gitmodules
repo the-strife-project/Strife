@@ -1,5 +1,5 @@
 [submodule "projects/kernel"]
-	path = projects/kernel
+	path = projects/base/kernel
 	url = git@github.com:the-strife-project/kernel
 [submodule "stdlib"]
 	path = projects/stdlib
@@ -12,23 +12,35 @@
 	url = https://github.com/limine-bootloader/limine
 	branch = v2.0-branch-binary
 [submodule "loader"]
-	path = projects/loader
+	path = projects/base/loader
 	url = git@github.com:the-strife-project/loader
 [submodule "term"]
-	path = projects/term
+	path = projects/base/term
 	url = git@github.com:the-strife-project/term
 [submodule "projects/PCI"]
-	path = projects/PCI
+	path = projects/base/PCI
 	url = git@github.com:the-strife-project/PCI
 [submodule "projects/AHCI"]
-	path = projects/AHCI
+	path = projects/storage/AHCI
 	url = git@github.com:the-strife-project/AHCI
 [submodule "projects/block"]
-	path = projects/block
+	path = projects/storage/block
 	url = git@github.com:the-strife-project/block
 [submodule "projects/ISO9660"]
-	path = projects/ISO9660
+	path = projects/storage/ISO9660
 	url = git@github.com:the-strife-project/ISO9660
 [submodule "projects/VFS"]
-	path = projects/VFS
+	path = projects/storage/VFS
 	url = git@github.com:the-strife-project/VFS
+[submodule "projects/base/PSNS"]
+	path = projects/base/PSNS
+	url = git@github.com:the-strife-project/PSNS
+[submodule "projects/storage/ramblock"]
+	path = projects/storage/ramblock
+	url = git@github.com:the-strife-project/ramblock
+[submodule "projects/storage/StrifeFS"]
+	path = projects/storage/StrifeFS
+	url = git@github.com:the-strife-project/StrifeFS
+[submodule "projects/programs/init"]
+	path = projects/programs/init
+	url = git@github.com:the-strife-project/init
