@@ -44,3 +44,18 @@
 [submodule "projects/programs/init"]
 	path = projects/programs/init
 	url = git@github.com:the-strife-project/init
+[submodule "projects/programs/splash"]
+	path = projects/programs/splash
+	url = git@github.com:the-strife-project/splash
+[submodule "projects/programs/registry"]
+	path = projects/programs/registry
+	url = git@github.com:the-strife-project/registry
+[submodule "projects/programs/keyboard"]
+	path = projects/programs/keyboard
+	url = git@github.com:the-strife-project/keyboard
+[submodule "projects/programs/shell"]
+	path = projects/programs/shell
+	url = git@github.com:the-strife-project/shell
+[submodule "projects/programs/tests"]
+	path = projects/programs/tests
+	url = git@github.com:the-strife-project/tests

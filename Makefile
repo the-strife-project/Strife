@@ -2,6 +2,7 @@ IMG := Strife.iso
 IMGPATH := img
 SHELL := /bin/bash
 BOOT := $(IMGPATH)/boot
+BIN := $(IMGPATH)/bin
 LIBSPATH := $(IMGPATH)/libs
 export STRIFE_LIBS := $(shell pwd)/$(LIBSPATH)
 export STRIFE_STDLIB_HEADERS := $(shell pwd)/projects/stdlib/pubheaders
@@ -17,8 +18,8 @@ LIMINE_FILES := $(_LIMINE_FILES:%=$(LIMINE_PATH)/%)
 
 all: $(IMG)
 run: all
-	@#qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge -machine q35
-	qemu-system-x86_64 -cdrom $(IMG) -cpu Broadwell -machine q35 -m 128M
+	@qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge -machine q35
+	@#qemu-system-x86_64 -cdrom $(IMG) -cpu Broadwell -machine q35 -m 128M
 
 pretty = "\e[34m\e[1m--- "$(1)" ---\e[0m"
 $(IMG): limine/limine-deploy
@@ -57,15 +58,22 @@ $(LIBSPATH):
 
 
 # Order doesn't matter
-programs: $(PROJECTS)
-$(PROJECTS): | $(BOOT)
+programs: $(IMGBOOT) $(IMGBIN)
+$(IMGBOOT): | $(BOOT)
 	@$(MAKE) -C projects/$@	# Do not use -j!
 	@cp -v projects/$@/$($@) $(BOOT)/
+$(IMGBIN): | $(BIN)
+	@$(MAKE) -C projects/$@
+	@cp -v projects/$@/$($@) $(BIN)/
+
+
 $(BOOT):
+	@mkdir -p $@
+$(BIN):
 	@mkdir -p $@
 
 
 clean:
 	@echo '🧹🧹🧹'
-	@$(foreach x, $(LIBS) $(PROJECTS), $(MAKE) -C projects/$(x) clean;)
+	@$(foreach x, $(LIBS) $(IMGBOOT) $(IMGBIN), $(MAKE) -C projects/$(x) clean;)
 	rm -rf $(IMG) $(IMGPATH)
