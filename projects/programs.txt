@@ -28,7 +28,7 @@ programs/init := init
 
 
 
-PROGRAMS := splash registry keyboard shell tests
+PROGRAMS := splash registry keyboard shell tests coreutils
 PROGRAMS := $(addprefix programs/,$(PROGRAMS))
 
 programs/splash := splash
@@ -36,6 +36,7 @@ programs/registry := registry
 programs/keyboard := keyboard
 programs/shell := shell
 programs/tests := tests
+programs/coreutils := {ls,mkdir}
 
 
 
