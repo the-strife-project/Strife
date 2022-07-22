@@ -28,15 +28,17 @@ programs/init := init
 
 
 
-PROGRAMS := splash registry keyboard shell tests coreutils
+PROGRAMS := splash users registry switcher keyboard shell tests coreutils
 PROGRAMS := $(addprefix programs/,$(PROGRAMS))
 
 programs/splash := splash
+programs/users := users
 programs/registry := registry
+programs/switcher := switcher
 programs/keyboard := keyboard
 programs/shell := shell
 programs/tests := tests
-programs/coreutils := {ls,mkdir}
+programs/coreutils := {ls,mkdir,mkfile,append,cat,useradd,userinfo,usermod,su,mem,aclget,acltree,acladd}
 
 
 

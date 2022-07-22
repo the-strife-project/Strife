@@ -62,3 +62,9 @@
 [submodule "projects/programs/coreutils"]
 	path = projects/programs/coreutils
 	url = git@github.com:the-strife-project/coreutils
+[submodule "projects/programs/users"]
+	path = projects/programs/users
+	url = git@github.com:the-strife-project/users
+[submodule "projects/programs/switcher"]
+	path = projects/programs/switcher
+	url = git@github.com:the-strife-project/switcher
