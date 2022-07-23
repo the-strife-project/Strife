@@ -52,7 +52,7 @@ limine/limine-deploy: limine/limine-deploy.c
 # Order is critical
 libs: | $(LIBSPATH)
 	$(foreach lib, $(LIBS), @$(MAKE) -C projects/$(lib) -j`nproc`; \
-		cp -v projects/$(lib)/$($(lib)) $(LIBSPATH)/)
+		cp -v projects/$(lib)/$($(lib)) $(LIBSPATH)/;)
 $(LIBSPATH):
 	@mkdir -p $@
 
