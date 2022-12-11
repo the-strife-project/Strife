@@ -18,7 +18,7 @@ LIMINE_FILES := $(_LIMINE_FILES:%=$(LIMINE_PATH)/%)
 
 all: $(IMG)
 run: all
-	@qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge -machine q35
+	@qemu-system-x86_64 -cdrom $(IMG) -cpu IvyBridge -machine q35 -m 1G
 	@#qemu-system-x86_64 -cdrom $(IMG) -cpu Broadwell -machine q35 -m 128M
 
 pretty = "\e[34m\e[1m--- "$(1)" ---\e[0m"
