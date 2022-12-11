@@ -1,3 +1,7 @@
+# Finished
+Strife has been marked as _finished_. Read [the farewell](https://github.com/the-strife-project/.github/blob/master/profile/farewell.md).
+
+# Old README
 This repo is the official Strife distribution.
 
 Since all projects have their own repository in [this GitHub organization](https://github.com/the-strife-project), there has to be a way to glue them all together.
